@@ -32,14 +32,6 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-void add_gap(std::vector<std::unique_ptr<yacrd::utils::interval> >& gaps, std::unique_ptr<yacrd::utils::interval> gap, std::uint64_t readlen)
-{
-    if(gap->first != gap->second && gap->first != 0 && gap->second != readlen)
-    {
-        gaps.push_back(std::move(gap));
-    }
-}
-
 void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
 {
     std::map<yacrd::utils::name_len, std::vector<yacrd::utils::interval>> read2mapping;
@@ -67,7 +59,8 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
 
         // find gap in coverage
         bool in_gap = true;
-        std::vector<std::unique_ptr<yacrd::utils::interval> > gaps;
+        std::vector<std::unique_ptr<yacrd::utils::interval> > middle_gaps;
+        std::vector<std::unique_ptr<yacrd::utils::interval> > extremity_gaps;
         std::unique_ptr<yacrd::utils::interval> gap = std::make_unique<yacrd::utils::interval>();
         auto it = coverage.begin();
         for(; it != coverage.end(); it++)
@@ -83,7 +76,7 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
             {
                 gap->second = it - coverage.begin();
                 in_gap = false;
-                add_gap(gaps, std::move(gap), read_name_len->first.second);
+                add_gap(middle_gaps, extremity_gaps, std::move(gap), read_name_len->first.second);
 
             }
         }
@@ -91,19 +84,53 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
         if(in_gap == true)
         {
             gap->second = it - coverage.begin();
-            add_gap(gaps, std::move(gap), read_name_len->first.second);
+            add_gap(middle_gaps, extremity_gaps, std::move(gap), read_name_len->first.second);
         }
 
         // if read have 1 or more gap it's a chimeric read
-        if(gaps.size() > 0)
+        if(middle_gaps.size() > 0)
         {
-            std::cout<<read_name_len->first.first<<":";
-            for(std::uint64_t i = 0; i != gaps.size(); i++)
+            std::cout<<"Chimeric:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
+            for(std::uint64_t i = 0; i != middle_gaps.size(); i++)
             {
-                std::cout<<abs(gaps[i]->first - gaps[i]->second)<<","<<gaps[i]->first<<","<<gaps[i]->second<<";";
+                std::unique_ptr<yacrd::utils::interval>& gap = middle_gaps[i];
+                std::cout<<abs(gap->first - gap->second)<<","<<gap->first<<","<<gap->second<<";";
             }
             std::cout<<std::endl;
+            continue;
+        }
+
+        if(extremity_gaps.size() > 0)
+        {
+            for(std::uint64_t i = 0; i != extremity_gaps.size(); i++)
+            {
+                std::unique_ptr<yacrd::utils::interval>& gap = extremity_gaps[i];
+                if(abs(gap->first - gap->second) > 0.8 * read_name_len->first.second)
+                {
+                    std::cout<<"Not_cover:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
+                    std::cout<<abs(gap->first - gap->second)<<","<<gap->first<<","<<gap->second<<";";
+                    std::cout<<std::endl;
+                    break;
+                }
+            }
+            continue;
         }
     }
 }
+
+void add_gap(std::vector<std::unique_ptr<yacrd::utils::interval> >& middle, std::vector<std::unique_ptr<yacrd::utils::interval> >& extremity, std::unique_ptr<yacrd::utils::interval> gap, std::uint64_t readlen)
+{
+    if(gap->first == gap->second)
+    {
+        return ;
+    }
+
+    if(gap->first == 0 || gap->second == readlen)
+    {
+        extremity.push_back(std::move(gap));
+        return ;
+    }
+    middle.push_back(std::move(gap));
+}
+
 
