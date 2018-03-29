@@ -59,32 +59,32 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
 
         // find gap in coverage
         bool in_gap = true;
-        std::vector<std::unique_ptr<yacrd::utils::interval> > middle_gaps;
-        std::vector<std::unique_ptr<yacrd::utils::interval> > extremity_gaps;
-        std::unique_ptr<yacrd::utils::interval> gap = std::make_unique<yacrd::utils::interval>();
+        std::vector<yacrd::utils::interval> middle_gaps;
+        std::vector<yacrd::utils::interval> extremity_gaps;
+        yacrd::utils::interval gap = std::make_pair<std::uint64_t, std::uint64_t>(0, 0);
         auto it = coverage.begin();
         for(; it != coverage.end(); it++)
         {
             if(*it <= coverage_min && in_gap == false)
             {
-                gap = std::make_unique<yacrd::utils::interval>();
-                gap->first = it - coverage.begin();
+                gap = std::make_pair<std::uint64_t, std::uint64_t>(0, 0);
+                gap.first = it - coverage.begin();
                 in_gap = true;
             }
 
             if(*it > coverage_min && in_gap == true)
             {
-                gap->second = it - coverage.begin();
+                gap.second = it - coverage.begin();
                 in_gap = false;
-                add_gap(middle_gaps, extremity_gaps, std::move(gap), read_name_len->first.second);
+                add_gap(middle_gaps, extremity_gaps, gap, read_name_len->first.second);
 
             }
         }
 
         if(in_gap == true)
         {
-            gap->second = it - coverage.begin();
-            add_gap(middle_gaps, extremity_gaps, std::move(gap), read_name_len->first.second);
+            gap.second = it - coverage.begin();
+            add_gap(middle_gaps, extremity_gaps, gap, read_name_len->first.second);
         }
 
         // if read have 1 or more gap it's a chimeric read
@@ -93,8 +93,8 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
             std::cout<<"Chimeric:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
             for(std::uint64_t i = 0; i != middle_gaps.size(); i++)
             {
-                std::unique_ptr<yacrd::utils::interval>& gap = middle_gaps[i];
-                std::cout<<abs(gap->first - gap->second)<<","<<gap->first<<","<<gap->second<<";";
+                yacrd::utils::interval& gap = middle_gaps[i];
+                std::cout<<abs(gap.first - gap.second)<<","<<gap.first<<","<<gap.second<<";";
             }
             std::cout<<std::endl;
             continue;
@@ -104,11 +104,11 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
         {
             for(std::uint64_t i = 0; i != extremity_gaps.size(); i++)
             {
-                std::unique_ptr<yacrd::utils::interval>& gap = extremity_gaps[i];
-                if(abs(gap->first - gap->second) > 0.8 * read_name_len->first.second)
+                yacrd::utils::interval& gap = extremity_gaps[i];
+                if(abs(gap.first - gap.second) > 0.8 * read_name_len->first.second)
                 {
                     std::cout<<"Not_covered:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
-                    std::cout<<abs(gap->first - gap->second)<<","<<gap->first<<","<<gap->second<<";";
+                    std::cout<<abs(gap.first - gap.second)<<","<<gap.first<<","<<gap.second<<";";
                     std::cout<<std::endl;
                     break;
                 }
@@ -118,19 +118,19 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
     }
 }
 
-void add_gap(std::vector<std::unique_ptr<yacrd::utils::interval> >& middle, std::vector<std::unique_ptr<yacrd::utils::interval> >& extremity, std::unique_ptr<yacrd::utils::interval> gap, std::uint64_t readlen)
+void add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen)
 {
-    if(gap->first == gap->second)
+    if(gap.first == gap.second)
     {
         return ;
     }
 
-    if(gap->first == 0 || gap->second == readlen)
+    if(gap.first == 0 || gap.second == readlen)
     {
-        extremity.push_back(std::move(gap));
+        extremity.push_back(gap);
         return ;
     }
-    middle.push_back(std::move(gap));
+    middle.push_back(gap);
 }
 
 
