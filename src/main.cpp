@@ -22,73 +22,61 @@ SOFTWARE.
 
 /* standard include */
 #include <memory>
+#include <string>
 #include <utility>
 #include <iostream>
+
+/* getopt include */
+#include <getopt.h>
 
 /* project include */
 #include "utils.hpp"
 #include "parser.hpp"
+#include "analysis.hpp"
 
 int main(int argc, char** argv)
 {
-    std::map<chimdect::utils::name_len, std::vector<chimdect::utils::interval>> read2mapping;
+    std::string paf_filename;
+    std::uint64_t coverage_min = 0;
 
-    // parse paf file
-    chimdect::parser::paf(std::string(argv[1]), &read2mapping);
+    int c;
 
-    // for each read
-    for(auto read_name_len = read2mapping.begin(); read_name_len != read2mapping.end(); read_name_len++)
+    const struct option longopts[] = 
     {
-        // compute coverage
-        std::vector<std::uint64_t> coverage(read_name_len->first.second, 0);
-        for(auto mapping : read_name_len->second)
+	{"in", required_argument, 0, 'i'},
+	{"min_coverage", optional_argument, 0, 'c'},
+	{0, 0, 0, 0}
+    };
+
+    int option_index = 0;
+    while((c = getopt_long(argc, argv, "i:c:", longopts, &option_index)) != -1)
+    {
+        switch(c)
         {
-            if(mapping.second > read_name_len->first.second)
-            {
-                mapping.second = read_name_len->first.second;
-            }
+            case 0:
+                if(longopts[option_index].flag != 0)
+                    break;
+                printf ("option %s", longopts[option_index].name);
+                if(optarg)
+                    printf(" with arg %s", optarg);
+                printf ("\n");
+                break;
 
-            for(auto i = mapping.first; i != mapping.second; i++)
-            {
-                coverage[i] += 1;
-            }
-        }
+            case 'i':
+                paf_filename = optarg;
+                break;
 
-        // find gap in coverage
-        bool in_gap = true;
-        std::vector<std::unique_ptr<chimdect::utils::interval> > gaps;
-        std::unique_ptr<chimdect::utils::interval> gap = std::make_unique<chimdect::utils::interval>();
-        auto it = coverage.begin();
-        for(; it != coverage.end(); it++)
-        {
-            if(*it == 0 && in_gap == false)
-            {
-                gap = std::make_unique<chimdect::utils::interval>();
-                gap->first = it - coverage.begin();
-                in_gap = true;
-            }
+            case 'c':
+                coverage_min = atol(optarg);
+                break;
 
-            if(*it != 0 && in_gap == true)
-            {
-                gap->second = it - coverage.begin();
-                in_gap = false;
-                if(gap->first != gap->second)
-                {
-                    gaps.push_back(std::move(gap));
-                }
-            }
-        }
+            case '?':
+                break;
 
-        if(in_gap == true)
-        {
-            gap->second = it - coverage.begin();
-            gaps.push_back(std::move(gap));
-        }
-
-        // if read have 3 or more gap it's a chimeric read
-        if(gaps.size() > 2)
-        {
-            std::cout<<read_name_len->first.first<<std::endl;
+            default:
+                break;
         }
     }
+
+    do_work(paf_filename, coverage_min);
 }
