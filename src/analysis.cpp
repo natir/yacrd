@@ -107,7 +107,7 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
                 std::unique_ptr<yacrd::utils::interval>& gap = extremity_gaps[i];
                 if(abs(gap->first - gap->second) > 0.8 * read_name_len->first.second)
                 {
-                    std::cout<<"Not_cover:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
+                    std::cout<<"Not_covered:"<<read_name_len->first.first<<","<<read_name_len->first.second<<";";
                     std::cout<<abs(gap->first - gap->second)<<","<<gap->first<<","<<gap->second<<";";
                     std::cout<<std::endl;
                     break;
