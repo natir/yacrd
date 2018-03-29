@@ -17,11 +17,12 @@ Chimera detection is done as follows:
 
 Long read error-correction tools usually detect and also remove chimeras. But it is difficult to isolate or retrieve information from just this step.
 
-DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER) does a similar job to yacrd but relies on a different mapping step, and uses different heuristics. Yacrd is simpler and easier to use.
+DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER) does a similar job to yacrd but relies on a different mapping step, and uses different (likely more advanced) heuristics. Yacrd is simpler and easier to use.
 
 ## Input
 
-PAF (Pairwise Alignement Format) file produced by [https://github.com/lh3/minimap2](minimap2).
+Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2)).
+yacrd takes the resulting PAF (Pairwise Alignement Format) file from minimap2 as input.
 
 ## Requirements
 
