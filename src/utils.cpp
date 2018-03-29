@@ -26,14 +26,14 @@ SOFTWARE.
 /* project include */
 #include "utils.hpp"
 
-std::vector<std::string> yacrd::utils::split(const std::string& s, char delimiter)
+void yacrd::utils::split(const std::string& s, char delimiter, std::vector<std::string>& tokens)
 {
-   std::vector<std::string> tokens;
+   tokens.clear();
+
    std::string token;
    std::istringstream tokenStream(s);
    while (std::getline(tokenStream, token, delimiter))
    {
       tokens.push_back(token);
    }
-   return tokens;
 }

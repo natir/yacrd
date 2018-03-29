@@ -30,14 +30,15 @@ void yacrd::parser::paf(const std::string& filename, std::map<yacrd::utils::name
 {
     std::uint64_t switch_val;
 
-    std::ifstream infile(filename);
     std::string line;
+    std::ifstream infile(filename);
+    std::vector<std::string> tokens;
     while(std::getline(infile, line))
     {
         std::string name_a, name_b;
         std::uint64_t len_a, beg_a, end_a, len_b, beg_b, end_b;
 
-        paf_line(line, &name_a, &len_a, &beg_a, &end_a, &name_b, &len_b, &beg_b, &end_b);
+        paf_line(line, &name_a, &len_a, &beg_a, &end_a, &name_b, &len_b, &beg_b, &end_b, tokens);
 
         if(beg_a > end_a)
         {
@@ -68,17 +69,17 @@ void yacrd::parser::paf(const std::string& filename, std::map<yacrd::utils::name
 
 }
 
-void yacrd::parser::paf_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b)
+void yacrd::parser::paf_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens)
 {
-    std::vector<std::string> split_line = yacrd::utils::split(line, '\t');
+    yacrd::utils::split(line, '\t', tokens);
 
-    *name_a = split_line[0];
-    *len_a = std::stoi(split_line[1]);
-    *beg_a = std::stoi(split_line[2]);
-    *end_a = std::stoi(split_line[3]);
+    *name_a = tokens[0];
+    *len_a = std::stoi(tokens[1]);
+    *beg_a = std::stoi(tokens[2]);
+    *end_a = std::stoi(tokens[3]);
 
-    *name_b = split_line[5];
-    *len_b = std::stoi(split_line[6]);
-    *beg_b = std::stoi(split_line[7]);
-    *end_b = std::stoi(split_line[8]);
+    *name_b = tokens[5];
+    *len_b = std::stoi(tokens[6]);
+    *beg_b = std::stoi(tokens[7]);
+    *end_b = std::stoi(tokens[8]);
 }
