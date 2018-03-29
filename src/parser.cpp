@@ -26,7 +26,7 @@ SOFTWARE.
 /* project include */
 #include "parser.hpp"
 
-void yacrd::parser::paf(const std::string& filename, std::map<yacrd::utils::name_len, std::vector<yacrd::utils::interval> >* read2mapping)
+void yacrd::parser::paf(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping)
 {
     std::uint64_t switch_val;
 

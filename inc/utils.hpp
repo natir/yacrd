@@ -26,12 +26,23 @@ SOFTWARE.
 /* standard include */
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace yacrd {
 namespace utils {
 
 using name_len = std::pair<std::string, std::uint64_t>;
 using interval = std::pair<std::uint64_t, std::uint64_t>;
+
+struct Read2MappingHash
+{
+    std::size_t operator()(const name_len& k) const
+    {
+	return std::hash<std::string>()(k.first);
+    }
+};
+
+using read2mapping_type = std::unordered_map<name_len, std::vector<interval>, Read2MappingHash>;
 
 void split(const std::string& s, char delimiter, std::vector<std::string>& tokens);
 

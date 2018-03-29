@@ -21,12 +21,12 @@ SOFTWARE.
 */
 
 /* standard include */
-#include <map>
 #include <cmath>
 #include <memory>
 #include <string>
 #include <utility>
 #include <iostream>
+#include <unordered_map>
 
 /* project include */
 #include "parser.hpp"
@@ -34,7 +34,7 @@ SOFTWARE.
 
 void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
 {
-    std::map<yacrd::utils::name_len, std::vector<yacrd::utils::interval>> read2mapping;
+    yacrd::utils::read2mapping_type read2mapping;
 
     // parse paf file
     yacrd::parser::paf(std::string(paf_filename), &read2mapping);
