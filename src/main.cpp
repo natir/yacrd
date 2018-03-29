@@ -34,6 +34,8 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
+void print_help(void);
+
 int main(int argc, char** argv)
 {
     std::string paf_filename;
@@ -49,7 +51,7 @@ int main(int argc, char** argv)
     };
 
     int option_index = 0;
-    while((c = getopt_long(argc, argv, "i:c:", longopts, &option_index)) != -1)
+    while((c = getopt_long(argc, argv, "hi:c:", longopts, &option_index)) != -1)
     {
         switch(c)
         {
@@ -70,6 +72,9 @@ int main(int argc, char** argv)
                 coverage_min = atol(optarg);
                 break;
 
+            case 'h':
+                print_help();
+                return -1;
             case '?':
                 break;
 
@@ -79,4 +84,17 @@ int main(int argc, char** argv)
     }
 
     do_work(paf_filename, coverage_min);
+
+    return 0;
+}
+
+void print_help()
+{
+    std::cerr<<"usage: yacrd [-h] [-c coverage_min] -i mapping.paf\n";
+    std::cerr<<"\n";
+    std::cerr<<"Options:\n";
+    std::cerr<<"\t-h                   Print help message\n";
+    std::cerr<<"\t-c,--min_coverage    If coverage are minus or equal to this create a gap [0]\n";
+    std::cerr<<"\t-i,--in              Maping input file\n";
+    std::cerr<<std::endl;
 }
