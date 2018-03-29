@@ -2,7 +2,7 @@
 
 ![yacrd pipeline presentation](image/pipeline.svg)
 
-yacrd performs:
+Using all-against-all read mapping, yacrd performs:
 
 1. computation of pile-up coverage for each read
 2. detection of chimeras
@@ -36,6 +36,9 @@ After building, you can move/copy/add yacrd exectuable binary in your PATH
 
 
 ## Usage
+
+1) Run Minimap2: `minimap2 reads.fq reads.fq > mapping.paf`
+2)
 
 ```
 usage: yacrd [-h] [-c coverage_min] -i mapping.paf
