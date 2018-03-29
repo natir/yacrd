@@ -30,7 +30,7 @@ After building you can move/copy yacrd exectuable binary in your PATH
 ## Usage
 
 ```
-yacrd mapping.paf
+yacrd -i mapping.paf
 ```
 
 yacrd write in standard output the id of chimeric read
