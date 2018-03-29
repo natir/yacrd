@@ -1,5 +1,7 @@
 # Yet Another Chimeric Read Detector
 
+![yacrd pipeline presentation](image/pipeline.svg)
+
 yacrd use reads against reads mapping to :
 1. compute coverage of each read
 2. each region where coverage is minus or equal to `min_coverage` (default 0), yacrd create a gap.
