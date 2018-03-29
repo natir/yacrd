@@ -5,16 +5,17 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 
 function run_test {
-    diff=$(./build/yacrd -i test/${1}.paf | diff test/${1}.out -)
+    diff=$(./build/yacrd -i test/${1}.${2} | diff test/${1}.out -)
     if [ "${diff}" == "" ]
     then
-	echo -e "${1} : ${GREEN}PASSED${NC}"
+	echo -e "${1}.${2} : ${GREEN}PASSED${NC}"
     else
-	echo -e "${1} : ${RED}FAILLED${NC}"
+	echo -e "${1}.${2} : ${RED}FAILLED${NC}"
 	echo ${diff}
     fi
 }
 
-run_test "no_coverage"
-run_test "2_extremity_1_middle"
-run_test "2_extremity_1_middle_position_switch"
+run_test "no_coverage" "paf"
+run_test "2_extremity_1_middle" "paf"
+run_test "2_extremity_1_middle" "mhap"
+run_test "2_extremity_1_middle_position_switch" "paf"

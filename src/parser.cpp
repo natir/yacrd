@@ -20,14 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <iostream>
 /* standard include */
 #include <fstream>
 
 /* project include */
 #include "parser.hpp"
 
-void yacrd::parser::paf(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping)
+void yacrd::parser::file(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping)
 {
+    auto parse_line = yacrd::parser::paf_line;
+    if(filename.substr(filename.find_last_of(".") + 1) == "mhap")
+    {
+        parse_line = yacrd::parser::mhap_line;
+    }
+
     std::uint64_t switch_val;
 
     std::string line;
@@ -38,7 +45,7 @@ void yacrd::parser::paf(const std::string& filename, yacrd::utils::read2mapping_
         std::string name_a, name_b;
         std::uint64_t len_a, beg_a, end_a, len_b, beg_b, end_b;
 
-        paf_line(line, &name_a, &len_a, &beg_a, &end_a, &name_b, &len_b, &beg_b, &end_b, tokens);
+        (*parse_line)(line, &name_a, &len_a, &beg_a, &end_a, &name_b, &len_b, &beg_b, &end_b, tokens);
 
         if(beg_a > end_a)
         {
@@ -83,3 +90,19 @@ void yacrd::parser::paf_line(const std::string& line, std::string* name_a, std::
     *beg_b = std::stoi(tokens[7]);
     *end_b = std::stoi(tokens[8]);
 }
+
+void yacrd::parser::mhap_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens)
+{
+    yacrd::utils::split(line, ' ', tokens);
+
+    *name_a = tokens[0];
+    *len_a = std::stoi(tokens[7]);
+    *beg_a = std::stoi(tokens[5]);
+    *end_a = std::stoi(tokens[6]);
+
+    *name_b = tokens[1];
+    *len_b = std::stoi(tokens[11]);
+    *beg_b = std::stoi(tokens[9]);
+    *end_b = std::stoi(tokens[10]);
+}
+

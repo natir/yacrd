@@ -37,7 +37,7 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
     yacrd::utils::read2mapping_type read2mapping;
 
     // parse paf file
-    yacrd::parser::paf(std::string(paf_filename), &read2mapping);
+    yacrd::parser::file(std::string(paf_filename), &read2mapping);
 
     std::vector<std::uint64_t> coverage;
     // for each read

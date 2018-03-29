@@ -35,9 +35,13 @@ SOFTWARE.
 namespace yacrd {
 namespace parser {
 
-void paf(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping);
+// PAF
+void file(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping);
 
 void paf_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens);
+
+void mhap_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens);
+
 
 
 } // namespace yacrd

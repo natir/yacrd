@@ -22,7 +22,7 @@ DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER)
 ## Input
 
 Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2)).
-yacrd takes the resulting PAF (Pairwise Alignement Format) file from minimap2 as input.
+yacrd takes the resulting PAF (Pairwise Alignement Format) or MHAP-like file from minimap2 or any other long reads overlapper as input.
 
 ## Requirements
 
@@ -44,7 +44,7 @@ After building, you can move/copy/add yacrd exectuable binary in your PATH
 
 ## Usage
 
-1) Run Minimap2: `minimap2 reads.fq reads.fq > mapping.paf`
+1) Run Minimap2: `minimap2 reads.fq reads.fq > mapping.paf` or any other long reads overlapper.
 2)
 
 ```
