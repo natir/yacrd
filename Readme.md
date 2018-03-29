@@ -1,6 +1,13 @@
 # Yet Another Chimeric Read Detector for long reads
 
+![yacrd pipeline presentation](image/pipeline.svg)
+
 yacrd performs:
+
+1. compute coverage of each read
+2. each region where coverage is minus or equal to `min_coverage` (default 0), yacrd create a gap.
+3. if gap are in middle of read, they are mark as `Chimeric`
+4. if gap size > 0.8 * read length, they are mark as `Not_cover`
 
 1. computation of pile-up coverage for each read
 2. detection of chimeras
