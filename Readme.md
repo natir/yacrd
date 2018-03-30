@@ -27,6 +27,7 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 ## Requirements
 
 - CMake >= 2.8
+- c++ modern compiler (tested with gcc >= 6.3)
 
 ## Building
 
