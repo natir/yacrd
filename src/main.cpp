@@ -38,7 +38,7 @@ void print_help(void);
 
 int main(int argc, char** argv)
 {
-    std::string paf_filename;
+    std::string paf_filename, filter, output;
     std::uint64_t coverage_min = 0;
 
     if(argc < 3)
@@ -53,11 +53,13 @@ int main(int argc, char** argv)
     {
 	{"in", required_argument, 0, 'i'},
 	{"min_coverage", optional_argument, 0, 'c'},
+	{"filter", optional_argument, 0, 'f'},
+	{"output", optional_argument, 0, 'o'},
 	{0, 0, 0, 0}
     };
 
     int option_index = 0;
-    while((c = getopt_long(argc, argv, "hi:c:", longopts, &option_index)) != -1)
+    while((c = getopt_long(argc, argv, "hi:c:f:o:", longopts, &option_index)) != -1)
     {
         switch(c)
         {
@@ -73,6 +75,14 @@ int main(int argc, char** argv)
             case 'i':
                 paf_filename = optarg;
                 break;
+
+	    case 'f':
+		filter = optarg;
+		break;
+
+	    case 'o':
+		output = optarg;
+		break;
 
             case 'c':
                 coverage_min = atol(optarg);
@@ -91,18 +101,33 @@ int main(int argc, char** argv)
         }
     }
 
-    do_work(paf_filename, coverage_min);
+    if((!filter.empty() && output.empty()) || (filter.empty() && !output.empty()))
+    {
+	std::cerr<<"You need set -f,--filter and -o,--output !\n"<<std::endl;
+	print_help();
+	return -1;
+    }
+
+    std::set<std::string> remove_read;
+    do_work(paf_filename, coverage_min, &remove_read);
+
+    if(!filter.empty() && !output.empty())
+    {
+	// do filtration her
+    }
 
     return 0;
 }
 
 void print_help()
 {
-    std::cerr<<"usage: yacrd [-h] [-c coverage_min] -i mapping.paf\n";
+    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|paf) -o output.(fasta|fastq|paf)]-i mapping.(paf|mhap)\n";
     std::cerr<<"\n";
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
     std::cerr<<"\t-c,--min_coverage    If coverage are minus or equal to this create a gap [0]\n";
     std::cerr<<"\t-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
+    std::cerr<<"\t-f,--filter          File contain data need to be filter (fasta|fastq|paf) output option need to be set\n";
+    std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf) filter option need to be set\n";
     std::cerr<<std::endl;
 }
