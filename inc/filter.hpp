@@ -20,24 +20,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef ANALYSIS_HPP
-#define ANALYSIS_HPP
+#ifndef FILTER_HPP
+#define FILTER_HPP
 
 /* standard include */
-#include <memory>
 #include <string>
+#include <unordered_set>
 
 /* project include */
-#include "utils.hpp"
 
 namespace yacrd {
-namespace analysis {
+namespace filter {
 
-void find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, std::unordered_set<std::string>* remove_reads);
+void read_write(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
 
-void add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen);
+void read_write_fasta(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
 
-} // namespace analysis
+void read_write_fastq(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
+
+void read_write_mhap(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
+
+void read_write_paf(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
+
+} // namespace filter
 } // namespace yacrd
 
 #endif // ANALYSIS_HPP
+

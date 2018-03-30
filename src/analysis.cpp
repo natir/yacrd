@@ -26,12 +26,13 @@ SOFTWARE.
 #include <utility>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 
 /* project include */
 #include "parser.hpp"
 #include "analysis.hpp"
 
-void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min)
+void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, std::unordered_set<std::string>* remove_reads)
 {
     yacrd::utils::read2mapping_type read2mapping;
 
@@ -90,6 +91,7 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
         // if read have 1 or more gap it's a chimeric read
         if(middle_gaps.size() > 0)
         {
+	    remove_reads->insert(read_name_len.first.first);
             std::cout<<"Chimeric:"<<read_name_len.first.first<<","<<read_name_len.first.second<<";";
             for(auto gap : middle_gaps)
             {
@@ -101,6 +103,7 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
 
         if(extremity_gaps.size() > 0)
         {
+	    remove_reads->insert(read_name_len.first.first);
             for(auto gap : extremity_gaps)
             {
                 if(yacrd::utils::absdiff(gap.first, gap.second) > 0.8 * read_name_len.first.second)

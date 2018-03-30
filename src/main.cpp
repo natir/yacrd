@@ -25,6 +25,7 @@ SOFTWARE.
 #include <string>
 #include <utility>
 #include <iostream>
+#include <unordered_set>
 
 /* getopt include */
 #include <getopt.h>
@@ -32,6 +33,7 @@ SOFTWARE.
 /* project include */
 #include "utils.hpp"
 #include "parser.hpp"
+#include "filter.hpp"
 #include "analysis.hpp"
 
 void print_help(void);
@@ -108,12 +110,12 @@ int main(int argc, char** argv)
 	return -1;
     }
 
-    std::set<std::string> remove_read;
-    yacrd::analysis::find_chimera(paf_filename, coverage_min);
+    std::unordered_set<std::string> remove_reads;
+    yacrd::analysis::find_chimera(paf_filename, coverage_min, &remove_reads);
 
     if(!filter.empty() && !output.empty())
     {
-	// do filtration her
+	yacrd::filter::read_write(filter, output, remove_reads);
     }
 
     return 0;
