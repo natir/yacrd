@@ -31,6 +31,7 @@ SOFTWARE.
 namespace yacrd {
 namespace utils {
 
+// type definition
 using name_len = std::pair<std::string, std::uint64_t>;
 using interval = std::pair<std::uint64_t, std::uint64_t>;
 
@@ -44,7 +45,13 @@ struct Read2MappingHash
 
 using read2mapping_type = std::unordered_map<name_len, std::vector<interval>, Read2MappingHash>;
 
+// utils function
 void split(const std::string& s, char delimiter, std::vector<std::string>& tokens);
+
+template< typename T >
+T absdiff( const T& lhs, const T& rhs ) {
+  return lhs>rhs ? lhs-rhs : rhs-lhs;
+}
 
 } // namespace utils
 } // namespace yacrd

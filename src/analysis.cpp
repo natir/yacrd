@@ -21,7 +21,6 @@ SOFTWARE.
 */
 
 /* standard include */
-#include <cmath>
 #include <memory>
 #include <string>
 #include <utility>
@@ -94,7 +93,7 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
             std::cout<<"Chimeric:"<<read_name_len.first.first<<","<<read_name_len.first.second<<";";
             for(auto gap : middle_gaps)
             {
-                std::cout<<abs(gap.first - gap.second)<<","<<gap.first<<","<<gap.second<<";";
+                std::cout<<yacrd::utils::absdiff(gap.first, gap.second)<<","<<gap.first<<","<<gap.second<<";";
             }
             std::cout<<std::endl;
             continue;
@@ -104,10 +103,10 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
         {
             for(auto gap : extremity_gaps)
             {
-                if(abs(gap.first - gap.second) > 0.8 * read_name_len.first.second)
+                if(yacrd::utils::absdiff(gap.first, gap.second) > 0.8 * read_name_len.first.second)
                 {
                     std::cout<<"Not_covered:"<<read_name_len.first.first<<","<<read_name_len.first.second<<";";
-                    std::cout<<abs(gap.first - gap.second)<<","<<gap.first<<","<<gap.second<<";";
+                    std::cout<<yacrd::utils::absdiff(gap.first, gap.second)<<","<<gap.first<<","<<gap.second<<";";
                     std::cout<<std::endl;
                     break;
                 }
