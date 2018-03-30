@@ -22,7 +22,7 @@ DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER)
 ## Input
 
 Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2)).
-yacrd takes the resulting PAF (Pairwise Alignement Format) or MHAP-like file from minimap2 or any other long reads overlapper as input.
+yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP file from some other long reads overlapper as input.
 
 ## Requirements
 
@@ -50,11 +50,10 @@ After building, you can move/copy/add yacrd exectuable binary in your PATH
 ```
 usage: yacrd [-h] [-c coverage_min] -i mapping.paf
 
-Options:
-        -h                   Print help message
-        -c,--min_coverage    If coverage are minus or equal to this create a gap [0]
-        -i,--in              Maping input file
-
+options:
+	-h                   Print help message
+	-c,--min_coverage    If coverage are minus or equal to this create a gap [0]
+	-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)
 ```
 
 yacrd writes to standard output (stdout) the id of chimeric or not sufficiently covered reads.

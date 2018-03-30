@@ -41,6 +41,12 @@ int main(int argc, char** argv)
     std::string paf_filename;
     std::uint64_t coverage_min = 0;
 
+    if(argc < 3)
+    {
+	print_help();
+	return -1;
+    }
+
     int c;
 
     const struct option longopts[] = 
@@ -76,10 +82,12 @@ int main(int argc, char** argv)
                 print_help();
                 return -1;
             case '?':
-                break;
+		print_help();
+		return -1;
 
             default:
-                break;
+		print_help();
+                return -1;
         }
     }
 
@@ -92,9 +100,9 @@ void print_help()
 {
     std::cerr<<"usage: yacrd [-h] [-c coverage_min] -i mapping.paf\n";
     std::cerr<<"\n";
-    std::cerr<<"Options:\n";
+    std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
     std::cerr<<"\t-c,--min_coverage    If coverage are minus or equal to this create a gap [0]\n";
-    std::cerr<<"\t-i,--in              Maping input file\n";
+    std::cerr<<"\t-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
     std::cerr<<std::endl;
 }
