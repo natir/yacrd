@@ -91,7 +91,7 @@ int main(int argc, char** argv)
         }
     }
 
-    do_work(paf_filename, coverage_min);
+    yacrd::analysis::find_chimera(paf_filename, coverage_min);
 
     return 0;
 }

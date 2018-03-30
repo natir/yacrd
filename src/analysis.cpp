@@ -31,7 +31,7 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
+void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min)
 {
     yacrd::utils::read2mapping_type read2mapping;
 
@@ -116,7 +116,7 @@ void do_work(const std::string& paf_filename, std::uint64_t coverage_min)
     }
 }
 
-void add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen)
+void yacrd::analysis::add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen)
 {
     if(gap.first == gap.second)
     {
