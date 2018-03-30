@@ -2,8 +2,25 @@ cmake_minimum_required(VERSION 2.8)
 
 project(yacrd)
 
+
+# Search for zlib as a dependency for SeqAn.
+find_package (ZLIB)
+find_package (BZip2)
+
+# Load the SeqAn module and fail if not found.
+find_package (SeqAn REQUIRED)
+
 # warning flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wredundant-decls -Wcast-align -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Wextra -Wall -Werror -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral -flto")
+
+# Add include directories.
+include_directories (${SEQAN_INCLUDE_DIRS})
+
+# Add definitions set by find_package (SeqAn).
+add_definitions (${SEQAN_DEFINITIONS})
+
+# Add CXX flags found by find_package (SeqAn).
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SEQAN_CXX_FLAGS}")
 
 # optimisation flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
@@ -17,3 +34,4 @@ file(
     )
 
 add_executable(${PROJECT_NAME} ${src_files})
+target_link_libraries(${PROJECT_NAME} ${SEQAN_LIBRARIES})

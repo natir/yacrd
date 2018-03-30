@@ -28,6 +28,7 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 
 - CMake >= 2.8
 - clang >= 3.5 or gcc >= 5.2 (tested with [cmake-cpp-docker](https://github.com/Nercury/cmake-cpp-docker))
+- seqan >= 2
 
 ## Building
 
