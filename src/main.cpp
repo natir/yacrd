@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     }
 
     std::set<std::string> remove_read;
-    do_work(paf_filename, coverage_min, &remove_read);
+    yacrd::analysis::find_chimera(paf_filename, coverage_min);
 
     if(!filter.empty() && !output.empty())
     {
