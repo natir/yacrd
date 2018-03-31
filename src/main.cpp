@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 
 void print_help()
 {
-    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|paf) -o output.(fasta|fastq|paf)]-i mapping.(paf|mhap)\n";
+    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -o output.(fasta|fastq|mhap|paf)]-i mapping.(paf|mhap)\n";
     std::cerr<<"\n";
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";

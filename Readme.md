@@ -28,7 +28,6 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 
 - CMake >= 2.8
 - clang >= 3.5 or gcc >= 5.2 (tested with [cmake-cpp-docker](https://github.com/Nercury/cmake-cpp-docker))
-- seqan >= 2
 
 ## Building
 
@@ -43,19 +42,20 @@ make
 
 After building, you can move/copy/add yacrd exectuable binary in your PATH
 
-
 ## Usage
 
 1) Run Minimap2: `minimap2 reads.fq reads.fq > mapping.paf` or any other long reads overlapper.
 2)
 
 ```
-usage: yacrd [-h] [-c coverage_min] -i mapping.paf
+usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -o output.(fasta|fastq|mhap|paf)] -i mapping.paf
 
 options:
 	-h                   Print help message
 	-c,--min_coverage    If coverage are minus or equal to this create a gap [0]
 	-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)
+    	-f,--filter          File contain data need to be filter (fasta|fastq|paf) output option need to be set
+	-o,--output          File where filtered data are write (fasta|fastq|paf) filter option need to be set
 ```
 
 yacrd writes to standard output (stdout) the id of chimeric or not sufficiently covered reads.
