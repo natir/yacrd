@@ -3,6 +3,11 @@
 *.paf
 *.mhap
 *.hisea
+*.chimeric.fastq.gz
+*.filter.*
+
+# Qt file
+CMakeLists.txt.user
 
 # Created by https://www.gitignore.io/api/c++,cmake
 
