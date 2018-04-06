@@ -124,6 +124,7 @@ void yacrd::filter::read_write_paf(const std::string& filter_path, const std::st
     std::ofstream out(output_path);
     std::vector<std::string> tokens;
     std::string line, name_a, name_b;
+
     while(std::getline(in, line))
     {
         yacrd::parser::paf_line(line, &name_a, &hack, &hack, &hack, &name_b, &hack, &hack, &hack, tokens);
