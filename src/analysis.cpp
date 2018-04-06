@@ -34,27 +34,6 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-using coverage_t = std::uint_fast8_t;
-
-namespace {
-
-void add_gap(yacrd::utils::interval_vector& middle, yacrd::utils::interval_vector& extremity, const yacrd::utils::interval& gap, const std::uint64_t readlen)
-{
-    if(gap.first == gap.second)
-    {
-        return ;
-    }
-
-    if(gap.first == 0 || gap.second == readlen)
-    {
-        extremity.push_back(gap);
-        return ;
-    }
-    middle.push_back(gap);
-}
-
-}  // namespace
-
 std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min)
 {
     yacrd::utils::read2mapping_type read2mapping;
@@ -63,16 +42,13 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
     // parse paf file
     yacrd::parser::file(std::string(paf_filename), read2mapping);
 
-
     yacrd::utils::interval_vector middle_gaps;
-    yacrd::utils::interval_vector extremity_gaps;
     std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> stack; // interval ends
 
     // for each read
     for(auto read_name_len : read2mapping)
     {
         middle_gaps.clear();
-        extremity_gaps.clear();
         stack = {};
 
         auto name_len = read_name_len.first;
@@ -82,6 +58,7 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
 
         std::sort(intervals.begin(), intervals.end());
 
+        size_t first_covered = 0;
         size_t last_covered = 0; // end of the last sufficiently covered interval
         for(auto interval : intervals) {
             // Unstack intervals ending before the beginning of this one
@@ -92,21 +69,25 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
                 stack.pop();
             }
 
-            if(stack.size() == coverage_min && last_covered < interval.first) {
-                add_gap(middle_gaps, extremity_gaps, {last_covered, interval.first}, len);
+            // If the new interval will cross the coverage treshold
+            if(stack.size() == coverage_min) {
+                if(last_covered != 0) { // Closing a gap
+                    middle_gaps.emplace_back(last_covered, interval.first);
+                } else { // First covered region
+                    first_covered = interval.first;
+                }
             }
 
             stack.push(interval.second);
         }
 
         // Unstack until we reach low coverage region or the end of the read
-        while(stack.size() > coverage_min && stack.top() < len) {
+        while(stack.size() > coverage_min) {
             last_covered = stack.top();
+            if(last_covered >= len) {
+                break;
+            }
             stack.pop();
-        }
-
-        if(stack.size() <= coverage_min) {
-            add_gap(middle_gaps, extremity_gaps, {last_covered, len}, len);
         }
 
 
@@ -123,19 +104,16 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
             continue;
         }
 
-        if(!extremity_gaps.empty())
-        {
-            for(auto gap : extremity_gaps)
-            {
-                if(yacrd::utils::absdiff(gap.first, gap.second) > 0.8 * len)
-                {
-                    std::cout<<"Not_covered:"<<name<<","<<len<<";";
-                    std::cout<<yacrd::utils::absdiff(gap.first, gap.second)<<","<<gap.first<<","<<gap.second<<";";
-                    std::cout<<"\n";
-                    remove_reads.insert(read_name_len.first.first);
-                    break;
-                }
+        size_t biggest_extremity_gap = std::max(first_covered, len - last_covered);
+        if(biggest_extremity_gap > 0.8 * len) {
+            std::cout << "Not_covered:" << name << "," << len << ";";
+            std::cout << biggest_extremity_gap << ",";
+            if(biggest_extremity_gap == first_covered) {
+                std::cout << "0," << first_covered << ";\n";
+            } else {
+                std::cout << last_covered << "," << len << ";\n";
             }
+            remove_reads.insert(name);
             continue;
         }
     }
