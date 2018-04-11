@@ -34,22 +34,23 @@ namespace utils {
 // type definition
 using name_len = std::pair<std::string, std::uint64_t>;
 using interval = std::pair<std::uint64_t, std::uint64_t>;
+using interval_vector = std::vector<interval>;
 
-struct Read2MappingHash
+struct Read2MappingHashEq
 {
+    bool operator()(const name_len& x, const name_len& y) const {
+        return x.first == y.first;
+    }
     std::size_t operator()(const name_len& k) const
     {
 	return std::hash<std::string>()(k.first);
     }
 };
 
-using read2mapping_type = std::unordered_map<name_len, std::vector<interval>, Read2MappingHash>;
-
-// utils function
-void split(const std::string& s, char delimiter, std::vector<std::string>& tokens);
+using read2mapping_type = std::unordered_map<name_len, std::vector<interval>, Read2MappingHashEq, Read2MappingHashEq>;
 
 template< typename T >
-T absdiff( const T& lhs, const T& rhs ) {
+inline T absdiff( const T& lhs, const T& rhs ) {
   return lhs>rhs ? lhs-rhs : rhs-lhs;
 }
 

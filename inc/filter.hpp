@@ -34,14 +34,6 @@ namespace filter {
 
 void read_write(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
 
-void read_write_fasta(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
-
-void read_write_fastq(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
-
-void read_write_mhap(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
-
-void read_write_paf(const std::string& filter_path, const std::string& output_path, const std::unordered_set<std::string>& remove_reads);
-
 } // namespace filter
 } // namespace yacrd
 

@@ -110,8 +110,7 @@ int main(int argc, char** argv)
 	return -1;
     }
 
-    std::unordered_set<std::string> remove_reads;
-    yacrd::analysis::find_chimera(paf_filename, coverage_min, &remove_reads);
+    std::unordered_set<std::string> remove_reads = yacrd::analysis::find_chimera(paf_filename, coverage_min);
 
     if(!filter.empty() && !output.empty())
     {

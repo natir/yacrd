@@ -20,89 +20,103 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <iostream>
 /* standard include */
 #include <fstream>
+#include <sstream>
+#include <limits>
 
 /* project include */
 #include "parser.hpp"
 
-void yacrd::parser::file(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping)
+namespace  {
+
+inline bool insert(yacrd::parser::alignment_span& span, yacrd::utils::read2mapping_type& read2mapping) {
+    if(span.beg > span.end) {
+        std::swap(span.beg, span.end);
+    }
+
+    // Inserts a new vector in the map, if the read wasn't already indexed
+    auto res = read2mapping.emplace(std::make_pair(span.name, span.len), yacrd::utils::interval_vector());
+    auto it = res.first; // Map iterator at the preexistent or inserted entry
+    it->second.push_back(std::make_pair(span.beg, span.end));
+
+    return res.second;
+}
+
+inline bool insert(yacrd::parser::alignment& alignment, yacrd::utils::read2mapping_type& read2mapping) {
+    bool ins_first = insert(alignment.first, read2mapping);
+    bool ins_second = insert(alignment.second, read2mapping);
+    return ins_first || ins_second;
+}
+
+} // namespace
+
+void yacrd::parser::file(const std::string& filename, yacrd::utils::read2mapping_type& read2mapping)
 {
     auto parse_line = yacrd::parser::paf_line;
-    if(filename.substr(filename.find_last_of(".") + 1) == "mhap")
+    if(filename.substr(filename.find_last_of('.') + 1) == "mhap")
     {
         parse_line = yacrd::parser::mhap_line;
     }
 
-    std::uint64_t switch_val;
-
-    std::string line;
     std::ifstream infile(filename);
-    std::vector<std::string> tokens;
+    std::string line;
+    std::istringstream line_stream;
+    yacrd::parser::alignment alignment;
     while(std::getline(infile, line))
     {
-        std::string name_a, name_b;
-        std::uint64_t len_a, beg_a, end_a, len_b, beg_b, end_b;
+        if(!line.empty()) {
+            line_stream.str(line);
+            line_stream.clear();
 
-        (*parse_line)(line, &name_a, &len_a, &beg_a, &end_a, &name_b, &len_b, &beg_b, &end_b, tokens);
+            (*parse_line)(line_stream, alignment, false);
 
-        if(beg_a > end_a)
-        {
-            switch_val = beg_a;
-            beg_a = end_a;
-            end_a = switch_val;
+            insert(alignment, read2mapping);
         }
-
-        if(beg_b > end_b)
-        {
-            switch_val = beg_b;
-            beg_b = end_b;
-            end_b = switch_val;
-        }
-
-        if(read2mapping->count(std::make_pair(name_a, len_a)) == 0)
-        {
-            read2mapping->emplace(std::make_pair(name_a, len_a), std::vector<yacrd::utils::interval>());
-        }
-        read2mapping->at(std::make_pair(name_a, len_a)).push_back(std::make_pair(beg_a, end_a));
-
-        if(read2mapping->count(std::make_pair(name_b, len_b)) == 0)
-        {
-            read2mapping->emplace(std::make_pair(name_b, len_b), std::vector<yacrd::utils::interval>());
-        }
-        read2mapping->at(std::make_pair(name_b, len_b)).push_back(std::make_pair(beg_b, end_b));
     }
 
 }
 
-void yacrd::parser::paf_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens)
-{
-    yacrd::utils::split(line, '\t', tokens);
 
-    *name_a = tokens[0];
-    *len_a = std::stoi(tokens[1]);
-    *beg_a = std::stoi(tokens[2]);
-    *end_a = std::stoi(tokens[3]);
-
-    *name_b = tokens[5];
-    *len_b = std::stoi(tokens[6]);
-    *beg_b = std::stoi(tokens[7]);
-    *end_b = std::stoi(tokens[8]);
+inline void skip(std::istringstream& strm, char sep) {
+    // consuming (>>) leave next sep while ignore consume it
+    strm.get(); // so we have to first consume one char in case a sep was left by >>
+    strm.ignore(std::numeric_limits<std::streamsize>::max(), sep);
 }
 
-void yacrd::parser::mhap_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens)
+void yacrd::parser::paf_line(std::istringstream& line, yacrd::parser::alignment& out, bool only_names)
 {
-    yacrd::utils::split(line, ' ', tokens);
+    line >> out.first.name; // Token 0
 
-    *name_a = tokens[0];
-    *len_a = std::stoi(tokens[7]);
-    *beg_a = std::stoi(tokens[5]);
-    *end_a = std::stoi(tokens[6]);
+    if(!only_names) {
+        line >> out.first.len >> out.first.beg >> out.first.end;
 
-    *name_b = tokens[1];
-    *len_b = std::stoi(tokens[11]);
-    *beg_b = std::stoi(tokens[9]);
-    *end_b = std::stoi(tokens[10]);
+        skip(line, '\t'); // Token 4: skip
+    } else {
+        for(unsigned i=0 ; i < 4 ; i++) {
+            skip(line, '\t');
+        }
+    }
+
+    line >> out.second.name; // Token 5
+
+    if(!only_names) {
+        line >> out.second.len >> out.second.beg >> out.second.end;
+    }
 }
 
+void yacrd::parser::mhap_line(std::istringstream& line, yacrd::parser::alignment& out, bool only_names)
+{
+    line >> out.first.name; // Token 0
+    line >> out.second.name;
+
+    if(!only_names) {
+        for(unsigned i=0 ; i < 3 ; i++) { skip(line, ' '); }
+        line >> out.first.beg >> out.first.end >> out.first.len;
+
+        skip(line, ' ');
+
+        line >> out.second.beg >> out.second.end >> out.second.len;
+
+    }
+}
