@@ -25,9 +25,7 @@ SOFTWARE.
 
 /* standard include */
 #include <string>
-#include <vector>
-#include <utility>
-#include <unordered_map>
+#include <sstream>
 
 /* project include */
 #include "utils.hpp"
@@ -35,17 +33,24 @@ SOFTWARE.
 namespace yacrd {
 namespace parser {
 
+struct alignment_span {
+  std::string name;
+  size_t beg, end, len;
+};
+
+using alignment = std::pair<alignment_span, alignment_span>;
+
 // PAF
-void file(const std::string& filename, yacrd::utils::read2mapping_type* read2mapping);
-
-void paf_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens);
-
-void mhap_line(const std::string& line, std::string* name_a, std::uint64_t* len_a, std::uint64_t* beg_a, std::uint64_t* end_a, std::string* name_b, std::uint64_t* len_b, std::uint64_t* beg_b, std::uint64_t* end_b, std::vector<std::string>& tokens);
+void file(const std::string& filename, yacrd::utils::read2mapping_type& read2mapping);
 
 
+using parser_t = void (*)(std::istringstream&, alignment&, bool);
 
-} // namespace yacrd
+void paf_line(std::istringstream& line, alignment& out, bool only_names=false);
+
+void mhap_line(std::istringstream& line, alignment& out, bool only_names=false);
+
 } // namespace parser
-
+} // namespace yacrd
 
 #endif // PARSER_HPP

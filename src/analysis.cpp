@@ -32,19 +32,39 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, std::unordered_set<std::string>* remove_reads)
+namespace {
+
+void add_gap(yacrd::utils::interval_vector& middle, yacrd::utils::interval_vector& extremity, const yacrd::utils::interval& gap, const std::uint64_t readlen)
+{
+    if(gap.first == gap.second)
+    {
+        return ;
+    }
+
+    if(gap.first == 0 || gap.second == readlen)
+    {
+        extremity.push_back(gap);
+        return ;
+    }
+    middle.push_back(gap);
+}
+
+}  // namespace
+
+std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min)
 {
     yacrd::utils::read2mapping_type read2mapping;
+    std::unordered_set<std::string> remove_reads;
 
     // parse paf file
-    yacrd::parser::file(std::string(paf_filename), &read2mapping);
+    yacrd::parser::file(std::string(paf_filename), read2mapping);
 
     std::vector<std::uint64_t> coverage;
     // for each read
     for(auto read_name_len : read2mapping)
     {
         // compute coverage
-	coverage.assign(read_name_len.first.second, 0);
+        coverage.assign(read_name_len.first.second, 0);
         for(auto mapping : read_name_len.second)
         {
             if(mapping.second > read_name_len.first.second)
@@ -60,20 +80,20 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
 
         // find gap in coverage
         bool in_gap = true;
-        std::vector<yacrd::utils::interval> middle_gaps;
-        std::vector<yacrd::utils::interval> extremity_gaps;
+        yacrd::utils::interval_vector middle_gaps;
+        yacrd::utils::interval_vector extremity_gaps;
         yacrd::utils::interval gap = std::make_pair<std::uint64_t, std::uint64_t>(0, 0);
         auto it = coverage.begin();
         for(; it != coverage.end(); it++)
         {
-            if(*it <= coverage_min && in_gap == false)
+            if(*it <= coverage_min && !in_gap)
             {
                 gap = std::make_pair<std::uint64_t, std::uint64_t>(0, 0);
                 gap.first = it - coverage.begin();
                 in_gap = true;
             }
 
-            if(*it > coverage_min && in_gap == true)
+            if(*it > coverage_min && in_gap)
             {
                 gap.second = it - coverage.begin();
                 in_gap = false;
@@ -82,16 +102,16 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
             }
         }
 
-        if(in_gap == true)
+        if(in_gap)
         {
             gap.second = it - coverage.begin();
             add_gap(middle_gaps, extremity_gaps, gap, read_name_len.first.second);
         }
 
         // if read have 1 or more gap it's a chimeric read
-        if(middle_gaps.size() > 0)
+        if(!middle_gaps.empty())
         {
-	    remove_reads->insert(read_name_len.first.first);
+            remove_reads.insert(read_name_len.first.first);
             std::cout<<"Chimeric:"<<read_name_len.first.first<<","<<read_name_len.first.second<<";";
             for(auto gap : middle_gaps)
             {
@@ -101,7 +121,7 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
             continue;
         }
 
-        if(extremity_gaps.size() > 0)
+        if(!extremity_gaps.empty())
         {
             for(auto gap : extremity_gaps)
             {
@@ -110,28 +130,13 @@ void yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_
                     std::cout<<"Not_covered:"<<read_name_len.first.first<<","<<read_name_len.first.second<<";";
                     std::cout<<yacrd::utils::absdiff(gap.first, gap.second)<<","<<gap.first<<","<<gap.second<<";";
                     std::cout<<std::endl;
-		    remove_reads->insert(read_name_len.first.first);
+                    remove_reads.insert(read_name_len.first.first);
                     break;
                 }
             }
             continue;
         }
     }
+
+    return remove_reads;
 }
-
-void yacrd::analysis::add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen)
-{
-    if(gap.first == gap.second)
-    {
-        return ;
-    }
-
-    if(gap.first == 0 || gap.second == readlen)
-    {
-        extremity.push_back(gap);
-        return ;
-    }
-    middle.push_back(gap);
-}
-
-

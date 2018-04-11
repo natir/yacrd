@@ -26,6 +26,7 @@ SOFTWARE.
 /* standard include */
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 /* project include */
 #include "utils.hpp"
@@ -33,9 +34,7 @@ SOFTWARE.
 namespace yacrd {
 namespace analysis {
 
-void find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, std::unordered_set<std::string>* remove_reads);
-
-void add_gap(std::vector<yacrd::utils::interval>& middle, std::vector<yacrd::utils::interval>& extremity, yacrd::utils::interval& gap, std::uint64_t readlen);
+std::unordered_set<std::string> find_chimera(const std::string& paf_filename, std::uint64_t coverage_min);
 
 } // namespace analysis
 } // namespace yacrd
