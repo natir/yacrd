@@ -34,7 +34,7 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min)
+std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, float coverage_ratio_min)
 {
     yacrd::utils::read2mapping_type read2mapping;
     std::unordered_set<std::string> remove_reads;
@@ -90,31 +90,43 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
             stack.pop();
         }
 
+        // Sum first and last gap, check if the covered region is above a treshold
+        size_t uncovered_extremities = first_covered + (len - last_covered);
 
-        // if read have 1 or more gap it's a chimeric read
+        const char* label = nullptr; // nullptr is "pass"
+
         if(!middle_gaps.empty())
-        {
-            remove_reads.insert(name);
-            std::cout<<"Chimeric:"<<name<<","<<len<<";";
-            for(auto gap : middle_gaps)
-            {
-                std::cout<<yacrd::utils::absdiff(gap.first, gap.second)<<","<<gap.first<<","<<gap.second<<";";
-            }
-            std::cout<<"\n";
-            continue;
+        {   // if read have 1 or more gap it's a chimeric read
+            label = "Chimeric\t";
+        } else if(uncovered_extremities > coverage_ratio_min * len) {
+            label = "Not_covered\t";
         }
 
-        size_t biggest_extremity_gap = std::max(first_covered, len - last_covered);
-        if(biggest_extremity_gap > 0.8 * len) {
-            std::cout << "Not_covered:" << name << "," << len << ";";
-            std::cout << biggest_extremity_gap << ",";
-            if(biggest_extremity_gap == first_covered) {
-                std::cout << "0," << first_covered << ";\n";
-            } else {
-                std::cout << last_covered << "," << len << ";\n";
-            }
+        if(label != nullptr)
+        {
             remove_reads.insert(name);
-            continue;
+
+            size_t ngaps = size_t(first_covered != 0) + size_t(last_covered != 0) + middle_gaps.size();
+            auto print_gap = [ngaps](std::pair<size_t, size_t> gap) mutable {
+                std::cout << gap.second - gap.first << "," << gap.first<< ","<< gap.second;
+                if(--ngaps > 0) {
+                    std::cout << ";";
+                } else {
+                    std::cout << "\n";
+                }
+            };
+
+            std::cout << label << name << "\t"<<len<<"\t";
+            if(first_covered != 0) {
+                print_gap({0, first_covered});
+            }
+            for(auto gap : middle_gaps)
+            {
+                print_gap(gap);
+            }
+            if(last_covered != len) {
+                print_gap({last_covered, len});
+            }
         }
     }
 
