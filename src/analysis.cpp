@@ -106,7 +106,7 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
         {
             remove_reads.insert(name);
 
-            size_t ngaps = size_t(first_covered != 0) + size_t(last_covered != 0) + middle_gaps.size();
+            size_t ngaps = size_t(first_covered != 0) + size_t(last_covered != len) + middle_gaps.size();
             auto print_gap = [ngaps](std::pair<size_t, size_t> gap) mutable {
                 std::cout << gap.second - gap.first << "," << gap.first<< ","<< gap.second;
                 if(--ngaps > 0) {
