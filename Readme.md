@@ -34,6 +34,7 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 ```
 git clone https://github.com/natir/yacrd.git
 cd yacrd
+git checkout v0.02
 mkdir build
 cd build
 cmake ..
