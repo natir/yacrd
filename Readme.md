@@ -21,7 +21,7 @@ DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER)
 
 ## Input
 
-Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2)).
+Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2) ).
 yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP file from some other long reads overlapper as input.
 
 ## Requirements
@@ -29,7 +29,19 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 - CMake >= 2.8
 - clang >= 3.5 or gcc >= 5.2 (tested with [cmake-cpp-docker](https://github.com/Nercury/cmake-cpp-docker))
 
-## Building
+## Instalation
+
+### With conda
+
+yacrd are avaible in [bioconda channel](https://bioconda.github.io/)
+
+if bioconda channel is setup you can run :
+
+```
+conda install yacrd
+```
+
+### From source
 
 ```
 git clone https://github.com/natir/yacrd.git
