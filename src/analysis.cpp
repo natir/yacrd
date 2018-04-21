@@ -49,7 +49,7 @@ std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string&
     for(auto read_name_len : read2mapping)
     {
         middle_gaps.clear();
-        stack = {};
+        stack = std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>>();
 
         auto name_len = read_name_len.first;
         std::string& name = name_len.first;
