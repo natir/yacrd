@@ -134,5 +134,5 @@ void print_help(void)
 
 void print_version(void)
 {
-    std::cerr<<"yacrd 0.2 Abok"<<std::endl;
+    std::cerr<<"yacrd 0.2.1 Kabuto"<<std::endl;
 }
