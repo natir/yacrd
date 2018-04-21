@@ -37,17 +37,12 @@ SOFTWARE.
 #include "analysis.hpp"
 
 void print_help(void);
+void print_version(void);
 
 int main(int argc, char** argv)
 {
     std::string paf_filename, filter, output;
     std::uint64_t coverage_min = 0;
-
-    if(argc < 3)
-    {
-	print_help();
-	return -1;
-    }
 
     int c;
 
@@ -61,7 +56,7 @@ int main(int argc, char** argv)
     };
 
     int option_index = 0;
-    while((c = getopt_long(argc, argv, "hi:c:f:o:", longopts, &option_index)) != -1)
+    while((c = getopt_long(argc, argv, "hvi:c:f:o:", longopts, &option_index)) != -1)
     {
         switch(c)
         {
@@ -90,6 +85,9 @@ int main(int argc, char** argv)
                 coverage_min = atol(optarg);
                 break;
 
+	    case 'v':
+		print_version();
+		return -1;
             case 'h':
                 print_help();
                 return -1;
@@ -120,15 +118,21 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void print_help()
+void print_help(void)
 {
     std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -o output.(fasta|fastq|mhap|paf)]-i mapping.(paf|mhap)\n";
     std::cerr<<"\n";
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
+    std::cerr<<"\t-v                   Print version number\n";
     std::cerr<<"\t-c,--min_coverage    If coverage are minus or equal to this create a gap [0]\n";
     std::cerr<<"\t-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
     std::cerr<<"\t-f,--filter          File contain data need to be filter (fasta|fastq|paf) output option need to be set\n";
     std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf) filter option need to be set\n";
     std::cerr<<std::endl;
+}
+
+void print_version(void)
+{
+    std::cerr<<"yacrd 0.2 Abok"<<std::endl;
 }
