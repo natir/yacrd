@@ -120,15 +120,15 @@ int main(int argc, char** argv)
 
 void print_help(void)
 {
-    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -o output.(fasta|fastq|mhap|paf)]-i mapping.(paf|mhap)\n";
+    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -i mapping.(paf|mhap) -o output.(fasta|fastq|mhap|paf)]\n";
     std::cerr<<"\n";
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
     std::cerr<<"\t-v                   Print version number\n";
-    std::cerr<<"\t-c,--min_coverage    If coverage are minus or equal to this create a gap [0]\n";
-    std::cerr<<"\t-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
-    std::cerr<<"\t-f,--filter          File contain data need to be filter (fasta|fastq|paf) output option need to be set\n";
-    std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf) filter option need to be set\n";
+    std::cerr<<"\t-c,--min_coverage    Coverage threshold below which a gap should be created [default: coverage 0]\n";
+    std::cerr<<"\t-i,--in              Mapping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
+    std::cerr<<"\t-f,--filter          File containing reads that will be filtered (fasta|fastq|paf), requires -o\n";
+    std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf), requires -f\n";
     std::cerr<<std::endl;
 }
 
