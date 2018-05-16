@@ -154,6 +154,7 @@ void print_help(void)
 {
     std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|paf|mhap)] [-F (paf|mhap)] -i (mapping.(paf|mhap)|-) -o output.(fasta|fastq|paf|mhap)]\n";
     std::cerr<<"\n";
+
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
     std::cerr<<"\t-v                   Print version number\n";
@@ -161,7 +162,18 @@ void print_help(void)
     std::cerr<<"\t-i,--in              Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input\n";
     std::cerr<<"\t-f,--filter          File containing reads that will be filtered (fasta|fastq|paf), requires -o\n";
     std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf), requires -f\n";
-    std::cerr<<"\t-F,--format          Force the input format paf or mhap [default: paf]";
+    std::cerr<<"\t-F,--format          Force the input format paf or mhap [default: paf]\n";
+    std::cerr<<"\n";
+    
+    std::cerr<<"examples:\n";
+    std::cerr<<"\tyacrd -i map_file.paf > map_file.yacrd\n";
+    std::cerr<<"\tyacrd -i map_file.mhap > map_file.yacrd\n";
+    std::cerr<<"\tyacrd -i map_file.xyz -F paf > map_file.yacrd\n";
+    std::cerr<<"\tyacrd -i map_file.paf -f sequence.fasta -o filter_sequence.fasta > map_file.yacrd\n";
+    std::cerr<<"\tzcat map_file.paf.gz | yacrd -i - > map_file.yacrd\n";
+    std::cerr<<"\tminimap2 sequence.fasta sequence.fasta | yacrd -i - -f sequence.fasta -o filter_sequence.fasta > map_file.yacrd\n";
+    std::cerr<<"\n";
+    std::cerr<<"\tOr any combination of this.\n";
     std::cerr<<std::endl;
 }
 

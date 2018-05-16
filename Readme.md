@@ -61,14 +61,26 @@ After building, you can move/copy/add yacrd exectuable binary in your PATH
 2)
 
 ```
-usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -o output.(fasta|fastq|mhap|paf)] -i mapping.paf
+usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|paf|mhap)] [-F (paf|mhap)] -i (mapping.(paf|mhap)|-) -o output.(fasta|fastq|paf|mhap)]
 
 options:
 	-h                   Print help message
-	-c,--min_coverage    If coverage are minus or equal to this create a gap [0]
-	-i,--in              Maping input file in PAF or MHAP format (with .paf or .mhap extension)
-    	-f,--filter          File contain data need to be filter (fasta|fastq|paf) output option need to be set
-	-o,--output          File where filtered data are write (fasta|fastq|paf) filter option need to be set
+	-v                   Print version number
+	-c,--min_coverage    Overlap depth threshold below which a gap should be created [default: coverage 0]
+	-i,--in              Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input
+	-f,--filter          File containing reads that will be filtered (fasta|fastq|paf), requires -o
+	-o,--output          File where filtered data are write (fasta|fastq|paf), requires -f
+	-F,--format          Force the input format paf or mhap [default: paf]
+
+examples:
+	yacrd -i map_file.paf > map_file.yacrd
+	yacrd -i map_file.mhap > map_file.yacrd
+	yacrd -i map_file.xyz -F paf > map_file.yacrd
+	yacrd -i map_file.paf -f sequence.fasta -o filter_sequence.fasta > map_file.yacrd
+	zcat map_file.paf.gz | yacrd -i - > map_file.yacrd
+	minimap2 sequence.fasta sequence.fasta | yacrd -i - -f sequence.fasta -o filter_sequence.fasta > map_file.yacrd
+
+	Or any combination of this.
 ```
 
 yacrd writes to standard output (stdout) the id of chimeric or not sufficiently covered reads.
