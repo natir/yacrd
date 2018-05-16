@@ -42,6 +42,7 @@ void print_version(void);
 
 int main(int argc, char** argv)
 {
+    /* Some optarg things */
     std::string in_filename, filter, output, format;
     std::uint64_t coverage_min = 0;
 
@@ -106,6 +107,7 @@ int main(int argc, char** argv)
         }
     }
 
+    /* Check parameter requirement */
     if((!filter.empty() && output.empty()) || (filter.empty() && !output.empty()))
     {
 	std::cerr<<"You need set -f,--filter and -o,--output !\n"<<std::endl;
@@ -113,6 +115,7 @@ int main(int argc, char** argv)
 	return -1;
     }
 
+    /* Choose the input */
     std::istream* input = nullptr;
     if(in_filename == "-")
     {
@@ -123,6 +126,7 @@ int main(int argc, char** argv)
 	input = new std::ifstream(in_filename);
     }
 
+    /* Choose the input parser */
     yacrd::parser::parser_t parser = yacrd::parser::paf_line;
     if(in_filename.substr(in_filename.find_last_of(".") + 1) == "mhap")
     {
@@ -134,8 +138,10 @@ int main(int argc, char** argv)
 	parser = yacrd::parser::mhap_line;
     }
 
+    /* Read input and write output in standard output */
     std::unordered_set<std::string> remove_reads = yacrd::analysis::find_chimera(input, parser, coverage_min);
 
+    /* Filter chimeric read in file */
     if(!filter.empty() && !output.empty())
     {
 	yacrd::filter::read_write(filter, output, remove_reads);
