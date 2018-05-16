@@ -46,7 +46,7 @@ conda install yacrd
 ```
 git clone https://github.com/natir/yacrd.git
 cd yacrd
-git checkout v0.02
+git checkout v0.2.1
 mkdir build
 cd build
 cmake ..
