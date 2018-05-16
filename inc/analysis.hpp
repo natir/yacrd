@@ -34,7 +34,7 @@ SOFTWARE.
 namespace yacrd {
 namespace analysis {
 
-std::unordered_set<std::string> find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, float coverage_ratio_min=0.8);
+std::unordered_set<std::string> find_chimera(std::istream* input, yacrd::parser::parser_t parser, std::uint64_t coverage_min, float coverage_ratio_min=0.8);
 
 } // namespace analysis
 } // namespace yacrd

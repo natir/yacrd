@@ -23,6 +23,7 @@ SOFTWARE.
 /* standard include */
 #include <memory>
 #include <string>
+#include <fstream>
 #include <utility>
 #include <iostream>
 #include <unordered_set>
@@ -41,7 +42,7 @@ void print_version(void);
 
 int main(int argc, char** argv)
 {
-    std::string paf_filename, filter, output;
+    std::string in_filename, filter, output, format;
     std::uint64_t coverage_min = 0;
 
     int c;
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
     };
 
     int option_index = 0;
-    while((c = getopt_long(argc, argv, "hvi:c:f:o:", longopts, &option_index)) != -1)
+    while((c = getopt_long(argc, argv, "hvi:c:f:o:F:", longopts, &option_index)) != -1)
     {
         switch(c)
         {
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
                 break;
 
             case 'i':
-                paf_filename = optarg;
+                in_filename = optarg;
                 break;
 
 	    case 'f':
@@ -83,6 +84,10 @@ int main(int argc, char** argv)
 
             case 'c':
                 coverage_min = atol(optarg);
+                break;
+
+	    case 'F':
+                format = optarg;
                 break;
 
 	    case 'v':
@@ -108,7 +113,28 @@ int main(int argc, char** argv)
 	return -1;
     }
 
-    std::unordered_set<std::string> remove_reads = yacrd::analysis::find_chimera(paf_filename, coverage_min);
+    std::istream* input = nullptr;
+    if(in_filename == "-")
+    {
+	input = &std::cin;
+    }
+    else
+    {
+	input = new std::ifstream(in_filename);
+    }
+
+    yacrd::parser::parser_t parser = yacrd::parser::paf_line;
+    if(in_filename.substr(in_filename.find_last_of(".") + 1) == "mhap")
+    {
+	parser = yacrd::parser::mhap_line;
+    }
+
+    if(!format.empty() && format == "mhap")
+    {
+	parser = yacrd::parser::mhap_line;
+    }
+
+    std::unordered_set<std::string> remove_reads = yacrd::analysis::find_chimera(input, parser, coverage_min);
 
     if(!filter.empty() && !output.empty())
     {
@@ -120,15 +146,16 @@ int main(int argc, char** argv)
 
 void print_help(void)
 {
-    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|mhap|paf) -i mapping.(paf|mhap) -o output.(fasta|fastq|mhap|paf)]\n";
+    std::cerr<<"usage: yacrd [-h] [-c coverage_min] [-f file_to_filter.(fasta|fastq|paf|mhap)] [-F (paf|mhap)] -i (mapping.(paf|mhap)|-) -o output.(fasta|fastq|paf|mhap)]\n";
     std::cerr<<"\n";
     std::cerr<<"options:\n";
     std::cerr<<"\t-h                   Print help message\n";
     std::cerr<<"\t-v                   Print version number\n";
     std::cerr<<"\t-c,--min_coverage    Overlap depth threshold below which a gap should be created [default: coverage 0]\n";
-    std::cerr<<"\t-i,--in              Mapping input file in PAF or MHAP format (with .paf or .mhap extension)\n";
+    std::cerr<<"\t-i,--in              Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input\n";
     std::cerr<<"\t-f,--filter          File containing reads that will be filtered (fasta|fastq|paf), requires -o\n";
     std::cerr<<"\t-o,--output          File where filtered data are write (fasta|fastq|paf), requires -f\n";
+    std::cerr<<"\t-F,--format          Force the input format paf or mhap [default: paf]";
     std::cerr<<std::endl;
 }
 

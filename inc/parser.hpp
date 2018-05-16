@@ -40,11 +40,10 @@ struct alignment_span {
 
 using alignment = std::pair<alignment_span, alignment_span>;
 
-// PAF
-void file(const std::string& filename, yacrd::utils::read2mapping_type& read2mapping);
-
-
 using parser_t = void (*)(std::istringstream&, alignment&, bool);
+
+// PAF
+void file(std::istream* filename, parser_t, yacrd::utils::read2mapping_type& read2mapping);
 
 void paf_line(std::istringstream& line, alignment& out, bool only_names=false);
 

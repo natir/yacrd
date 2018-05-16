@@ -51,25 +51,18 @@ inline bool insert(yacrd::parser::alignment& alignment, yacrd::utils::read2mappi
 
 } // namespace
 
-void yacrd::parser::file(const std::string& filename, yacrd::utils::read2mapping_type& read2mapping)
+void yacrd::parser::file(std::istream* infile, yacrd::parser::parser_t parser, yacrd::utils::read2mapping_type& read2mapping)
 {
-    auto parse_line = yacrd::parser::paf_line;
-    if(filename.substr(filename.find_last_of('.') + 1) == "mhap")
-    {
-        parse_line = yacrd::parser::mhap_line;
-    }
-
-    std::ifstream infile(filename);
     std::string line;
     std::istringstream line_stream;
     yacrd::parser::alignment alignment;
-    while(std::getline(infile, line))
+    while(std::getline(*infile, line))
     {
-        if(!line.empty()) {
+	if(!line.empty()) {
             line_stream.str(line);
             line_stream.clear();
 
-            (*parse_line)(line_stream, alignment, false);
+            (*parser)(line_stream, alignment, false);
 
             insert(alignment, read2mapping);
         }

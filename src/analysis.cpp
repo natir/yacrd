@@ -34,13 +34,13 @@ SOFTWARE.
 #include "parser.hpp"
 #include "analysis.hpp"
 
-std::unordered_set<std::string> yacrd::analysis::find_chimera(const std::string& paf_filename, std::uint64_t coverage_min, float coverage_ratio_min)
+std::unordered_set<std::string> yacrd::analysis::find_chimera(std::istream* input, yacrd::parser::parser_t parser, std::uint64_t coverage_min, float coverage_ratio_min)
 {
     yacrd::utils::read2mapping_type read2mapping;
     std::unordered_set<std::string> remove_reads;
 
     // parse paf file
-    yacrd::parser::file(std::string(paf_filename), read2mapping);
+    yacrd::parser::file(input, parser, read2mapping);
 
     yacrd::utils::interval_vector middle_gaps;
     std::priority_queue<size_t, std::vector<size_t>, std::greater<size_t>> stack; // interval ends
