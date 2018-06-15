@@ -6,4 +6,7 @@ authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 [dependencies]
 bio = "*"
 zip = "*"
+csv = "1"
 clap = "2.31.2"
+serde = "1.0"
+serde_derive = "1.0"

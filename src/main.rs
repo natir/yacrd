@@ -20,12 +20,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+extern crate csv;
 extern crate clap;
-
-use std::io;
-use std::fs::File;
+#[macro_use]
+extern crate serde_derive;
 
 use clap::{Arg, App};
+
+/* local use */
+mod utils;
+mod filter;
+mod chimera;
+
+/* crates use */
+
+/* standard use */
+use std::io;
+use std::fs::File;
+use std::collections::{HashSet};
 
 fn main() {
     let matches = App::new("yacrd")
@@ -88,12 +100,36 @@ fn main() {
              .long("not-covered-threshold")
              .help("Coverage depth threshold above which a read are mark as not covered")
              )
-        .arg(Arg::with_name("fileterd-suffix")
+        .arg(Arg::with_name("filtered-suffix")
              .display_order(7)
              .takes_value(true)
-             .long("fileterd-suffix")
-             .default_value("_fileterd")
+             .long("filtered-suffix")
+             .default_value("_filtered")
              .help("Change the suffix of file generate by filter option")
              )
         .get_matches();
+
+    let input: Box<io::Read> = match matches.value_of("input").unwrap() {
+        "-" => Box::new(io::stdin()),
+        _ => Box::new(File::open(matches.value_of("input").unwrap()).expect("Can't open input file")),
+    };
+
+    let tmp = matches.value_of("output").unwrap();
+    let output: Box<io::Write> = match matches.value_of("output").expect("Something wrong") {
+        "-" => Box::new(io::stdout()),
+        _ => Box::new(File::create(matches.value_of("output").unwrap()).expect("Can't open output file")),
+    };
+
+    let filters: Vec<_> = match matches.is_present("filter") {
+        true => matches.values_of("filter").unwrap().collect(),
+        false => Vec::new()
+    };
+
+    let format = utils::get_format(&matches).expect("Format of input can be determinate check file extension or value of --format option");
+
+    let chim_thres = matches.value_of("chimeric-threshold").unwrap().parse::<u64>().unwrap();
+    let ncov_thres = matches.value_of("not-covered-threshold").unwrap().parse::<f64>().unwrap();
+    let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
+
+    let remove_reads: Box<HashSet<String>> = chimera::find(input, output, format, chim_thres, ncov_thres);
 }
