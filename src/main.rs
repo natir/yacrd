@@ -116,7 +116,7 @@ fn main() {
              .display_order(8)
              .takes_value(true)
              .long("compression-out")
-             .possible_values(&["gzip", "bzip2", "lzma"])
+             .possible_values(&["gzip", "bzip2", "lzma", "no"])
              .help("Overlap depth threshold below which a gap should be created")
              )
         .get_matches();

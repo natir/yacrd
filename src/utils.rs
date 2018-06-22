@@ -41,10 +41,14 @@ pub fn get_format(m: &clap::ArgMatches) -> Option<MappingFormat> {
         };
     }
 
-    let input_path = Path::new(m.value_of("input").unwrap());
-    return match Path::new(input_path).extension().unwrap().to_str().unwrap() {
-        "paf" => Some(MappingFormat::Paf),
-        "mhap" => Some(MappingFormat::Mhap),
-        _ => None,
+    let input_path = m.value_of("input").unwrap();
+    return if input_path.contains(".paf") {
+        Some(MappingFormat::Paf)
+    }
+    else if input_path.contains(".mhap") {
+        Some(MappingFormat::Mhap)
+    }
+    else {
+        None
     };
 }
