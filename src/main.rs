@@ -21,13 +21,17 @@ SOFTWARE.
 */
 
 extern crate csv;
+extern crate xz2;
 extern crate clap;
+extern crate bzip2;
+extern crate flate2;
 #[macro_use]
 extern crate serde_derive;
 
 use clap::{Arg, App};
 
 /* local use */
+mod file;
 mod utils;
 mod filter;
 mod chimera;
@@ -58,7 +62,7 @@ fn main() {
              .display_order(1)
              .takes_value(true)
              .default_value("-")
-             .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input")
+             .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed)")
              )
         .arg(Arg::with_name("output")
              .short("o")
@@ -66,7 +70,7 @@ fn main() {
              .display_order(2)
              .takes_value(true)
              .default_value("-")
-             .help("Path where yacrd report are write")
+             .help("Path where yacrd report are write, use - for write in standard output same compression as input or use --compression-out")
              )
         .arg(Arg::with_name("filter")
              .short("f")
@@ -81,8 +85,8 @@ fn main() {
              .long("format")
              .display_order(4)
              .takes_value(true)
-             .possible_values(&["paf", "mhap"])
              .help("Force the format used")
+             .possible_values(&["paf", "mhap"])
              )
         .arg(Arg::with_name("chimeric-threshold")
              .short("c")
@@ -107,18 +111,20 @@ fn main() {
              .default_value("_filtered")
              .help("Change the suffix of file generate by filter option")
              )
+        .arg(Arg::with_name("compression-out")
+             .short("C")
+             .display_order(8)
+             .takes_value(true)
+             .long("compression-out")
+             .possible_values(&["gzip", "bzip2", "lzma"])
+             .help("Overlap depth threshold below which a gap should be created")
+             )
         .get_matches();
 
-    let input: Box<io::Read> = match matches.value_of("input").unwrap() {
-        "-" => Box::new(io::stdin()),
-        _ => Box::new(File::open(matches.value_of("input").unwrap()).expect("Can't open input file")),
-    };
+    let (input, compression) = file::get_input(matches.value_of("input").unwrap());
 
-    let tmp = matches.value_of("output").unwrap();
-    let output: Box<io::Write> = match matches.value_of("output").expect("Something wrong") {
-        "-" => Box::new(io::stdout()),
-        _ => Box::new(File::create(matches.value_of("output").unwrap()).expect("Can't open output file")),
-    };
+    let out_compression = file::choose_compression(compression, matches.is_present("compression-out"), matches.value_of("compression-out").unwrap_or("no"));
+    let output: Box<io::Write> = file::get_output(matches.value_of("output").unwrap(), out_compression);
 
     let filters: Vec<_> = match matches.is_present("filter") {
         true => matches.values_of("filter").unwrap().collect(),
