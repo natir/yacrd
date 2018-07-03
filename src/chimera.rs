@@ -83,7 +83,7 @@ impl PartialEq for Interval {
 
 impl Eq for Interval {}
 
-pub fn find(input: Box<io::Read>, mut output: Box<io::Write>, format: utils::MappingFormat, chim_thres: u64, ncov_thres: f64) -> Box<HashSet<String>>
+pub fn find(input: Box<io::Read>, mut output: Box<io::Write>, format: utils::Format, chim_thres: u64, ncov_thres: f64) -> Box<HashSet<String>>
 {
     let mut remove_reads: HashSet<String> = HashSet::new();
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
@@ -171,10 +171,11 @@ fn print_gap(gap: &Interval, mut output: Box<io::Write>, i: usize) -> Box<io::Wr
     output
 }
 
-fn parse(input: Box<io::Read>, format: utils::MappingFormat, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
+fn parse(input: Box<io::Read>, format: utils::Format, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
    match format {
-       utils::MappingFormat::Paf => parse_paf(input, read2mapping),
-       utils::MappingFormat::Mhap => parse_mhap(input, read2mapping),
+       utils::Format::Paf => parse_paf(input, read2mapping),
+       utils::Format::Mhap => parse_mhap(input, read2mapping),
+       _ => panic!("Isn't a mapping format"),
    } 
 }
 
@@ -248,5 +249,4 @@ fn parse_mhap(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Inte
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
         read2mapping.entry(key_b).or_insert(Vec::new()).push(val_b);
     }
-
 }

@@ -131,11 +131,15 @@ fn main() {
         false => Vec::new()
     };
 
-    let format = utils::get_format(&matches).expect("Format of input can be determinate check file extension or value of --format option");
+    let format = utils::get_mapping_format(&matches).expect("Format of input can be determinate check file extension or value of --format option");
 
     let chim_thres = matches.value_of("chimeric-threshold").unwrap().parse::<u64>().unwrap();
     let ncov_thres = matches.value_of("not-covered-threshold").unwrap().parse::<f64>().unwrap();
     let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
 
     let remove_reads: Box<HashSet<String>> = chimera::find(input, output, format, chim_thres, ncov_thres);
+
+    for filename in filters {
+        filter::run(&remove_reads, filename, filterd_suffix);
+    }
 }

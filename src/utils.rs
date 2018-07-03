@@ -27,26 +27,37 @@ use clap;
 use std::path::Path;
 
 #[derive(Debug)]
-pub enum MappingFormat {
+pub enum Format {
     Paf,
     Mhap,
+    Fasta,
+    Fastq,
 }
 
-pub fn get_format(m: &clap::ArgMatches) -> Option<MappingFormat> {
+pub fn get_mapping_format(m: &clap::ArgMatches) -> Option<Format> {
     if m.is_present("format") {
         return match m.value_of("format").unwrap() {
-            "paf" => Some(MappingFormat::Paf),
-            "mhap" => Some(MappingFormat::Mhap),
+            "paf" => Some(Format::Paf),
+            "mhap" => Some(Format::Mhap),
             _ => None,
         };
     }
 
-    let input_path = m.value_of("input").unwrap();
-    return if input_path.contains(".paf") {
-        Some(MappingFormat::Paf)
+    return get_format(m.value_of("input").unwrap());
+}
+
+pub fn get_format(filename: &str) -> Option<Format> {
+    return if filename.contains(".paf") {
+        Some(Format::Paf)
     }
-    else if input_path.contains(".mhap") {
-        Some(MappingFormat::Mhap)
+    else if filename.contains(".mhap") {
+        Some(Format::Mhap)
+    }
+    else if filename.contains(".fasta") {
+        Some(Format::Mhap)
+    }
+    else if filename.contains(".fastq") {
+        Some(Format::Mhap)
     }
     else {
         None

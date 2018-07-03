@@ -84,7 +84,6 @@ pub fn get_output(output_name: &str, format: CompressionFormat) -> Box<io::Write
         CompressionFormat::Bzip => Box::new(bzip2::write::BzEncoder::new(get_writable(output_name), bzip2::Compression::Best)),
         CompressionFormat::Lzma => Box::new(xz2::write::XzEncoder::new(get_writable(output_name), 9)),
         CompressionFormat::No => Box::new(get_writable(output_name))
-
     }
 }
 
