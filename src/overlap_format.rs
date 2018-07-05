@@ -22,7 +22,7 @@ SOFTWARE.
 
 /* crates use */
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PafRecord {
     pub read_a: String,
     pub length_a: u64,
@@ -38,7 +38,7 @@ pub struct PafRecord {
     pub mapping_quality: u64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MhapRecord {
     pub read_a: String,
     pub read_b: String,

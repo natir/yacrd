@@ -98,7 +98,7 @@ pub fn choose_compression(input_compression: CompressionFormat, compression_set:
 
     match compression_value {
         "gzip" => CompressionFormat::Gzip,
-        "bzip" => CompressionFormat::Bzip,
+        "bzip2" => CompressionFormat::Bzip,
         "lzma" => CompressionFormat::Lzma,
         _ => CompressionFormat::No,
     }

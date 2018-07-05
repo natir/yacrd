@@ -53,10 +53,10 @@ pub fn get_format(filename: &str) -> Option<Format> {
         Some(Format::Mhap)
     }
     else if filename.contains(".fasta") {
-        Some(Format::Mhap)
+        Some(Format::Fasta)
     }
     else if filename.contains(".fastq") {
-        Some(Format::Mhap)
+        Some(Format::Fastq)
     }
     else {
         None
