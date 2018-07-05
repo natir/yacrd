@@ -21,44 +21,36 @@ SOFTWARE.
 */
 
 /* crates use */
-use clap;
 
-/* standard use */
-
-#[derive(Debug)]
-pub enum Format {
-    Paf,
-    Mhap,
-    Fasta,
-    Fastq,
+#[derive(Debug, Deserialize)]
+pub struct PafRecord {
+    pub read_a: String,
+    pub length_a: u64,
+    pub begin_a: u64,
+    pub end_a: u64,
+    pub strand : char,
+    pub read_b: String,
+    pub length_b: u64,
+    pub begin_b: u64,
+    pub end_b: u64,
+    pub nb_match_base: u64,
+    pub nb_base: u64,
+    pub mapping_quality: u64,
 }
 
-pub fn get_mapping_format(m: &clap::ArgMatches) -> Option<Format> {
-    if m.is_present("format") {
-        return match m.value_of("format").unwrap() {
-            "paf" => Some(Format::Paf),
-            "mhap" => Some(Format::Mhap),
-            _ => None,
-        };
-    }
-
-    return get_format(m.value_of("input").unwrap());
+#[derive(Debug, Deserialize)]
+pub struct MhapRecord {
+    pub read_a: String,
+    pub read_b: String,
+    pub error: f64,
+    pub shared_min_mers: u64,
+    pub strand_a: char,
+    pub begin_a: u64,
+    pub end_a: u64,
+    pub length_a: u64,
+    pub strand_b: char,
+    pub begin_b: u64,
+    pub end_b: u64,
+    pub length_b: u64,
 }
 
-pub fn get_format(filename: &str) -> Option<Format> {
-    return if filename.contains(".paf") {
-        Some(Format::Paf)
-    }
-    else if filename.contains(".mhap") {
-        Some(Format::Mhap)
-    }
-    else if filename.contains(".fasta") {
-        Some(Format::Mhap)
-    }
-    else if filename.contains(".fastq") {
-        Some(Format::Mhap)
-    }
-    else {
-        None
-    };
-}

@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+extern crate bio;
 extern crate csv;
 extern crate xz2;
 extern crate clap;
@@ -30,17 +31,17 @@ extern crate serde_derive;
 
 use clap::{Arg, App};
 
-/* local use */
+/* local mod */
 mod file;
 mod utils;
 mod filter;
 mod chimera;
+mod overlap_format;
 
 /* crates use */
 
 /* standard use */
 use std::io;
-use std::fs::File;
 use std::collections::{HashSet};
 
 fn main() {

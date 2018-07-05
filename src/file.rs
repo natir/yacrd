@@ -39,22 +39,26 @@ pub enum CompressionFormat {
 
 pub fn get_input(input_name: &str) -> (Box<io::Read>, CompressionFormat) {
     // choose std::io::stdin or open file
-    let raw_input = get_readable(input_name); 
-
     if input_name == "-" {
         return (Box::new(get_readable(input_name)), CompressionFormat::No);
     }
+
+    return get_readable_file(input_name)
+}
+
+pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
+{
+    let raw_input = get_readable(input_name); 
+    
     // check compression
     let compression = get_compression(raw_input);
 
-    let mut input: Box<io::Read> = get_readable(input_name);
     // return readable and compression status
     match compression {
         CompressionFormat::Gzip => (Box::new(flate2::read::GzDecoder::new(get_readable(input_name))), CompressionFormat::Gzip),
         CompressionFormat::Bzip => (Box::new(bzip2::read::BzDecoder::new(get_readable(input_name))), CompressionFormat::Bzip),
         CompressionFormat::Lzma => (Box::new(xz2::read::XzDecoder::new(get_readable(input_name))), CompressionFormat::Lzma),
         CompressionFormat::No => (Box::new(get_readable(input_name)), CompressionFormat::No),
-        
     }
 }
 
@@ -68,7 +72,7 @@ fn get_readable(input_name: &str) -> Box<io::Read> {
 fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     let mut buf = vec![0u8; 2];
 
-    in_stream.read_exact(&mut buf);
+    in_stream.read_exact(&mut buf).expect("Error durring reading first bit of file");
 
     match &buf[..] {
         [0x1F, 0x8B] => CompressionFormat::Gzip,
@@ -106,4 +110,5 @@ fn get_writable(output_name: &str) -> Box<io::Write> {
         _ => Box::new(File::create(output_name).expect("Can't open output file")),
     }
 }
+
 
