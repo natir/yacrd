@@ -28,10 +28,10 @@ use utils;
 use csv;
 
 /* standard use */
+use std;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
-use std;
 
 #[derive(Debug)]
 struct NameLen {

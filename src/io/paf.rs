@@ -42,12 +42,14 @@ pub struct Record {
     pub nb_match_base: u64,
     pub nb_base: u64,
     pub mapping_quality: u64,
+    pub sam_field: Option<Vec<String>>,
 }
 
 pub fn get_reader<R: std::io::Read>(input: R) -> csv::Reader<R> {
     csv::ReaderBuilder::new()
         .delimiter(b'\t')
         .has_headers(false)
+        .flexible(true)
         .from_reader(input)
 }
 
@@ -57,4 +59,3 @@ pub fn get_writer<W: std::io::Write>(output: W) -> csv::Writer<W> {
         .has_headers(false)
         .from_writer(output)
 }
-

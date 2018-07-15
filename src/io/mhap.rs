@@ -57,4 +57,3 @@ pub fn get_writer<W: std::io::Write>(output: W) -> csv::Writer<W> {
         .has_headers(false)
         .from_writer(output)
 }
-

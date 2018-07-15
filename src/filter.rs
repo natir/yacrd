@@ -30,8 +30,8 @@ use bio;
 use csv;
 
 /* standard use */
-use std::collections::HashSet;
 use std;
+use std::collections::HashSet;
 
 pub fn run(reads: &Box<HashSet<String>>, filename: &str, filterd_suffix: &str) {
     let filterd_name = &generate_filterd_name(filename.to_owned(), filterd_suffix);
@@ -52,7 +52,11 @@ fn generate_filterd_name(filename: String, filterd_suffix: &str) -> String {
     return filename.replacen(".", &format!("{}.", filterd_suffix), 1);
 }
 
-fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+fn filterd_paf(
+    reads: &Box<HashSet<String>>,
+    input: Box<std::io::Read>,
+    output: Box<std::io::Write>,
+) {
     let mut reader: csv::Reader<Box<std::io::Read>> = io::paf::get_reader(input);
 
     let mut writer: csv::Writer<Box<std::io::Write>> = io::paf::get_writer(output);
@@ -65,7 +69,11 @@ fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: 
     }
 }
 
-fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+fn filterd_mhap(
+    reads: &Box<HashSet<String>>,
+    input: Box<std::io::Read>,
+    output: Box<std::io::Write>,
+) {
     let mut reader: csv::Reader<Box<std::io::Read>> = io::mhap::get_reader(input);
 
     let mut writer: csv::Writer<Box<std::io::Write>> = io::mhap::get_writer(output);
@@ -78,7 +86,11 @@ fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output:
     }
 }
 
-fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+fn filterd_fasta(
+    reads: &Box<HashSet<String>>,
+    input: Box<std::io::Read>,
+    output: Box<std::io::Write>,
+) {
     let reader = bio::io::fasta::Reader::new(input);
     let mut writer = bio::io::fasta::Writer::new(output);
 
@@ -92,7 +104,11 @@ fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output
     }
 }
 
-fn filterd_fastq(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+fn filterd_fastq(
+    reads: &Box<HashSet<String>>,
+    input: Box<std::io::Read>,
+    output: Box<std::io::Write>,
+) {
     let reader = bio::io::fastq::Reader::new(input);
     let mut writer = bio::io::fastq::Writer::new(output);
 
