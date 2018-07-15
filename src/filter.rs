@@ -22,7 +22,7 @@ SOFTWARE.
 
 /* project use */
 use file;
-use overlap_format;
+use io;
 use utils;
 
 /* crates use */
@@ -31,7 +31,7 @@ use csv;
 
 /* standard use */
 use std::collections::HashSet;
-use std::io;
+use std;
 
 pub fn run(reads: &Box<HashSet<String>>, filename: &str, filterd_suffix: &str) {
     let filterd_name = &generate_filterd_name(filename.to_owned(), filterd_suffix);
@@ -52,18 +52,12 @@ fn generate_filterd_name(filename: String, filterd_suffix: &str) -> String {
     return filename.replacen(".", &format!("{}.", filterd_suffix), 1);
 }
 
-fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<io::Write>) {
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .has_headers(false)
-        .from_reader(input);
+fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+    let mut reader: csv::Reader<Box<std::io::Read>> = io::paf::get_reader(input);
 
-    let mut writer = csv::WriterBuilder::new()
-        .delimiter(b'\t')
-        .has_headers(false)
-        .from_writer(output);
+    let mut writer: csv::Writer<Box<std::io::Write>> = io::paf::get_writer(output);
 
-    for result in reader.deserialize::<overlap_format::PafRecord>() {
+    for result in reader.deserialize::<io::paf::Record>() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
             writer.serialize(record).unwrap();
@@ -71,18 +65,12 @@ fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<i
     }
 }
 
-fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<io::Write>) {
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b' ')
-        .has_headers(false)
-        .from_reader(input);
+fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
+    let mut reader: csv::Reader<Box<std::io::Read>> = io::mhap::get_reader(input);
 
-    let mut writer = csv::WriterBuilder::new()
-        .delimiter(b'\t')
-        .has_headers(false)
-        .from_writer(output);
+    let mut writer: csv::Writer<Box<std::io::Write>> = io::mhap::get_writer(output);
 
-    for result in reader.deserialize::<overlap_format::MhapRecord>() {
+    for result in reader.deserialize::<io::mhap::Record>() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
             writer.serialize(record).unwrap();
@@ -90,7 +78,7 @@ fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<
     }
 }
 
-fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<io::Write>) {
+fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
     let reader = bio::io::fasta::Reader::new(input);
     let mut writer = bio::io::fasta::Writer::new(output);
 
@@ -104,7 +92,7 @@ fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box
     }
 }
 
-fn filterd_fastq(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<io::Write>) {
+fn filterd_fastq(reads: &Box<HashSet<String>>, input: Box<std::io::Read>, output: Box<std::io::Write>) {
     let reader = bio::io::fastq::Reader::new(input);
     let mut writer = bio::io::fastq::Writer::new(output);
 

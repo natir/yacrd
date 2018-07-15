@@ -20,10 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/* local use */
+
 /* crates use */
+use csv;
+
+/* standard use */
+use std;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct PafRecord {
+pub struct Record {
     pub read_a: String,
     pub length_a: u64,
     pub begin_a: u64,
@@ -38,18 +44,17 @@ pub struct PafRecord {
     pub mapping_quality: u64,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct MhapRecord {
-    pub read_a: String,
-    pub read_b: String,
-    pub error: f64,
-    pub shared_min_mers: u64,
-    pub strand_a: char,
-    pub begin_a: u64,
-    pub end_a: u64,
-    pub length_a: u64,
-    pub strand_b: char,
-    pub begin_b: u64,
-    pub end_b: u64,
-    pub length_b: u64,
+pub fn get_reader<R: std::io::Read>(input: R) -> csv::Reader<R> {
+    csv::ReaderBuilder::new()
+        .delimiter(b'\t')
+        .has_headers(false)
+        .from_reader(input)
 }
+
+pub fn get_writer<W: std::io::Write>(output: W) -> csv::Writer<W> {
+    csv::WriterBuilder::new()
+        .delimiter(b'\t')
+        .has_headers(false)
+        .from_writer(output)
+}
+

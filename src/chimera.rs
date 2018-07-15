@@ -21,7 +21,7 @@ SOFTWARE.
 */
 
 /* local use */
-use overlap_format;
+use io;
 use utils;
 
 /* crates use */
@@ -31,7 +31,7 @@ use csv;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
-use std::io;
+use std;
 
 #[derive(Debug)]
 struct NameLen {
@@ -85,8 +85,8 @@ impl PartialEq for Interval {
 impl Eq for Interval {}
 
 pub fn find(
-    input: Box<io::Read>,
-    output: &mut Box<io::Write>,
+    input: Box<std::io::Read>,
+    output: &mut Box<std::io::Write>,
     format: utils::Format,
     chim_thres: u64,
     ncov_thres: f64,
@@ -183,7 +183,7 @@ pub fn find(
     return Box::new(remove_reads);
 }
 
-fn write_gap(gap: &Interval, output: &mut Box<io::Write>, i: usize) {
+fn write_gap(gap: &Interval, output: &mut Box<std::io::Write>, i: usize) {
     output
         .write_fmt(format_args!(
             "{},{},{}",
@@ -200,7 +200,7 @@ fn write_gap(gap: &Interval, output: &mut Box<io::Write>, i: usize) {
 }
 
 fn parse(
-    input: Box<io::Read>,
+    input: Box<std::io::Read>,
     format: utils::Format,
     read2mapping: &mut HashMap<NameLen, Vec<Interval>>,
 ) -> () {
@@ -211,13 +211,10 @@ fn parse(
     }
 }
 
-fn parse_paf(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .has_headers(false)
-        .from_reader(input);
+fn parse_paf(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
+    let mut reader: csv::Reader<Box<std::io::Read>> = io::paf::get_reader(input);
 
-    for result in reader.deserialize::<overlap_format::PafRecord>() {
+    for result in reader.deserialize::<io::paf::Record>() {
         let record = result.unwrap();
 
         let key_a = NameLen {
@@ -243,13 +240,10 @@ fn parse_paf(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Inter
     }
 }
 
-fn parse_mhap(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b' ')
-        .has_headers(false)
-        .from_reader(input);
+fn parse_mhap(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
+    let mut reader: csv::Reader<Box<std::io::Read>> = io::mhap::get_reader(input);
 
-    for result in reader.deserialize::<overlap_format::MhapRecord>() {
+    for result in reader.deserialize::<io::mhap::Record>() {
         let record = result.unwrap();
 
         let key_a = NameLen {

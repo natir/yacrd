@@ -35,14 +35,13 @@ use clap::{App, Arg};
 mod chimera;
 mod file;
 mod filter;
-mod overlap_format;
+mod io;
 mod utils;
 
 /* crates use */
 
 /* standard use */
 use std::collections::HashSet;
-use std::io;
 
 fn main() {
     let matches = App::new("yacrd")
@@ -129,7 +128,7 @@ fn main() {
         matches.is_present("compression-out"),
         matches.value_of("compression-out").unwrap_or("no"),
     );
-    let mut output: Box<io::Write> =
+    let mut output: Box<std::io::Write> =
         file::get_output(matches.value_of("output").unwrap(), out_compression);
 
     let filters: Vec<_> = match matches.is_present("filter") {
