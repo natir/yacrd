@@ -27,7 +27,6 @@ use utils;
 
 /* crates use */
 use bio;
-use csv;
 
 /* standard use */
 use std;
@@ -57,14 +56,13 @@ fn filterd_paf(
     input: Box<std::io::Read>,
     output: Box<std::io::Write>,
 ) {
-    let mut reader: csv::Reader<Box<std::io::Read>> = io::paf::get_reader(input);
+    let mut reader = io::paf::Reader::new(input);
+    let mut writer = io::paf::Writer::new(output);
 
-    let mut writer: csv::Writer<Box<std::io::Write>> = io::paf::get_writer(output);
-
-    for result in reader.deserialize::<io::paf::Record>() {
+    for result in reader.records() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
-            writer.serialize(record).unwrap();
+            writer.write(&record).unwrap();
         }
     }
 }
@@ -74,14 +72,13 @@ fn filterd_mhap(
     input: Box<std::io::Read>,
     output: Box<std::io::Write>,
 ) {
-    let mut reader: csv::Reader<Box<std::io::Read>> = io::mhap::get_reader(input);
+    let mut reader = io::mhap::Reader::new(input);
+    let mut writer = io::mhap::Writer::new(output);
 
-    let mut writer: csv::Writer<Box<std::io::Write>> = io::mhap::get_writer(output);
-
-    for result in reader.deserialize::<io::mhap::Record>() {
+    for result in reader.records() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
-            writer.serialize(record).unwrap();
+            writer.write(&record).unwrap();
         }
     }
 }

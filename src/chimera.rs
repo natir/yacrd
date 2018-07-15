@@ -25,7 +25,6 @@ use io;
 use utils;
 
 /* crates use */
-use csv;
 
 /* standard use */
 use std;
@@ -212,9 +211,9 @@ fn parse(
 }
 
 fn parse_paf(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-    let mut reader: csv::Reader<Box<std::io::Read>> = io::paf::get_reader(input);
+    let mut reader = io::paf::Reader::new(input);
 
-    for result in reader.deserialize::<io::paf::Record>() {
+    for result in reader.records() {
         let record = result.unwrap();
 
         let key_a = NameLen {
@@ -241,9 +240,9 @@ fn parse_paf(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<
 }
 
 fn parse_mhap(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-    let mut reader: csv::Reader<Box<std::io::Read>> = io::mhap::get_reader(input);
+    let mut reader = io::mhap::Reader::new(input);
 
-    for result in reader.deserialize::<io::mhap::Record>() {
+    for result in reader.records() {
         let record = result.unwrap();
 
         let key_a = NameLen {
