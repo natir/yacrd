@@ -21,17 +21,17 @@ SOFTWARE.
 */
 
 /* local use */
-use utils;
 use overlap_format;
+use utils;
 
 /* crates use */
 use csv;
 
 /* standard use */
-use std::io;
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
-use std::collections::{BinaryHeap, HashSet, HashMap};
+use std::io;
 
 #[derive(Debug)]
 struct NameLen {
@@ -84,13 +84,18 @@ impl PartialEq for Interval {
 
 impl Eq for Interval {}
 
-pub fn find(input: Box<io::Read>, output: &mut Box<io::Write>, format: utils::Format, chim_thres: u64, ncov_thres: f64) -> Box<HashSet<String>>
-{
+pub fn find(
+    input: Box<io::Read>,
+    output: &mut Box<io::Write>,
+    format: utils::Format,
+    chim_thres: u64,
+    ncov_thres: f64,
+) -> Box<HashSet<String>> {
     let mut remove_reads: HashSet<String> = HashSet::new();
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
 
     parse(input, format, &mut read2mapping);
-    
+
     let mut middle_gaps: Vec<Interval> = Vec::new();
     let mut stack: BinaryHeap<u64> = BinaryHeap::new();
 
@@ -112,9 +117,11 @@ pub fn find(input: Box<io::Read>, output: &mut Box<io::Write>, format: utils::Fo
 
             if stack.len() == chim_thres as usize {
                 if last_covered != 0 {
-                    middle_gaps.push(Interval{begin: last_covered, end: interval.begin});
-                }
-                else {
+                    middle_gaps.push(Interval {
+                        begin: last_covered,
+                        end: interval.begin,
+                    });
+                } else {
                     first_covered = interval.begin;
                 }
             }
@@ -143,20 +150,33 @@ pub fn find(input: Box<io::Read>, output: &mut Box<io::Write>, format: utils::Fo
         if label != "" {
             remove_reads.insert(key.name.to_string());
 
-            output.write_fmt(format_args!("{}\t{}\t{}\t", label, key.name, key.len)).expect("Error durring writting of result");
+            output
+                .write_fmt(format_args!("{}\t{}\t{}\t", label, key.name, key.len))
+                .expect("Error durring writting of result");
 
             if first_covered != 0 {
-                middle_gaps.insert(0, Interval{begin: 0, end: first_covered});
+                middle_gaps.insert(
+                    0,
+                    Interval {
+                        begin: 0,
+                        end: first_covered,
+                    },
+                );
             }
             if last_covered != key.len {
-                middle_gaps.push(Interval{begin: last_covered, end: key.len});
+                middle_gaps.push(Interval {
+                    begin: last_covered,
+                    end: key.len,
+                });
             }
-            
+
             for (i, interval) in middle_gaps.iter().enumerate() {
                 write_gap(interval, output, middle_gaps.len() - i);
             }
 
-            output.write(b"\n").expect("Error durring writting of result");
+            output
+                .write(b"\n")
+                .expect("Error durring writting of result");
         }
     }
 
@@ -164,22 +184,34 @@ pub fn find(input: Box<io::Read>, output: &mut Box<io::Write>, format: utils::Fo
 }
 
 fn write_gap(gap: &Interval, output: &mut Box<io::Write>, i: usize) {
-    output.write_fmt(format_args!("{},{},{}", gap.end - gap.begin, gap.begin, gap.end)).expect("Error durring writting of result");
+    output
+        .write_fmt(format_args!(
+            "{},{},{}",
+            gap.end - gap.begin,
+            gap.begin,
+            gap.end
+        ))
+        .expect("Error durring writting of result");
     if i > 1 {
-        output.write(b";").expect("Error durring writting of result");
+        output
+            .write(b";")
+            .expect("Error durring writting of result");
     }
 }
 
-fn parse(input: Box<io::Read>, format: utils::Format, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-   match format {
-       utils::Format::Paf => parse_paf(input, read2mapping),
-       utils::Format::Mhap => parse_mhap(input, read2mapping),
-       _ => panic!("Isn't a mapping format"),
-   } 
+fn parse(
+    input: Box<io::Read>,
+    format: utils::Format,
+    read2mapping: &mut HashMap<NameLen, Vec<Interval>>,
+) -> () {
+    match format {
+        utils::Format::Paf => parse_paf(input, read2mapping),
+        utils::Format::Mhap => parse_mhap(input, read2mapping),
+        _ => panic!("Isn't a mapping format"),
+    }
 }
 
 fn parse_paf(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b'\t')
         .has_headers(false)
@@ -188,19 +220,30 @@ fn parse_paf(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Inter
     for result in reader.deserialize::<overlap_format::PafRecord>() {
         let record = result.unwrap();
 
-        let key_a = NameLen{name: record.read_a, len: record.length_a};
-        let val_a = Interval{begin: record.begin_a, end: record.end_a};
-        
-        let key_b = NameLen{name: record.read_b, len: record.length_b};
-        let val_b = Interval{begin: record.begin_b, end: record.end_b};
-        
+        let key_a = NameLen {
+            name: record.read_a,
+            len: record.length_a,
+        };
+        let val_a = Interval {
+            begin: record.begin_a,
+            end: record.end_a,
+        };
+
+        let key_b = NameLen {
+            name: record.read_b,
+            len: record.length_b,
+        };
+        let val_b = Interval {
+            begin: record.begin_b,
+            end: record.end_b,
+        };
+
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
         read2mapping.entry(key_b).or_insert(Vec::new()).push(val_b);
     }
 }
 
 fn parse_mhap(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
-
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b' ')
         .has_headers(false)
@@ -209,12 +252,24 @@ fn parse_mhap(input: Box<io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Inte
     for result in reader.deserialize::<overlap_format::MhapRecord>() {
         let record = result.unwrap();
 
-        let key_a = NameLen{name: record.read_a, len: record.length_a};
-        let val_a = Interval{begin: record.begin_a, end: record.end_a};
-        
-        let key_b = NameLen{name: record.read_b, len: record.length_b};
-        let val_b = Interval{begin: record.begin_b, end: record.end_b};
-        
+        let key_a = NameLen {
+            name: record.read_a,
+            len: record.length_a,
+        };
+        let val_a = Interval {
+            begin: record.begin_a,
+            end: record.end_a,
+        };
+
+        let key_b = NameLen {
+            name: record.read_b,
+            len: record.length_b,
+        };
+        let val_b = Interval {
+            begin: record.begin_b,
+            end: record.end_b,
+        };
+
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
         read2mapping.entry(key_b).or_insert(Vec::new()).push(val_b);
     }

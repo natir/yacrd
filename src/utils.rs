@@ -48,17 +48,13 @@ pub fn get_mapping_format(m: &clap::ArgMatches) -> Option<Format> {
 pub fn get_format(filename: &str) -> Option<Format> {
     return if filename.contains(".paf") {
         Some(Format::Paf)
-    }
-    else if filename.contains(".mhap") {
+    } else if filename.contains(".mhap") {
         Some(Format::Mhap)
-    }
-    else if filename.contains(".fasta") {
+    } else if filename.contains(".fasta") {
         Some(Format::Fasta)
-    }
-    else if filename.contains(".fastq") {
+    } else if filename.contains(".fastq") {
         Some(Format::Fastq)
-    }
-    else {
+    } else {
         None
     };
 }

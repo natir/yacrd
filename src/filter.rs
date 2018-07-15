@@ -22,20 +22,20 @@ SOFTWARE.
 
 /* project use */
 use file;
-use utils;
 use overlap_format;
+use utils;
 
 /* crates use */
 use bio;
 use csv;
 
 /* standard use */
+use std::collections::HashSet;
 use std::io;
-use std::collections::{HashSet};
 
 pub fn run(reads: &Box<HashSet<String>>, filename: &str, filterd_suffix: &str) {
     let filterd_name = &generate_filterd_name(filename.to_owned(), filterd_suffix);
- 
+
     let (raw_input, compression) = file::get_readable_file(filename);
     let input = Box::new(raw_input);
     let output = Box::new(file::get_output(filterd_name, compression));
@@ -97,7 +97,9 @@ fn filterd_fasta(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box
     for r in reader.records() {
         let record = r.expect("Trouble in fasta parsing process");
         if !reads.contains(record.id()) {
-            writer.write_record(&record).expect("Trouble durring fasta valid sequence writing");
+            writer
+                .write_record(&record)
+                .expect("Trouble durring fasta valid sequence writing");
         }
     }
 }
@@ -109,8 +111,9 @@ fn filterd_fastq(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box
     for r in reader.records() {
         let record = r.expect("Trouble in fastq parsing process");
         if !reads.contains(record.id()) {
-            writer.write_record(&record).expect("Trouble durring fasta valid sequence writing");
+            writer
+                .write_record(&record)
+                .expect("Trouble durring fasta valid sequence writing");
         }
     }
-
 }

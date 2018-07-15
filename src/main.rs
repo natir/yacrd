@@ -21,28 +21,28 @@ SOFTWARE.
 */
 
 extern crate bio;
-extern crate csv;
-extern crate xz2;
-extern crate clap;
 extern crate bzip2;
+extern crate clap;
+extern crate csv;
 extern crate flate2;
+extern crate xz2;
 #[macro_use]
 extern crate serde_derive;
 
-use clap::{Arg, App};
+use clap::{App, Arg};
 
 /* local mod */
-mod file;
-mod utils;
-mod filter;
 mod chimera;
+mod file;
+mod filter;
 mod overlap_format;
+mod utils;
 
 /* crates use */
 
 /* standard use */
+use std::collections::HashSet;
 use std::io;
-use std::collections::{HashSet};
 
 fn main() {
     let matches = App::new("yacrd")
@@ -124,21 +124,37 @@ fn main() {
 
     let (input, compression) = file::get_input(matches.value_of("input").unwrap());
 
-    let out_compression = file::choose_compression(compression, matches.is_present("compression-out"), matches.value_of("compression-out").unwrap_or("no"));
-    let mut output: Box<io::Write> = file::get_output(matches.value_of("output").unwrap(), out_compression);
+    let out_compression = file::choose_compression(
+        compression,
+        matches.is_present("compression-out"),
+        matches.value_of("compression-out").unwrap_or("no"),
+    );
+    let mut output: Box<io::Write> =
+        file::get_output(matches.value_of("output").unwrap(), out_compression);
 
     let filters: Vec<_> = match matches.is_present("filter") {
         true => matches.values_of("filter").unwrap().collect(),
-        false => Vec::new()
+        false => Vec::new(),
     };
 
-    let format = utils::get_mapping_format(&matches).expect("Format of input can be determinate check file extension or value of --format option");
+    let format = utils::get_mapping_format(&matches).expect(
+        "Format of input can be determinate check file extension or value of --format option",
+    );
 
-    let chim_thres = matches.value_of("chimeric-threshold").unwrap().parse::<u64>().unwrap();
-    let ncov_thres = matches.value_of("not-covered-threshold").unwrap().parse::<f64>().unwrap();
+    let chim_thres = matches
+        .value_of("chimeric-threshold")
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+    let ncov_thres = matches
+        .value_of("not-covered-threshold")
+        .unwrap()
+        .parse::<f64>()
+        .unwrap();
     let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
 
-    let remove_reads: Box<HashSet<String>> = chimera::find(input, &mut output, format, chim_thres, ncov_thres);
+    let remove_reads: Box<HashSet<String>> =
+        chimera::find(input, &mut output, format, chim_thres, ncov_thres);
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);

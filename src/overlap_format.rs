@@ -28,7 +28,7 @@ pub struct PafRecord {
     pub length_a: u64,
     pub begin_a: u64,
     pub end_a: u64,
-    pub strand : char,
+    pub strand: char,
     pub read_b: String,
     pub length_b: u64,
     pub begin_b: u64,
@@ -53,4 +53,3 @@ pub struct MhapRecord {
     pub end_b: u64,
     pub length_b: u64,
 }
-
