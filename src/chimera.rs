@@ -84,7 +84,7 @@ impl PartialEq for Interval {
 
 impl Eq for Interval {}
 
-pub fn find(input: Box<io::Read>, mut output: Box<io::Write>, format: utils::Format, chim_thres: u64, ncov_thres: f64) -> Box<HashSet<String>>
+pub fn find(input: Box<io::Read>, output: &mut Box<io::Write>, format: utils::Format, chim_thres: u64, ncov_thres: f64) -> Box<HashSet<String>>
 {
     let mut remove_reads: HashSet<String> = HashSet::new();
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
@@ -153,7 +153,7 @@ pub fn find(input: Box<io::Read>, mut output: Box<io::Write>, format: utils::For
             }
             
             for (i, interval) in middle_gaps.iter().enumerate() {
-                output = print_gap(interval, output, middle_gaps.len() - i);
+                write_gap(interval, output, middle_gaps.len() - i);
             }
 
             output.write(b"\n").expect("Error durring writting of result");
@@ -163,13 +163,11 @@ pub fn find(input: Box<io::Read>, mut output: Box<io::Write>, format: utils::For
     return Box::new(remove_reads);
 }
 
-fn print_gap(gap: &Interval, mut output: Box<io::Write>, i: usize) -> Box<io::Write> {
+fn write_gap(gap: &Interval, output: &mut Box<io::Write>, i: usize) {
     output.write_fmt(format_args!("{},{},{}", gap.end - gap.begin, gap.begin, gap.end)).expect("Error durring writting of result");
     if i > 1 {
         output.write(b";").expect("Error durring writting of result");
     }
-
-    output
 }
 
 fn parse(input: Box<io::Read>, format: utils::Format, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {

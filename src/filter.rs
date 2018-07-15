@@ -66,7 +66,7 @@ fn filterd_paf(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<i
     for result in reader.deserialize::<overlap_format::PafRecord>() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
-            writer.serialize(record);
+            writer.serialize(record).unwrap();
         }
     }
 }
@@ -85,7 +85,7 @@ fn filterd_mhap(reads: &Box<HashSet<String>>, input: Box<io::Read>, output: Box<
     for result in reader.deserialize::<overlap_format::MhapRecord>() {
         let record = result.unwrap();
         if !(reads.contains(&record.read_a) || reads.contains(&record.read_b)) {
-            writer.serialize(record);
+            writer.serialize(record).unwrap();
         }
     }
 }

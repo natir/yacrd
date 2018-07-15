@@ -125,7 +125,7 @@ fn main() {
     let (input, compression) = file::get_input(matches.value_of("input").unwrap());
 
     let out_compression = file::choose_compression(compression, matches.is_present("compression-out"), matches.value_of("compression-out").unwrap_or("no"));
-    let output: Box<io::Write> = file::get_output(matches.value_of("output").unwrap(), out_compression);
+    let mut output: Box<io::Write> = file::get_output(matches.value_of("output").unwrap(), out_compression);
 
     let filters: Vec<_> = match matches.is_present("filter") {
         true => matches.values_of("filter").unwrap().collect(),
@@ -138,7 +138,7 @@ fn main() {
     let ncov_thres = matches.value_of("not-covered-threshold").unwrap().parse::<f64>().unwrap();
     let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
 
-    let remove_reads: Box<HashSet<String>> = chimera::find(input, output, format, chim_thres, ncov_thres);
+    let remove_reads: Box<HashSet<String>> = chimera::find(input, &mut output, format, chim_thres, ncov_thres);
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);
