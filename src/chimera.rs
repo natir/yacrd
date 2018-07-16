@@ -83,9 +83,9 @@ impl PartialEq for Interval {
 
 impl Eq for Interval {}
 
-pub fn find(
-    input: Box<std::io::Read>,
-    output: &mut Box<std::io::Write>,
+pub fn find<R: std::io::Read, W: std::io::Write>(
+    input: R,
+    mut output: W,
     format: utils::Format,
     chim_thres: u64,
     ncov_thres: f64,
@@ -170,7 +170,7 @@ pub fn find(
             }
 
             for (i, interval) in middle_gaps.iter().enumerate() {
-                write_gap(interval, output, middle_gaps.len() - i);
+                write_gap(interval, &mut output, middle_gaps.len() - i);
             }
 
             output
@@ -182,7 +182,7 @@ pub fn find(
     return Box::new(remove_reads);
 }
 
-fn write_gap(gap: &Interval, output: &mut Box<std::io::Write>, i: usize) {
+fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
     output
         .write_fmt(format_args!(
             "{},{},{}",
@@ -198,11 +198,11 @@ fn write_gap(gap: &Interval, output: &mut Box<std::io::Write>, i: usize) {
     }
 }
 
-fn parse(
-    input: Box<std::io::Read>,
+fn parse<R: std::io::Read>(
+    input: R,
     format: utils::Format,
     read2mapping: &mut HashMap<NameLen, Vec<Interval>>,
-) -> () {
+) {
     match format {
         utils::Format::Paf => parse_paf(input, read2mapping),
         utils::Format::Mhap => parse_mhap(input, read2mapping),
@@ -210,7 +210,7 @@ fn parse(
     }
 }
 
-fn parse_paf(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
+fn parse_paf<R: std::io::Read>(input: R, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) {
     let mut reader = io::paf::Reader::new(input);
 
     for result in reader.records() {
@@ -239,7 +239,7 @@ fn parse_paf(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<
     }
 }
 
-fn parse_mhap(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) -> () {
+fn parse_mhap<R: std::io::Read>(input: R, read2mapping: &mut HashMap<NameLen, Vec<Interval>>) {
     let mut reader = io::mhap::Reader::new(input);
 
     for result in reader.records() {
@@ -265,5 +265,125 @@ fn parse_mhap(input: Box<std::io::Read>, read2mapping: &mut HashMap<NameLen, Vec
 
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
         read2mapping.entry(key_b).or_insert(Vec::new()).push(val_b);
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
+";
+
+    const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
+1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
+";
+
+    const NOT_COVERED_FILE: &'static [u8] =
+        b"1\t10000\t1000\t10000\t-\t2\t10000\t0\t9000\t9000\t9000\t255
+1\t10000\t0\t1000\t-\t3\t10000\t9000\t10000\t1000\t1000\t255
+";
+
+    #[test]
+    fn find_chimera() {
+        let good = b"Chimeric\t1\t12000\t20,0,20;1000,4500,5500;2000,10000,12000\n";
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(PAF_FILE, &mut writer, utils::Format::Paf, 0, 0.8);
+
+        assert_eq!(writer, good.to_vec());
+
+        writer.clear();
+        find(MHAP_FILE, &mut writer, utils::Format::Mhap, 0, 0.8);
+        assert_eq!(writer, good.to_vec());
+    }
+
+    #[test]
+    fn find_not_covered() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(NOT_COVERED_FILE, &mut writer, utils::Format::Paf, 0, 0.8);
+
+        let good = b"Not_covered\t3\t10000\t9000,0,9000\n";
+        assert_eq!(writer, good.to_vec());
+    }
+
+    #[test]
+    fn formating_gap() {
+        let mut writer: Vec<u8> = Vec::new();
+        let input = vec![
+            Interval { begin: 0, end: 10 },
+            Interval {
+                begin: 50,
+                end: 100,
+            },
+            Interval {
+                begin: 150,
+                end: 200,
+            },
+        ];
+
+        for (i, gaps) in input.iter().enumerate() {
+            write_gap(gaps, &mut writer, input.len() - i);
+        }
+
+        assert_eq!(writer, b"10,0,10;50,50,100;50,150,200");
+    }
+
+    lazy_static! {
+        static ref READ2MAPPING: HashMap<NameLen, Vec<Interval>> = {
+            let mut m = HashMap::new();
+
+            m.insert(
+                NameLen {
+                    name: "3".to_string(),
+                    len: 10000,
+                },
+                vec![Interval {
+                    begin: 0,
+                    end: 4500,
+                }],
+            );
+            m.insert(
+                NameLen {
+                    name: "2".to_string(),
+                    len: 10000,
+                },
+                vec![Interval {
+                    begin: 5500,
+                    end: 10000,
+                }],
+            );
+            m.insert(
+                NameLen {
+                    name: "1".to_string(),
+                    len: 12000,
+                },
+                vec![
+                    Interval {
+                        begin: 20,
+                        end: 4500,
+                    },
+                    Interval {
+                        begin: 5500,
+                        end: 10000,
+                    },
+                ],
+            );
+            m
+        };
+    }
+
+    #[test]
+    fn mapping2read2mapping() {
+        let mut hash: HashMap<NameLen, Vec<Interval>> = HashMap::new();
+        parse(Box::new(PAF_FILE), utils::Format::Paf, &mut hash);
+        assert_eq!(*READ2MAPPING, hash);
+
+        hash.clear();
+        parse(Box::new(MHAP_FILE), utils::Format::Mhap, &mut hash);
+        assert_eq!(*READ2MAPPING, hash);
     }
 }

@@ -126,9 +126,18 @@ mod test {
 
     #[test]
     fn filtred_name() {
-       assert_eq!(generate_filterd_name("test.paf".to_string(), "_test"), "test_test.paf"); 
-       assert_eq!(generate_filterd_name("test.paf.gz".to_string(), "_test"), "test_test.paf.gz"); 
-       assert_eq!(generate_filterd_name("test.fasta".to_string(), "_filtred"), "test_filtred.fasta"); 
+        assert_eq!(
+            generate_filterd_name("test.paf".to_string(), "_test"),
+            "test_test.paf"
+        );
+        assert_eq!(
+            generate_filterd_name("test.paf.gz".to_string(), "_test"),
+            "test_test.paf.gz"
+        );
+        assert_eq!(
+            generate_filterd_name("test.fasta".to_string(), "_filtred"),
+            "test_filtred.fasta"
+        );
     }
 
     lazy_static! {
@@ -142,7 +151,7 @@ mod test {
     const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
-    
+
     const PAF_FILE_FILTRED: &'static [u8] = b"";
 
     #[test]
@@ -153,13 +162,13 @@ mod test {
 
         assert_eq!(writer, PAF_FILE_FILTRED);
     }
-    
+
     const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 100 450 1000 0 550 900 1000
 1 3 0.1 2 0 550 900 1000 0 100 450 1000
 ";
-    
+
     const MHAP_FILE_FILTRED: &'static [u8] = b"";
-    
+
     #[test]
     fn mhap() {
         let mut writer: Vec<u8> = Vec::new();
@@ -182,7 +191,7 @@ ACTG
 >3
 ACTG
 ";
-    
+
     #[test]
     fn fasta() {
         let mut writer: Vec<u8> = Vec::new();
@@ -191,7 +200,7 @@ ACTG
 
         assert_eq!(writer, FASTA_FILE_FILTRED);
     }
-    
+
     const FASTQ_FILE: &'static [u8] = b"@1
 ACTG
 +
@@ -215,7 +224,7 @@ ACTG
 +
 !!!!
 ";
-    
+
     #[test]
     fn fastq() {
         let mut writer: Vec<u8> = Vec::new();

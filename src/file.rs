@@ -143,18 +143,45 @@ mod test {
 
     #[test]
     fn compression_from_file() {
-        assert_eq!(get_compression(Box::new(GZIP_FILE)), CompressionFormat::Gzip);
-        assert_eq!(get_compression(Box::new(BZIP_FILE)), CompressionFormat::Bzip);
-        assert_eq!(get_compression(Box::new(LZMA_FILE)), CompressionFormat::Lzma);
+        assert_eq!(
+            get_compression(Box::new(GZIP_FILE)),
+            CompressionFormat::Gzip
+        );
+        assert_eq!(
+            get_compression(Box::new(BZIP_FILE)),
+            CompressionFormat::Bzip
+        );
+        assert_eq!(
+            get_compression(Box::new(LZMA_FILE)),
+            CompressionFormat::Lzma
+        );
     }
 
     #[test]
     fn compression_from_input_or_cli() {
-        assert_eq!(choose_compression(CompressionFormat::Gzip, false, "_"), CompressionFormat::Gzip);
-        assert_eq!(choose_compression(CompressionFormat::Bzip, false, "_"), CompressionFormat::Bzip);
-        assert_eq!(choose_compression(CompressionFormat::Lzma, false, "_"), CompressionFormat::Lzma);
-        assert_eq!(choose_compression(CompressionFormat::No, true, "gzip"), CompressionFormat::Gzip);
-        assert_eq!(choose_compression(CompressionFormat::No, true, "bzip2"), CompressionFormat::Bzip);
-        assert_eq!(choose_compression(CompressionFormat::No, true, "lzma"), CompressionFormat::Lzma);
+        assert_eq!(
+            choose_compression(CompressionFormat::Gzip, false, "_"),
+            CompressionFormat::Gzip
+        );
+        assert_eq!(
+            choose_compression(CompressionFormat::Bzip, false, "_"),
+            CompressionFormat::Bzip
+        );
+        assert_eq!(
+            choose_compression(CompressionFormat::Lzma, false, "_"),
+            CompressionFormat::Lzma
+        );
+        assert_eq!(
+            choose_compression(CompressionFormat::No, true, "gzip"),
+            CompressionFormat::Gzip
+        );
+        assert_eq!(
+            choose_compression(CompressionFormat::No, true, "bzip2"),
+            CompressionFormat::Bzip
+        );
+        assert_eq!(
+            choose_compression(CompressionFormat::No, true, "lzma"),
+            CompressionFormat::Lzma
+        );
     }
 }
