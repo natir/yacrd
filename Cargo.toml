@@ -1,5 +1,5 @@
 [package]
-name = "yarcd-rust"
+name = "yarcd"
 version = "0.3.0"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 

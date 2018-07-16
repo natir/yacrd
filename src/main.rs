@@ -66,7 +66,7 @@ fn main() {
              .display_order(1)
              .takes_value(true)
              .default_value("-")
-             .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed)")
+             .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed, paf format by default)")
              )
         .arg(Arg::with_name("output")
              .short("o")

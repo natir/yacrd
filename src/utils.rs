@@ -54,7 +54,9 @@ fn _get_mapping_format(present: bool, format: &str, input: &str) -> Option<Forma
 }
 
 pub fn get_format(filename: &str) -> Option<Format> {
-    return if filename.contains(".paf") {
+    return if filename == "-" {
+        Some(Format::Paf)
+    } else if filename.contains(".paf") {
         Some(Format::Paf)
     } else if filename.contains(".mhap") {
         Some(Format::Mhap)
