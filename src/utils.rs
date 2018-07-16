@@ -25,7 +25,7 @@ use clap;
 
 /* standard use */
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Format {
     Paf,
     Mhap,
@@ -34,15 +34,19 @@ pub enum Format {
 }
 
 pub fn get_mapping_format(m: &clap::ArgMatches) -> Option<Format> {
-    if m.is_present("format") {
-        return match m.value_of("format").unwrap() {
+    return _get_mapping_format(m.is_present("format"), m.value_of("format").unwrap_or("_"), m.value_of("input").unwrap_or("_"));
+}
+
+fn _get_mapping_format(present: bool, format: &str, input: &str) -> Option<Format> {
+    if present {
+        return match format {
             "paf" => Some(Format::Paf),
             "mhap" => Some(Format::Mhap),
             _ => None,
         };
     }
 
-    return get_format(m.value_of("input").unwrap());
+    return get_format(input);
 }
 
 pub fn get_format(filename: &str) -> Option<Format> {
@@ -57,4 +61,36 @@ pub fn get_format(filename: &str) -> Option<Format> {
     } else {
         None
     };
+}
+
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    
+    #[test]
+    fn arg_match() {
+        assert_eq!(_get_mapping_format(true, "paf", "_").unwrap(), Format::Paf);
+        assert_eq!(_get_mapping_format(false, "_", "test.paf").unwrap(), Format::Paf);
+        assert_eq!(_get_mapping_format(true, "mhap", "_").unwrap(), Format::Mhap);
+        assert_eq!(_get_mapping_format(false, "_", "test.mhap").unwrap(), Format::Mhap);
+    }
+
+    #[test]
+    fn filename_based() {
+        assert_eq!(get_format("t.paf").unwrap(), Format::Paf);
+        assert_eq!(get_format("t.mhap").unwrap(), Format::Mhap);
+        assert_eq!(get_format("t.fasta").unwrap(), Format::Fasta);
+        assert_eq!(get_format("t.fastq").unwrap(), Format::Fastq);
+    }
+   
+    #[test]
+    fn filename_based_compressed() {
+        assert_eq!(get_format("t.paf.gz").unwrap(), Format::Paf);
+        assert_eq!(get_format("t.mhap.xz").unwrap(), Format::Mhap);
+        assert_eq!(get_format("t.fasta.something").unwrap(), Format::Fasta);
+        assert_eq!(get_format("t.fastq.zip").unwrap(), Format::Fastq);
+    }
+
 }
