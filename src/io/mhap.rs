@@ -225,5 +225,6 @@ mod test {
                 .ok()
                 .expect("Error writing record");
         }
+        assert_eq!(writer.inner.into_inner().unwrap(), MHAP_FILE);
     }
 }

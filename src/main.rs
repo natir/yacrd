@@ -26,6 +26,10 @@ extern crate clap;
 extern crate csv;
 extern crate flate2;
 extern crate xz2;
+
+#[macro_use]
+extern crate lazy_static;
+
 #[macro_use]
 extern crate serde_derive;
 

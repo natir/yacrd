@@ -51,10 +51,10 @@ fn generate_filterd_name(filename: String, filterd_suffix: &str) -> String {
     return filename.replacen(".", &format!("{}.", filterd_suffix), 1);
 }
 
-fn filterd_paf(
+fn filterd_paf<R: std::io::Read, W: std::io::Write>(
     reads: &Box<HashSet<String>>,
-    input: Box<std::io::Read>,
-    output: Box<std::io::Write>,
+    input: R,
+    output: W,
 ) {
     let mut reader = io::paf::Reader::new(input);
     let mut writer = io::paf::Writer::new(output);
@@ -67,10 +67,10 @@ fn filterd_paf(
     }
 }
 
-fn filterd_mhap(
+fn filterd_mhap<R: std::io::Read, W: std::io::Write>(
     reads: &Box<HashSet<String>>,
-    input: Box<std::io::Read>,
-    output: Box<std::io::Write>,
+    input: R,
+    output: W,
 ) {
     let mut reader = io::mhap::Reader::new(input);
     let mut writer = io::mhap::Writer::new(output);
@@ -83,10 +83,10 @@ fn filterd_mhap(
     }
 }
 
-fn filterd_fasta(
+fn filterd_fasta<R: std::io::Read, W: std::io::Write>(
     reads: &Box<HashSet<String>>,
-    input: Box<std::io::Read>,
-    output: Box<std::io::Write>,
+    input: R,
+    output: W,
 ) {
     let reader = bio::io::fasta::Reader::new(input);
     let mut writer = bio::io::fasta::Writer::new(output);
@@ -101,10 +101,10 @@ fn filterd_fasta(
     }
 }
 
-fn filterd_fastq(
+fn filterd_fastq<R: std::io::Read, W: std::io::Write>(
     reads: &Box<HashSet<String>>,
-    input: Box<std::io::Read>,
-    output: Box<std::io::Write>,
+    input: R,
+    output: W,
 ) {
     let reader = bio::io::fastq::Reader::new(input);
     let mut writer = bio::io::fastq::Writer::new(output);
@@ -117,4 +117,112 @@ fn filterd_fastq(
                 .expect("Trouble durring fasta valid sequence writing");
         }
     }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn filtred_name() {
+       assert_eq!(generate_filterd_name("test.paf".to_string(), "_test"), "test_test.paf"); 
+       assert_eq!(generate_filterd_name("test.paf.gz".to_string(), "_test"), "test_test.paf.gz"); 
+       assert_eq!(generate_filterd_name("test.fasta".to_string(), "_filtred"), "test_filtred.fasta"); 
+    }
+
+    lazy_static! {
+        static ref REMOVE_READS: Box<HashSet<String>> = {
+            let mut m = Box::new(HashSet::new());
+            m.insert("1".to_string());
+            m
+        };
+    }
+
+    const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
+";
+    
+    const PAF_FILE_FILTRED: &'static [u8] = b"";
+
+    #[test]
+    fn paf() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        filterd_paf(&REMOVE_READS, PAF_FILE, &mut writer);
+
+        assert_eq!(writer, PAF_FILE_FILTRED);
+    }
+    
+    const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 100 450 1000 0 550 900 1000
+1 3 0.1 2 0 550 900 1000 0 100 450 1000
+";
+    
+    const MHAP_FILE_FILTRED: &'static [u8] = b"";
+    
+    #[test]
+    fn mhap() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        filterd_mhap(&REMOVE_READS, MHAP_FILE, &mut writer);
+
+        assert_eq!(writer, MHAP_FILE_FILTRED);
+    }
+
+    const FASTA_FILE: &'static [u8] = b">1
+ACTG
+>2
+ACTG
+>3
+ACTG
+";
+
+    const FASTA_FILE_FILTRED: &'static [u8] = b">2
+ACTG
+>3
+ACTG
+";
+    
+    #[test]
+    fn fasta() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        filterd_fasta(&REMOVE_READS, FASTA_FILE, &mut writer);
+
+        assert_eq!(writer, FASTA_FILE_FILTRED);
+    }
+    
+    const FASTQ_FILE: &'static [u8] = b"@1
+ACTG
++
+!!!!
+@2
+ACTG
++
+!!!!
+@3
+ACTG
++
+!!!!
+";
+
+    const FASTQ_FILE_FILTRED: &'static [u8] = b"@2
+ACTG
++
+!!!!
+@3
+ACTG
++
+!!!!
+";
+    
+    #[test]
+    fn fastq() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        filterd_fastq(&REMOVE_READS, FASTQ_FILE, &mut writer);
+
+        assert_eq!(writer, FASTQ_FILE_FILTRED);
+    }
+
 }
