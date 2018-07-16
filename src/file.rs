@@ -29,7 +29,7 @@ use xz2;
 use std::fs::File;
 use std::io;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CompressionFormat {
     Gzip = 0x1F8B,
     Bzip = 0x425A,
@@ -70,7 +70,7 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
     }
 }
 
-fn get_readable(input_name: &str) -> Box<io::Read> {
+pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
         "-" => Box::new(io::stdin()),
         _ => Box::new(File::open(input_name).expect("Can't open input file")),
@@ -83,7 +83,6 @@ fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     in_stream
         .read_exact(&mut buf)
         .expect("Error durring reading first bit of file");
-
     match &buf[..] {
         [0x1F, 0x8B] => CompressionFormat::Gzip,
         [0x42, 0x5A] => CompressionFormat::Bzip,
@@ -130,5 +129,32 @@ fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
         "-" => Box::new(io::stdout()),
         _ => Box::new(File::create(output_name).expect("Can't open output file")),
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    const GZIP_FILE: &'static [u8] = &[0o037, 0o213];
+    const BZIP_FILE: &'static [u8] = &[0o102, 0o132];
+    const LZMA_FILE: &'static [u8] = &[0o375, 0o067];
+
+    #[test]
+    fn compression_from_file() {
+        assert_eq!(get_compression(Box::new(GZIP_FILE)), CompressionFormat::Gzip);
+        assert_eq!(get_compression(Box::new(BZIP_FILE)), CompressionFormat::Bzip);
+        assert_eq!(get_compression(Box::new(LZMA_FILE)), CompressionFormat::Lzma);
+    }
+
+    #[test]
+    fn compression_from_input_or_cli() {
+        assert_eq!(choose_compression(CompressionFormat::Gzip, false, "_"), CompressionFormat::Gzip);
+        assert_eq!(choose_compression(CompressionFormat::Bzip, false, "_"), CompressionFormat::Bzip);
+        assert_eq!(choose_compression(CompressionFormat::Lzma, false, "_"), CompressionFormat::Lzma);
+        assert_eq!(choose_compression(CompressionFormat::No, true, "gzip"), CompressionFormat::Gzip);
+        assert_eq!(choose_compression(CompressionFormat::No, true, "bzip2"), CompressionFormat::Bzip);
+        assert_eq!(choose_compression(CompressionFormat::No, true, "lzma"), CompressionFormat::Lzma);
     }
 }
