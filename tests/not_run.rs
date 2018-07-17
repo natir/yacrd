@@ -80,7 +80,7 @@ mod not_run {
         assert_eq!(output.stdout, b"yacrd 0.3 Mew\n");
         println!("{:?}", output);
     }
-    
+
     #[test]
     fn help() {
         let output = Command::new("./target/debug/yarcd")

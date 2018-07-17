@@ -73,7 +73,9 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
 pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
         "-" => Box::new(io::stdin()),
-        _ => Box::new(File::open(input_name).expect(&format!("Can't open input file {}", input_name))),
+        _ => Box::new(
+            File::open(input_name).expect(&format!("Can't open input file {}", input_name)),
+        ),
     }
 }
 
@@ -128,7 +130,9 @@ pub fn choose_compression(
 fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
         "-" => Box::new(io::stdout()),
-        _ => Box::new(File::create(output_name).expect(&format!("Can't open output file {}", output_name))),
+        _ => Box::new(
+            File::create(output_name).expect(&format!("Can't open output file {}", output_name)),
+        ),
     }
 }
 

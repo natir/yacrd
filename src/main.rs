@@ -28,10 +28,11 @@ extern crate flate2;
 extern crate xz2;
 
 #[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
 extern crate serde_derive;
+
+#[cfg(test)]
+#[macro_use]
+extern crate lazy_static;
 
 use clap::{App, Arg};
 

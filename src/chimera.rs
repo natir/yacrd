@@ -32,6 +32,8 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
+/* begin of type declaration */
+
 #[derive(Debug)]
 struct NameLen {
     name: String,
@@ -83,6 +85,30 @@ impl PartialEq for Interval {
 
 impl Eq for Interval {}
 
+#[derive(Debug, PartialEq)]
+struct MinInteger(u64);
+
+impl Eq for MinInteger {}
+
+impl PartialOrd for MinInteger {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        other.0.partial_cmp(&self.0)
+    }
+}
+
+impl Ord for MinInteger {
+    fn cmp(&self, other: &MinInteger) -> Ordering {
+        let ord = self.partial_cmp(other).unwrap();
+        match ord {
+            Ordering::Greater => Ordering::Less,
+            Ordering::Less => Ordering::Greater,
+            Ordering::Equal => ord,
+        }
+    }
+}
+
+/* End of type declaration */
+
 pub fn find<R: std::io::Read, W: std::io::Write>(
     input: R,
     mut output: W,
@@ -96,20 +122,21 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
     parse(input, format, &mut read2mapping);
 
     let mut middle_gaps: Vec<Interval> = Vec::new();
-    let mut stack: BinaryHeap<u64> = BinaryHeap::new();
+    let mut stack: BinaryHeap<MinInteger> = BinaryHeap::new();
 
     for (key, val) in read2mapping.iter_mut() {
-        stack.clear();
         middle_gaps.clear();
+        stack.clear();
 
         val.sort();
 
         let mut first_covered = 0;
         let mut last_covered = 0;
+
         for interval in val {
-            while !stack.is_empty() && stack.peek().unwrap() < &interval.begin {
+            while !stack.is_empty() && stack.peek().unwrap().0 < interval.begin {
                 if stack.len() > chim_thres as usize {
-                    last_covered = *stack.peek().unwrap();
+                    last_covered = stack.peek().unwrap().0;
                 }
                 stack.pop();
             }
@@ -125,11 +152,11 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
                 }
             }
 
-            stack.push(interval.end);
+            stack.push(MinInteger(interval.end));
         }
 
         while stack.len() > chim_thres as usize {
-            last_covered = *stack.peek().unwrap();
+            last_covered = stack.peek().unwrap().0;
             if last_covered >= key.len {
                 break;
             }
@@ -277,6 +304,14 @@ mod test {
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
+    const PAF_FILE_COV_1: &'static [u8] =
+        b"1\t10000\t0\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+1\t10000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
+1\t10000\t2000\t8000\t+\t4\t6000\t0\t6000\t6000\t6000\t255
+2\t10000\t7500\t10000\t-\t4\t6000\t0\t2500\t2500\t2500\t255
+3\t10000\t0\t2500\t-\t4\t6000\t3500\t6000\t2500\t2500\t255
+";
+
     const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
 1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
 ";
@@ -289,6 +324,7 @@ mod test {
     #[test]
     fn find_chimera() {
         let good = b"Chimeric\t1\t12000\t20,0,20;1000,4500,5500;2000,10000,12000\n";
+
         let mut writer: Vec<u8> = Vec::new();
 
         find(PAF_FILE, &mut writer, utils::Format::Paf, 0, 0.8);
@@ -298,6 +334,22 @@ mod test {
         writer.clear();
         find(MHAP_FILE, &mut writer, utils::Format::Mhap, 0, 0.8);
         assert_eq!(writer, good.to_vec());
+    }
+
+    #[test]
+    fn find_chimera_cov_1() {
+        let result = "Chimeric\t4\t6000\t1000,2500,3500\nChimeric\t1\t10000\t2000,0,2000;1000,4500,5500;2000,8000,10000\n".to_string();
+        let good: HashSet<&str> = result.split("\n").collect();
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(PAF_FILE_COV_1, &mut writer, utils::Format::Paf, 1, 0.8);
+
+        assert_eq!(
+            String::from_utf8_lossy(&writer)
+                .split("\n")
+                .collect::<HashSet<&str>>(),
+            good
+        );
     }
 
     #[test]
