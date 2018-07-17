@@ -6,6 +6,7 @@ minimap -x ava10k validation/longislnd_t_roseus.chimeric.fastq.gz validation/lon
 
 TP=$(cargo run -- -i validation/longislnd_t_roseus.minimap1.paf | grep Chimeric | grep "_" -c)
 FP=$(cargo run -- -i validation/longislnd_t_roseus.minimap1.paf | grep Chimeric | grep -v "_" -c)
+
 FN=$(($1 - $TP))
 
 echo "minimap :"
@@ -18,6 +19,7 @@ minimap2 -x ava-pb validation/longislnd_t_roseus.chimeric.fastq.gz validation/lo
 
 TP=$(cargo run -- -i validation/longislnd_t_roseus.minimap2.paf | grep Chimeric | grep "_" -c)
 FP=$(cargo run -- -i validation/longislnd_t_roseus.minimap2.paf | grep Chimeric | grep -v "_" -c)
+
 FN=$(($1 - $TP))
 
 echo "minimap2 :"
