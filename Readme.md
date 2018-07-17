@@ -1,5 +1,7 @@
 # Yet Another Chimeric Read Detector for long reads
 
+[![Build Status](https://travis-ci.org/natir/yacrd.svg?branch=master)](https://travis-ci.org/natir/yacrd)
+
 ![yacrd pipeline presentation](image/pipeline.svg)
 
 Using all-against-all read mapping, yacrd performs:
@@ -21,7 +23,7 @@ DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER)
 
 ## Input
 
-Any set of long reads (PacBio, Nanopore, anything that can be given to [https://github.com/lh3/minimap2](minimap2) ).
+Any set of long reads (PacBio, Nanopore, anything that can be given to [minimap2](https://github.com/lh3/minimap2) ).
 yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP file from some other long reads overlapper as input.
 
 ## Requirements
@@ -30,9 +32,17 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 
 ## Instalation
 
+### With cargo
+
+If you have a rust environment setup you can run :
+
+```
+cargo install yacrd
+```
+
 ### With conda
 
-yacrd are avaible in [bioconda channel](https://bioconda.github.io/)
+yacrd is avaible in [bioconda channel](https://bioconda.github.io/)
 
 if bioconda channel is setup you can run :
 
@@ -58,7 +68,7 @@ cargo install
 2)
 
 ```
-yacrd 0.3 Mew
+yacrd 0.3 Ninetales
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
@@ -81,7 +91,7 @@ OPTIONS:
             Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no
             compression allowed, paf format by default) [default: -]
     -o, --output <output>
-            Path where yacrd report are write, use - for write in standard output same compression as input or use
+            Path where yacrd report are writen, use - for write in standard output same compression as input or use
             --compression-out [default: -]
     -f, --filter <filter>...
             File containing reads that will be filtered (fasta|fastq|mhap|paf), new file are create like
@@ -91,7 +101,7 @@ OPTIONS:
             Overlap depth threshold below which a gap should be created [default: 0]
 
     -n, --not-covered-threshold <not-covered-threshold>
-            Coverage depth threshold above which a read are mark as not covered [default: 0.80]
+            Coverage depth threshold above which a read are marked as not covered [default: 0.80]
 
         --filtered-suffix <filtered-suffix>
             Change the suffix of file generate by filter option [default: _filtered]

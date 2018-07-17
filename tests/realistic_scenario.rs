@@ -35,7 +35,7 @@ mod realistic_scenario {
 
     #[test]
     fn default() {
-        let child = Command::new("./target/debug/yarcd")
+        let child = Command::new("./target/debug/yacrd")
             .stdin(Stdio::from(fs::File::open("tests/data/test.paf").unwrap()))
             .stdout(Stdio::piped())
             .spawn()
@@ -49,7 +49,7 @@ mod realistic_scenario {
 
     #[test]
     fn file_mhap_gz_out_same_paf_default_default() {
-        let child = Command::new("./target/debug/yarcd")
+        let child = Command::new("./target/debug/yacrd")
             .arg("-i")
             .arg("tests/data/test.mhap.gz")
             .arg("-F")
@@ -81,7 +81,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
 ";
         let good: HashSet<&str> = expected.split("\n").collect();
 
-        Command::new("./target/debug/yarcd")
+        Command::new("./target/debug/yacrd")
             .arg("-i")
             .arg("-")
             .arg("-o")
@@ -92,7 +92,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
                 fs::File::open("tests/data/test_cov_1.paf").unwrap(),
             ))
             .stdout(Stdio::piped())
-            .spawn()
+            .output()
             .expect("Could ot run yacrd");
 
         assert_eq!(
@@ -113,7 +113,7 @@ Not_covered	3	10000	5500,4500,10000
 ";
         let good: HashSet<&str> = expected.split("\n").collect();
 
-        let child = Command::new("./target/debug/yarcd")
+        let child = Command::new("./target/debug/yacrd")
             .arg("-i")
             .arg("tests/data/test.paf.bz2")
             .arg("-o")
@@ -169,7 +169,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
 
         let good: HashSet<&str> = expected.split("\n").collect();
         
-        Command::new("./target/debug/yarcd")
+        Command::new("./target/debug/yacrd")
             .arg("-i")
             .arg("tests/data/test_cov_1.mhap.xz")
             .arg("-o")
@@ -184,7 +184,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
             .arg("tests/data/test.fasta")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .spawn()
+            .output()
             .expect("Could not run yacrd");
 
         {

@@ -50,7 +50,7 @@ use std::collections::HashSet;
 
 fn main() {
     let matches = App::new("yacrd")
-        .version("0.3 Mew")
+        .version("0.3 Ninetales")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
         .usage("yacrd [-i|--input] <input> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
@@ -75,7 +75,7 @@ fn main() {
              .display_order(2)
              .takes_value(true)
              .default_value("-")
-             .help("Path where yacrd report are write, use - for write in standard output same compression as input or use --compression-out")
+             .help("Path where yacrd report are writen, use - for write in standard output same compression as input or use --compression-out")
              )
         .arg(Arg::with_name("filter")
              .short("f")
@@ -107,7 +107,7 @@ fn main() {
              .takes_value(true)
              .default_value("0.80")
              .long("not-covered-threshold")
-             .help("Coverage depth threshold above which a read are mark as not covered")
+             .help("Coverage depth threshold above which a read are marked as not covered")
              )
         .arg(Arg::with_name("filtered-suffix")
              .display_order(7)

@@ -22,7 +22,7 @@ SOFTWARE.
 
 use std::process::Command;
 
-static HELP_MESSAGE: &'static str = "yacrd 0.3 Mew
+static HELP_MESSAGE: &'static str = "yacrd 0.3 Ninetales
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
@@ -45,7 +45,7 @@ OPTIONS:
             Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no
             compression allowed, paf format by default) [default: -]
     -o, --output <output>
-            Path where yacrd report are write, use - for write in standard output same compression as input or use
+            Path where yacrd report are writen, use - for write in standard output same compression as input or use
             --compression-out [default: -]
     -f, --filter <filter>...
             File containing reads that will be filtered (fasta|fastq|mhap|paf), new file are create like
@@ -55,7 +55,7 @@ OPTIONS:
             Overlap depth threshold below which a gap should be created [default: 0]
 
     -n, --not-covered-threshold <not-covered-threshold>
-            Coverage depth threshold above which a read are mark as not covered [default: 0.80]
+            Coverage depth threshold above which a read are marked as not covered [default: 0.80]
 
         --filtered-suffix <filtered-suffix>
             Change the suffix of file generate by filter option [default: _filtered]
@@ -72,18 +72,18 @@ mod not_run {
 
     #[test]
     fn version() {
-        let output = Command::new("./target/debug/yarcd")
+        let output = Command::new("./target/debug/yacrd")
             .arg("-V")
             .output()
             .expect("Could not run yacrd");
 
-        assert_eq!(output.stdout, b"yacrd 0.3 Mew\n");
+        assert_eq!(output.stdout, b"yacrd 0.3 Ninetales\n");
         println!("{:?}", output);
     }
 
     #[test]
     fn help() {
-        let output = Command::new("./target/debug/yarcd")
+        let output = Command::new("./target/debug/yacrd")
             .arg("-h")
             .output()
             .expect("Could not run yacrd");
@@ -93,7 +93,7 @@ mod not_run {
 
     #[test]
     fn no_argument() {
-        let output = Command::new("./target/debug/yarcd")
+        let output = Command::new("./target/debug/yacrd")
             .output()
             .expect("Could not run yacrd");
 

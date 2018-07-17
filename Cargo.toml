@@ -1,10 +1,23 @@
 [package]
-name = "yarcd"
+name = "yacrd"
 version = "0.3.0"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 
+exclude = ["image/*", "validation/*", "tests/*"]
+
+description = "Using all-against-all read mapping, yacrd performs: computation of pile-up coverage for each read and detection of chimeras"
+#documentation = "https://github.com/natir/yacrd"
+homepage = "https://github.com/natir/yacrd"
+repository = "https://github.com/natir/yacrd"
+readme = "Readme.md"
+license = "MIT"
+keywords = ["bioinformatics", "chimera", "long-read"]
+
+[badges]
+travis-ci = { repository = "natir/yacrd", branch = "master" }
+
 [dependencies]
-bio          = "*"
+bio          = "0.21"
 csv          = "1"
 xz2          = "0.1"
 clap         = "2.31.2"
@@ -14,3 +27,7 @@ flate2       = "1.0"
 rust-lzma    = "0.2"
 lazy_static  = "1.0"
 serde_derive = "1.0"
+
+[[bin]]
+name = "yacrd"
+path = "src/main.rs"
