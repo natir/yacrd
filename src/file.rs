@@ -28,6 +28,7 @@ use xz2;
 /* standard use */
 use std::fs::File;
 use std::io;
+use std::io::{BufReader, BufWriter};
 
 #[derive(Debug, PartialEq)]
 pub enum CompressionFormat {
@@ -72,9 +73,11 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
 
 pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
-        "-" => Box::new(io::stdin()),
+        "-" => Box::new(BufReader::new(io::stdin())),
         _ => Box::new(
-            File::open(input_name).expect(&format!("Can't open input file {}", input_name)),
+            BufReader::new(
+                File::open(input_name).expect(&format!("Can't open input file {}", input_name))
+            )
         ),
     }
 }
@@ -129,9 +132,11 @@ pub fn choose_compression(
 
 fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
-        "-" => Box::new(io::stdout()),
+        "-" => Box::new(BufWriter::new(io::stdout())),
         _ => Box::new(
-            File::create(output_name).expect(&format!("Can't open output file {}", output_name)),
+            BufWriter::new(
+                File::create(output_name).expect(&format!("Can't open output file {}", output_name))
+            )
         ),
     }
 }
