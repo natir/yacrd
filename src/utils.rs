@@ -33,24 +33,31 @@ pub enum Format {
     Fastq,
 }
 
-pub fn get_mapping_format(m: &clap::ArgMatches) -> Option<Format> {
-    return _get_mapping_format(
-        m.is_present("format"),
-        m.value_of("format").unwrap_or("_"),
-        m.value_of("input").unwrap_or("_"),
-    );
+pub fn get_mapping_format(matches: &clap::ArgMatches, formats: &mut Vec<Format>) {
+    if matches.is_present("format") {
+        if matches.values_of("input").unwrap().len() > 1 {
+            panic!("Format option are avaible only for one input");
+        } else {
+            formats.push(match matches.value_of("format").unwrap() {
+                "paf" => Format::Paf,
+                "mhap" => Format::Mhap,
+                _ => panic!("You can't be her send your command line to pierre.marijon@inria.fr"),
+            })
+        }
+    } else {
+        for input_name in matches.values_of("input").unwrap() {
+            formats.push(
+                get_format_mapping(input_name).expect("Format of input can be determinate check file extension (paf and mhap are allowed)")
+            );
+        }
+    }
 }
 
-fn _get_mapping_format(present: bool, format: &str, input: &str) -> Option<Format> {
-    if present {
-        return match format {
-            "paf" => Some(Format::Paf),
-            "mhap" => Some(Format::Mhap),
-            _ => None,
-        };
-    }
-
-    return get_format(input);
+pub fn get_format_mapping(filename: &str) -> Option<Format> {
+    return match get_format(filename) {
+        e @ Some(Format::Paf) | e @ Some(Format::Mhap) => e,
+        _ => None,
+    };
 }
 
 pub fn get_format(filename: &str) -> Option<Format> {
@@ -75,20 +82,11 @@ mod test {
     use super::*;
 
     #[test]
-    fn arg_match() {
-        assert_eq!(_get_mapping_format(true, "paf", "_").unwrap(), Format::Paf);
-        assert_eq!(
-            _get_mapping_format(false, "_", "test.paf").unwrap(),
-            Format::Paf
-        );
-        assert_eq!(
-            _get_mapping_format(true, "mhap", "_").unwrap(),
-            Format::Mhap
-        );
-        assert_eq!(
-            _get_mapping_format(false, "_", "test.mhap").unwrap(),
-            Format::Mhap
-        );
+    fn filename_mapping_only() {
+        assert_eq!(get_format_mapping("t.paf").unwrap(), Format::Paf);
+        assert_eq!(get_format_mapping("t.mhap").unwrap(), Format::Mhap);
+        assert_eq!(get_format_mapping("t.fasta"), None);
+        assert_eq!(get_format_mapping("t.fastq"), None);
     }
 
     #[test]

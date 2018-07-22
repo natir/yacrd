@@ -110,16 +110,18 @@ impl Ord for MinInteger {
 /* End of type declaration */
 
 pub fn find<R: std::io::Read, W: std::io::Write>(
-    input: R,
+    inputs: Vec<R>,
     mut output: W,
-    format: utils::Format,
+    formats: Vec<utils::Format>,
     chim_thres: u64,
     ncov_thres: f64,
 ) -> Box<HashSet<String>> {
     let mut remove_reads: HashSet<String> = HashSet::new();
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
 
-    parse(input, format, &mut read2mapping);
+    for (input, format) in inputs.into_iter().zip(formats.iter()) {
+        parse(input, format, &mut read2mapping);
+    }
 
     let mut middle_gaps: Vec<Interval> = Vec::new();
     let mut stack: BinaryHeap<MinInteger> = BinaryHeap::new();
@@ -227,7 +229,7 @@ fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
 
 fn parse<R: std::io::Read>(
     input: R,
-    format: utils::Format,
+    format: &utils::Format,
     read2mapping: &mut HashMap<NameLen, Vec<Interval>>,
 ) {
     match format {
@@ -327,12 +329,24 @@ mod test {
 
         let mut writer: Vec<u8> = Vec::new();
 
-        find(PAF_FILE, &mut writer, utils::Format::Paf, 0, 0.8);
+        find(
+            vec![PAF_FILE],
+            &mut writer,
+            vec![utils::Format::Paf],
+            0,
+            0.8,
+        );
 
         assert_eq!(writer, good.to_vec());
 
         writer.clear();
-        find(MHAP_FILE, &mut writer, utils::Format::Mhap, 0, 0.8);
+        find(
+            vec![MHAP_FILE],
+            &mut writer,
+            vec![utils::Format::Mhap],
+            0,
+            0.8,
+        );
         assert_eq!(writer, good.to_vec());
     }
 
@@ -342,7 +356,13 @@ mod test {
         let good: HashSet<&str> = result.split("\n").collect();
         let mut writer: Vec<u8> = Vec::new();
 
-        find(PAF_FILE_COV_1, &mut writer, utils::Format::Paf, 1, 0.8);
+        find(
+            vec![PAF_FILE_COV_1],
+            &mut writer,
+            vec![utils::Format::Paf],
+            1,
+            0.8,
+        );
 
         assert_eq!(
             String::from_utf8_lossy(&writer)
@@ -356,7 +376,13 @@ mod test {
     fn find_not_covered() {
         let mut writer: Vec<u8> = Vec::new();
 
-        find(NOT_COVERED_FILE, &mut writer, utils::Format::Paf, 0, 0.8);
+        find(
+            vec![NOT_COVERED_FILE],
+            &mut writer,
+            vec![utils::Format::Paf],
+            0,
+            0.8,
+        );
 
         let good = b"Not_covered\t3\t10000\t9000,0,9000\n";
         assert_eq!(writer, good.to_vec());
@@ -431,11 +457,11 @@ mod test {
     #[test]
     fn mapping2read2mapping() {
         let mut hash: HashMap<NameLen, Vec<Interval>> = HashMap::new();
-        parse(Box::new(PAF_FILE), utils::Format::Paf, &mut hash);
+        parse(Box::new(PAF_FILE), &utils::Format::Paf, &mut hash);
         assert_eq!(*READ2MAPPING, hash);
 
         hash.clear();
-        parse(Box::new(MHAP_FILE), utils::Format::Mhap, &mut hash);
+        parse(Box::new(MHAP_FILE), &utils::Format::Mhap, &mut hash);
         assert_eq!(*READ2MAPPING, hash);
     }
 }

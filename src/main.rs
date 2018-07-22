@@ -46,14 +46,13 @@ mod utils;
 /* crates use */
 
 /* standard use */
-use std::collections::HashSet;
 
 fn main() {
     let matches = App::new("yacrd")
         .version("0.3 Ninetales")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
-        .usage("yacrd [-i|--input] <input> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
+        .usage("yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
 \tyacrd -i map_file.paf -o map_file.yacrd
 \tyacrd -i map_file.mhap -o map_file.yacrd
 \tyacrd -i map_file.xyz -F paf -o map_file.yacrd
@@ -64,6 +63,7 @@ fn main() {
         .arg(Arg::with_name("input")
              .short("i")
              .long("input")
+             .multiple(true)
              .display_order(1)
              .takes_value(true)
              .default_value("-")
@@ -126,7 +126,13 @@ fn main() {
              )
         .get_matches();
 
-    let (input, compression) = file::get_input(matches.value_of("input").unwrap());
+    let mut compression: file::CompressionFormat = file::CompressionFormat::No;
+    let mut inputs: Vec<Box<std::io::Read>> = Vec::new();
+    for input_name in matches.values_of("input").unwrap() {
+        let tmp = file::get_input(input_name);
+        inputs.push(tmp.0);
+        compression = tmp.1;
+    }
 
     let out_compression = file::choose_compression(
         compression,
@@ -141,9 +147,8 @@ fn main() {
         false => Vec::new(),
     };
 
-    let format = utils::get_mapping_format(&matches).expect(
-        "Format of input can be determinate check file extension or value of --format option",
-    );
+    let mut formats: Vec<utils::Format> = Vec::new();
+    utils::get_mapping_format(&matches, &mut formats);;
 
     let chim_thres = matches
         .value_of("chimeric-threshold")
@@ -157,8 +162,7 @@ fn main() {
         .unwrap();
     let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
 
-    let remove_reads: Box<HashSet<String>> =
-        chimera::find(input, &mut output, format, chim_thres, ncov_thres);
+    let remove_reads = chimera::find(inputs, &mut output, formats, chim_thres, ncov_thres);
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);

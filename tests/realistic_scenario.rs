@@ -75,6 +75,25 @@ mod realistic_scenario {
     }
 
     #[test]
+    fn file_mhapgzpafxz_out_same_paf_default_default() {
+        let child = Command::new("./target/debug/yacrd")
+            .arg("-i")
+            .arg("tests/data/test.mhap.gz")
+            .arg("tests/data/test.paf.bz2")
+            .arg("-C")
+            .arg("no")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Could ot run yacrd");
+
+        assert_eq!(
+            String::from_utf8_lossy(&child.wait_with_output().unwrap().stdout),
+            "Chimeric\t1\t10000\t1000,4500,5500\n"
+        );
+    }
+
+    #[test]
     fn in_paf_no_file_same_no_other_default() {
         let expected = "Chimeric	4	6000	1000,2500,3500
 Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
@@ -135,7 +154,9 @@ Not_covered	3	10000	5500,4500,10000
             let proxy: &[u8] = &output_raw;
 
             let mut output = Vec::new();
-            xz2::read::XzDecoder::new(proxy).read_to_end(&mut output).unwrap();
+            xz2::read::XzDecoder::new(proxy)
+                .read_to_end(&mut output)
+                .unwrap();
 
             let proxy_deflate = String::from_utf8_lossy(&output);
             let result = proxy_deflate.split("\n").collect::<HashSet<&str>>();
@@ -150,7 +171,9 @@ Not_covered	3	10000	5500,4500,10000
             let proxy: &[u8] = &output_raw;
 
             let mut output = Vec::new();
-            flate2::read::GzDecoder::new(proxy).read_to_end(&mut output).unwrap();
+            flate2::read::GzDecoder::new(proxy)
+                .read_to_end(&mut output)
+                .unwrap();
 
             assert_eq!(output, b"@4\nACTG\n+\n!!!!\n");
         }
@@ -161,14 +184,14 @@ Not_covered	3	10000	5500,4500,10000
 
     #[test]
     fn file_mhap_xz_file_other_fasta_other_other() {
-        let expected ="Not_covered	3	10000	7500,2500,10000
+        let expected = "Not_covered	3	10000	7500,2500,10000
 Not_covered	2	10000	7500,0,7500
 Chimeric	4	6000	1000,2500,3500
 Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
 ";
 
         let good: HashSet<&str> = expected.split("\n").collect();
-        
+
         Command::new("./target/debug/yacrd")
             .arg("-i")
             .arg("tests/data/test_cov_1.mhap.xz")
@@ -192,12 +215,22 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
             let proxy: &[u8] = &output_raw;
 
             let mut output = Vec::new();
-            flate2::read::GzDecoder::new(proxy).read_to_end(&mut output).unwrap();
+            flate2::read::GzDecoder::new(proxy)
+                .read_to_end(&mut output)
+                .unwrap();
             println!("{:?}", String::from_utf8_lossy(&output));
-            assert_eq!(String::from_utf8_lossy(&output).split("\n").collect::<HashSet<&str>>(), good);
+            assert_eq!(
+                String::from_utf8_lossy(&output)
+                    .split("\n")
+                    .collect::<HashSet<&str>>(),
+                good
+            );
         }
-            
-        assert_eq!(fs::read("tests/data/test_filtered.fasta").unwrap(), b">5\nACTG\n");
+
+        assert_eq!(
+            fs::read("tests/data/test_filtered.fasta").unwrap(),
+            b">5\nACTG\n"
+        );
 
         fs::remove_file("tests/data/test.yacrd.gz").unwrap();
         fs::remove_file("tests/data/test_filtered.fasta").unwrap();
