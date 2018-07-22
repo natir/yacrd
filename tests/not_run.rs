@@ -22,7 +22,7 @@ SOFTWARE.
 
 use std::process::Command;
 
-static HELP_MESSAGE: &'static str = "yacrd 0.3 Ninetales
+static HELP_MESSAGE: &'static str = "yacrd 0.4 Mew
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
@@ -83,7 +83,7 @@ mod not_run {
             .output()
             .expect("Could not run yacrd");
 
-        assert_eq!(output.stdout, b"yacrd 0.3 Ninetales\n");
+        assert_eq!(output.stdout, b"yacrd 0.4 Mew\n");
         println!("{:?}", output);
     }
 
