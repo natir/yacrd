@@ -29,6 +29,9 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP
 ## Requirements
 
 - [Rust](https://www.rust-lang.org/) in stable channel
+- libgz
+- libbzip2
+- liblzma
 
 ## Instalation
 
