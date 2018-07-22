@@ -235,4 +235,29 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
         fs::remove_file("tests/data/test.yacrd.gz").unwrap();
         fs::remove_file("tests/data/test_filtered.fasta").unwrap();
     }
+
+    #[test]
+    fn file_paf_out_same_paf_extract() {
+        let child = Command::new("./target/debug/yacrd")
+            .arg("-i")
+            .arg("tests/data/test.paf")
+            .arg("-e")
+            .arg("tests/data/test.fasta")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Could ot run yacrd");
+
+        assert_eq!(
+            String::from_utf8_lossy(&child.wait_with_output().unwrap().stdout),
+            "Chimeric\t1\t10000\t1000,4500,5500\n"
+        );
+        
+        assert_eq!(
+            fs::read("tests/data/test_extracted.fasta").unwrap(),
+            b">1\nACTG\n"
+        );
+        
+        fs::remove_file("tests/data/test_extracted.fasta").unwrap();
+    }
 }

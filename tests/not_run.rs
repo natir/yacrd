@@ -48,8 +48,11 @@ OPTIONS:
             Path where yacrd report are writen, use - for write in standard output same compression as input or use
             --compression-out [default: -]
     -f, --filter <filter>...
-            File containing reads that will be filtered (fasta|fastq|mhap|paf), new file are create like
-            {original_path}_fileterd.{original_extension}
+            Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format
+            support fasta|fastq|mhap|paf
+    -e, --extract <extract>...
+            Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support
+            fasta|fastq|mhap|paf
     -F, --format <format>                                  Force the format used [possible values: paf, mhap]
     -c, --chimeric-threshold <chimeric-threshold>
             Overlap depth threshold below which a gap should be created [default: 0]
@@ -59,6 +62,9 @@ OPTIONS:
 
         --filtered-suffix <filtered-suffix>
             Change the suffix of file generate by filter option [default: _filtered]
+
+        --extracted-suffix <extracted-suffix>
+            Change the suffix of file generate by extract option [default: _extracted]
 
     -C, --compression-out <compression-out>
             Overlap depth threshold below which a gap should be created [possible values: gzip, bzip2, lzma, no]

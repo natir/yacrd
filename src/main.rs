@@ -40,6 +40,7 @@ use clap::{App, Arg};
 mod chimera;
 mod file;
 mod filter;
+mod extract;
 mod io;
 mod utils;
 
@@ -64,7 +65,7 @@ fn main() {
              .short("i")
              .long("input")
              .multiple(true)
-             .display_order(1)
+             .display_order(10)
              .takes_value(true)
              .default_value("-")
              .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed, paf format by default)")
@@ -72,7 +73,7 @@ fn main() {
         .arg(Arg::with_name("output")
              .short("o")
              .long("output")
-             .display_order(2)
+             .display_order(20)
              .takes_value(true)
              .default_value("-")
              .help("Path where yacrd report are writen, use - for write in standard output same compression as input or use --compression-out")
@@ -81,21 +82,29 @@ fn main() {
              .short("f")
              .long("filter")
              .multiple(true)
-             .display_order(3)
+             .display_order(30)
              .takes_value(true)
-             .help("File containing reads that will be filtered (fasta|fastq|mhap|paf), new file are create like {original_path}_fileterd.{original_extension}")
+             .help("Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format support fasta|fastq|mhap|paf")
+             )
+        .arg(Arg::with_name("extract")
+             .short("e")
+             .long("extract")
+             .multiple(true)
+             .display_order(40)
+             .takes_value(true)
+             .help("Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support fasta|fastq|mhap|paf")
              )
         .arg(Arg::with_name("format")
              .short("F")
              .long("format")
-             .display_order(4)
+             .display_order(50)
              .takes_value(true)
              .help("Force the format used")
              .possible_values(&["paf", "mhap"])
              )
         .arg(Arg::with_name("chimeric-threshold")
              .short("c")
-             .display_order(5)
+             .display_order(60)
              .takes_value(true)
              .default_value("0")
              .long("chimeric-threshold")
@@ -103,22 +112,29 @@ fn main() {
              )
         .arg(Arg::with_name("not-covered-threshold")
              .short("n")
-             .display_order(6)
+             .display_order(70)
              .takes_value(true)
              .default_value("0.80")
              .long("not-covered-threshold")
              .help("Coverage depth threshold above which a read are marked as not covered")
              )
         .arg(Arg::with_name("filtered-suffix")
-             .display_order(7)
+             .display_order(80)
              .takes_value(true)
              .long("filtered-suffix")
              .default_value("_filtered")
              .help("Change the suffix of file generate by filter option")
              )
+        .arg(Arg::with_name("extracted-suffix")
+             .display_order(90)
+             .takes_value(true)
+             .long("extracted-suffix")
+             .default_value("_extracted")
+             .help("Change the suffix of file generate by extract option")
+             )
         .arg(Arg::with_name("compression-out")
              .short("C")
-             .display_order(8)
+             .display_order(100)
              .takes_value(true)
              .long("compression-out")
              .possible_values(&["gzip", "bzip2", "lzma", "no"])
@@ -146,7 +162,14 @@ fn main() {
         true => matches.values_of("filter").unwrap().collect(),
         false => Vec::new(),
     };
+    let extracts: Vec<_> = match matches.is_present("extract") {
+        true => matches.values_of("extract").unwrap().collect(),
+        false => Vec::new(),
+    };
 
+    let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
+    let extract_suffix = matches.value_of("extracted-suffix").unwrap();
+    
     let mut formats: Vec<utils::Format> = Vec::new();
     utils::get_mapping_format(&matches, &mut formats);;
 
@@ -160,11 +183,16 @@ fn main() {
         .unwrap()
         .parse::<f64>()
         .unwrap();
-    let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
+
 
     let remove_reads = chimera::find(inputs, &mut output, formats, chim_thres, ncov_thres);
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);
     }
+
+    for filename in extracts {
+        extract::run(&remove_reads, filename, extract_suffix);
+    }
+
 }
