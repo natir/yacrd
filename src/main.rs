@@ -36,10 +36,11 @@ extern crate lazy_static;
 
 /* local mod */
 mod chimera;
+mod extract;
 mod file;
 mod filter;
-mod extract;
 mod io;
+mod split;
 mod utils;
 
 /* crates use */
@@ -49,7 +50,6 @@ use clap::{App, Arg};
 use std::collections::HashMap;
 
 fn main() {
-
     let matches = App::new("yacrd")
         .version("0.4 Mew")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
@@ -95,6 +95,14 @@ fn main() {
              .takes_value(true)
              .help("Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support fasta|fastq|mhap|paf")
              )
+        .arg(Arg::with_name("split")
+             .short("s")
+             .long("split")
+             .multiple(true)
+             .display_order(45)
+             .takes_value(true)
+             .help("Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format support fasta|fastq")
+             )
         .arg(Arg::with_name("format")
              .short("F")
              .long("format")
@@ -133,6 +141,13 @@ fn main() {
              .default_value("_extracted")
              .help("Change the suffix of file generate by extract option")
              )
+        .arg(Arg::with_name("splited-suffix")
+             .display_order(95)
+             .takes_value(true)
+             .long("splited-suffix")
+             .default_value("_splited")
+             .help("Change the suffix of file generate by split option")
+             )
         .arg(Arg::with_name("compression-out")
              .short("C")
              .display_order(100)
@@ -167,10 +182,15 @@ fn main() {
         true => matches.values_of("extract").unwrap().collect(),
         false => Vec::new(),
     };
+    let splits: Vec<_> = match matches.is_present("split") {
+        true => matches.values_of("split").unwrap().collect(),
+        false => Vec::new(),
+    };
 
     let filterd_suffix = matches.value_of("filtered-suffix").unwrap();
     let extract_suffix = matches.value_of("extracted-suffix").unwrap();
-    
+    let split_suffix = matches.value_of("splited-suffix").unwrap();
+
     let mut formats: Vec<utils::Format> = Vec::new();
     utils::get_mapping_format(&matches, &mut formats);;
 
@@ -186,8 +206,15 @@ fn main() {
         .unwrap();
 
     let mut remove_reads: chimera::BadReadMap = HashMap::new();
-    
-    chimera::find(inputs, &mut output, formats, chim_thres, ncov_thres, &mut remove_reads);
+
+    chimera::find(
+        inputs,
+        &mut output,
+        formats,
+        chim_thres,
+        ncov_thres,
+        &mut remove_reads,
+    );
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);
@@ -197,4 +224,10 @@ fn main() {
         extract::run(&remove_reads, filename, extract_suffix);
     }
 
+    for filename in splits {
+        let format = utils::get_format(filename).unwrap();
+        if format == utils::Format::Fasta || format == utils::Format::Fastq {
+            split::run(&remove_reads, filename, split_suffix);
+        }
+    }
 }

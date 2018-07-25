@@ -21,10 +21,10 @@ SOFTWARE.
 */
 
 /* project use */
+use chimera;
 use file;
 use io;
 use utils;
-use chimera;
 
 /* crates use */
 use bio;
@@ -123,7 +123,7 @@ fn extract_fastq<R: std::io::Read, W: std::io::Write>(
 mod test {
 
     use super::*;
-    
+
     use std::collections::HashMap;
 
     #[test]
@@ -145,7 +145,16 @@ mod test {
     lazy_static! {
         static ref REMOVE_READS: chimera::BadReadMap = {
             let mut m = HashMap::new();
-            m.insert("1".to_string(), (chimera::BadReadType::Chimeric, vec![chimera::Interval{begin: 4500, end: 5500}]));
+            m.insert(
+                "1".to_string(),
+                (
+                    chimera::BadReadType::Chimeric,
+                    vec![chimera::Interval {
+                        begin: 4500,
+                        end: 5500,
+                    }],
+                ),
+            );
             m
         };
     }
@@ -154,7 +163,8 @@ mod test {
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
-    const PAF_FILE_EXTRACTED: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+    const PAF_FILE_EXTRACTED: &'static [u8] =
+        b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
@@ -235,4 +245,3 @@ ACTG
     }
 
 }
-

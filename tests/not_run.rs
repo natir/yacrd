@@ -53,6 +53,9 @@ OPTIONS:
     -e, --extract <extract>...
             Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support
             fasta|fastq|mhap|paf
+    -s, --split <split>...
+            Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format
+            support fasta|fastq
     -F, --format <format>                                  Force the format used [possible values: paf, mhap]
     -c, --chimeric-threshold <chimeric-threshold>
             Overlap depth threshold below which a gap should be created [default: 0]
@@ -65,6 +68,9 @@ OPTIONS:
 
         --extracted-suffix <extracted-suffix>
             Change the suffix of file generate by extract option [default: _extracted]
+
+        --splited-suffix <splited-suffix>
+            Change the suffix of file generate by split option [default: _splited]
 
     -C, --compression-out <compression-out>
             Overlap depth threshold below which a gap should be created [possible values: gzip, bzip2, lzma, no]

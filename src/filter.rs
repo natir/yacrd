@@ -21,10 +21,10 @@ SOFTWARE.
 */
 
 /* project use */
+use chimera;
 use file;
 use io;
 use utils;
-use chimera;
 
 /* crates use */
 use bio;
@@ -125,7 +125,7 @@ mod test {
     use super::*;
 
     use std::collections::HashMap;
-    
+
     #[test]
     fn filtred_name() {
         assert_eq!(
@@ -145,7 +145,16 @@ mod test {
     lazy_static! {
         static ref REMOVE_READS: Box<chimera::BadReadMap> = {
             let mut m = Box::new(HashMap::new());
-            m.insert("1".to_string(), (chimera::BadReadType::Chimeric, vec![chimera::Interval{begin: 4500, end: 5500}]));
+            m.insert(
+                "1".to_string(),
+                (
+                    chimera::BadReadType::Chimeric,
+                    vec![chimera::Interval {
+                        begin: 4500,
+                        end: 5500,
+                    }],
+                ),
+            );
             m
         };
     }

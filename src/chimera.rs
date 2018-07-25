@@ -130,16 +130,14 @@ pub type BadReadMap = HashMap<String, (BadReadType, Vec<Interval>)>;
 
 /* End of type declaration */
 
-
 pub fn find<R: std::io::Read, W: std::io::Write>(
     inputs: Vec<R>,
     mut output: W,
     formats: Vec<utils::Format>,
     chim_thres: u64,
     ncov_thres: f64,
-    remove_reads: &mut BadReadMap
+    remove_reads: &mut BadReadMap,
 ) {
-
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
 
     for (input, format) in inputs.into_iter().zip(formats.iter()) {
@@ -215,7 +213,7 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
                     end: key.len,
                 });
             }
-            
+
             write_result(&mut output, &label, &key.name, &key.len, &middle_gaps);
 
             remove_reads.insert(key.name.to_string(), (label, middle_gaps.clone()));
@@ -223,8 +221,13 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
     }
 }
 
-pub fn write_result<W: std::io::Write>(mut output: &mut W, label: &BadReadType, name: &str, len: &u64, gaps: &Vec<Interval>) {
-
+pub fn write_result<W: std::io::Write>(
+    mut output: &mut W,
+    label: &BadReadType,
+    name: &str,
+    len: &u64,
+    gaps: &Vec<Interval>,
+) {
     output
         .write_fmt(format_args!("{}\t{}\t{}\t", label.as_str(), name, len))
         .expect("Error durring writting of result");
