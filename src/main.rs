@@ -34,8 +34,6 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
-use clap::{App, Arg};
-
 /* local mod */
 mod chimera;
 mod file;
@@ -45,10 +43,12 @@ mod io;
 mod utils;
 
 /* crates use */
+use clap::{App, Arg};
 
 /* standard use */
 
 fn main() {
+
     let matches = App::new("yacrd")
         .version("0.4 Mew")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")

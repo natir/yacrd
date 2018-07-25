@@ -34,6 +34,25 @@ use std::hash::{Hash, Hasher};
 
 /* begin of type declaration */
 
+#[derive(Debug, PartialEq)]
+pub enum BadReadType {
+    Chimeric,
+    NotCovered,
+    NotBad,
+}
+
+impl Eq for BadReadType {}
+
+impl BadReadType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BadReadType::Chimeric => "Chimeric",
+            BadReadType::NotCovered => "Not_covered",
+            BadReadType::NotBad => "NotBad",
+        }
+    }
+}
+
 #[derive(Debug)]
 struct NameLen {
     name: String,
@@ -168,18 +187,18 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
         let uncovered_extremities = first_covered + (key.len - last_covered);
 
         let label = if !middle_gaps.is_empty() {
-            "Chimeric"
+            BadReadType::Chimeric
         } else if uncovered_extremities > (ncov_thres * key.len as f64) as u64 {
-            "Not_covered"
+            BadReadType::NotCovered
         } else {
-            ""
+            BadReadType::NotBad
         };
 
-        if label != "" {
+        if label != BadReadType::NotBad {
             remove_reads.insert(key.name.to_string());
 
             output
-                .write_fmt(format_args!("{}\t{}\t{}\t", label, key.name, key.len))
+                .write_fmt(format_args!("{}\t{}\t{}\t", label.as_str(), key.name, key.len))
                 .expect("Error durring writting of result");
 
             if first_covered != 0 {
