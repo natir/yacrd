@@ -29,7 +29,7 @@ use utils;
 /* standard use */
 use std;
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 use std::hash::{Hash, Hasher};
 
 /* begin of type declaration */
@@ -73,10 +73,10 @@ impl Hash for NameLen {
     }
 }
 
-#[derive(Debug)]
-struct Interval {
-    begin: u64,
-    end: u64,
+#[derive(Debug, Clone)]
+pub struct Interval {
+    pub begin: u64,
+    pub end: u64,
 }
 
 impl Ord for Interval {
@@ -126,7 +126,10 @@ impl Ord for MinInteger {
     }
 }
 
+pub type BadReadMap = HashMap<String, (BadReadType, Vec<Interval>)>;
+
 /* End of type declaration */
+
 
 pub fn find<R: std::io::Read, W: std::io::Write>(
     inputs: Vec<R>,
@@ -134,8 +137,9 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
     formats: Vec<utils::Format>,
     chim_thres: u64,
     ncov_thres: f64,
-) -> Box<HashSet<String>> {
-    let mut remove_reads: HashSet<String> = HashSet::new();
+    remove_reads: &mut BadReadMap
+) {
+
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
 
     for (input, format) in inputs.into_iter().zip(formats.iter()) {
@@ -195,12 +199,6 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
         };
 
         if label != BadReadType::NotBad {
-            remove_reads.insert(key.name.to_string());
-
-            output
-                .write_fmt(format_args!("{}\t{}\t{}\t", label.as_str(), key.name, key.len))
-                .expect("Error durring writting of result");
-
             if first_covered != 0 {
                 middle_gaps.insert(
                     0,
@@ -210,24 +208,34 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
                     },
                 );
             }
+
             if last_covered != key.len {
                 middle_gaps.push(Interval {
                     begin: last_covered,
                     end: key.len,
                 });
             }
+            
+            write_result(&mut output, &label, &key.name, &key.len, &middle_gaps);
 
-            for (i, interval) in middle_gaps.iter().enumerate() {
-                write_gap(interval, &mut output, middle_gaps.len() - i);
-            }
-
-            output
-                .write(b"\n")
-                .expect("Error durring writting of result");
+            remove_reads.insert(key.name.to_string(), (label, middle_gaps.clone()));
         }
     }
+}
 
-    return Box::new(remove_reads);
+pub fn write_result<W: std::io::Write>(mut output: &mut W, label: &BadReadType, name: &str, len: &u64, gaps: &Vec<Interval>) {
+
+    output
+        .write_fmt(format_args!("{}\t{}\t{}\t", label.as_str(), name, len))
+        .expect("Error durring writting of result");
+
+    for (i, interval) in gaps.iter().enumerate() {
+        write_gap(interval, &mut output, gaps.len() - i);
+    }
+
+    output
+        .write(b"\n")
+        .expect("Error durring writting of result");
 }
 
 fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
@@ -321,6 +329,8 @@ mod test {
 
     use super::*;
 
+    use std::collections::HashSet;
+
     const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
@@ -346,6 +356,7 @@ mod test {
     fn find_chimera() {
         let good = b"Chimeric\t1\t12000\t20,0,20;1000,4500,5500;2000,10000,12000\n";
 
+        let mut remove_reads: BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
         find(
@@ -354,6 +365,7 @@ mod test {
             vec![utils::Format::Paf],
             0,
             0.8,
+            &mut remove_reads,
         );
 
         assert_eq!(writer, good.to_vec());
@@ -365,6 +377,7 @@ mod test {
             vec![utils::Format::Mhap],
             0,
             0.8,
+            &mut remove_reads,
         );
         assert_eq!(writer, good.to_vec());
     }
@@ -373,6 +386,7 @@ mod test {
     fn find_chimera_cov_1() {
         let result = "Chimeric\t4\t6000\t1000,2500,3500\nChimeric\t1\t10000\t2000,0,2000;1000,4500,5500;2000,8000,10000\n".to_string();
         let good: HashSet<&str> = result.split("\n").collect();
+        let mut remove_reads: BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
         find(
@@ -381,6 +395,7 @@ mod test {
             vec![utils::Format::Paf],
             1,
             0.8,
+            &mut remove_reads,
         );
 
         assert_eq!(
@@ -393,6 +408,7 @@ mod test {
 
     #[test]
     fn find_not_covered() {
+        let mut remove_reads: BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
         find(
@@ -401,6 +417,7 @@ mod test {
             vec![utils::Format::Paf],
             0,
             0.8,
+            &mut remove_reads,
         );
 
         let good = b"Not_covered\t3\t10000\t9000,0,9000\n";

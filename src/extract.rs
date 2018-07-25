@@ -24,15 +24,15 @@ SOFTWARE.
 use file;
 use io;
 use utils;
+use chimera;
 
 /* crates use */
 use bio;
 
 /* standard use */
 use std;
-use std::collections::HashSet;
 
-pub fn run(reads: &Box<HashSet<String>>, filename: &str, extract_suffix: &str) {
+pub fn run(reads: &chimera::BadReadMap, filename: &str, extract_suffix: &str) {
     let filterd_name = &generate_extracted_name(filename.to_owned(), extract_suffix);
 
     let (raw_input, compression) = file::get_readable_file(filename);
@@ -52,7 +52,7 @@ fn generate_extracted_name(filename: String, filterd_suffix: &str) -> String {
 }
 
 fn extract_paf<R: std::io::Read, W: std::io::Write>(
-    reads: &Box<HashSet<String>>,
+    reads: &chimera::BadReadMap,
     input: R,
     output: W,
 ) {
@@ -61,14 +61,14 @@ fn extract_paf<R: std::io::Read, W: std::io::Write>(
 
     for result in reader.records() {
         let record = result.unwrap();
-        if reads.contains(&record.read_a) || reads.contains(&record.read_b) {
+        if reads.contains_key(&record.read_a) || reads.contains_key(&record.read_b) {
             writer.write(&record).unwrap();
         }
     }
 }
 
 fn extract_mhap<R: std::io::Read, W: std::io::Write>(
-    reads: &Box<HashSet<String>>,
+    reads: &chimera::BadReadMap,
     input: R,
     output: W,
 ) {
@@ -77,14 +77,14 @@ fn extract_mhap<R: std::io::Read, W: std::io::Write>(
 
     for result in reader.records() {
         let record = result.unwrap();
-        if reads.contains(&record.read_a) || reads.contains(&record.read_b) {
+        if reads.contains_key(&record.read_a) || reads.contains_key(&record.read_b) {
             writer.write(&record).unwrap();
         }
     }
 }
 
 fn extract_fasta<R: std::io::Read, W: std::io::Write>(
-    reads: &Box<HashSet<String>>,
+    reads: &chimera::BadReadMap,
     input: R,
     output: W,
 ) {
@@ -93,7 +93,7 @@ fn extract_fasta<R: std::io::Read, W: std::io::Write>(
 
     for r in reader.records() {
         let record = r.expect("Trouble in fasta parsing process");
-        if reads.contains(record.id()) {
+        if reads.contains_key(record.id()) {
             writer
                 .write_record(&record)
                 .expect("Trouble durring fasta valid sequence writing");
@@ -102,7 +102,7 @@ fn extract_fasta<R: std::io::Read, W: std::io::Write>(
 }
 
 fn extract_fastq<R: std::io::Read, W: std::io::Write>(
-    reads: &Box<HashSet<String>>,
+    reads: &chimera::BadReadMap,
     input: R,
     output: W,
 ) {
@@ -111,7 +111,7 @@ fn extract_fastq<R: std::io::Read, W: std::io::Write>(
 
     for r in reader.records() {
         let record = r.expect("Trouble in fastq parsing process");
-        if reads.contains(record.id()) {
+        if reads.contains_key(record.id()) {
             writer
                 .write_record(&record)
                 .expect("Trouble durring fasta valid sequence writing");
@@ -123,6 +123,8 @@ fn extract_fastq<R: std::io::Read, W: std::io::Write>(
 mod test {
 
     use super::*;
+    
+    use std::collections::HashMap;
 
     #[test]
     fn filtred_name() {
@@ -141,9 +143,9 @@ mod test {
     }
 
     lazy_static! {
-        static ref REMOVE_READS: Box<HashSet<String>> = {
-            let mut m = Box::new(HashSet::new());
-            m.insert("1".to_string());
+        static ref REMOVE_READS: chimera::BadReadMap = {
+            let mut m = HashMap::new();
+            m.insert("1".to_string(), (chimera::BadReadType::Chimeric, vec![chimera::Interval{begin: 4500, end: 5500}]));
             m
         };
     }

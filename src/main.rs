@@ -46,6 +46,7 @@ mod utils;
 use clap::{App, Arg};
 
 /* standard use */
+use std::collections::HashMap;
 
 fn main() {
 
@@ -184,8 +185,9 @@ fn main() {
         .parse::<f64>()
         .unwrap();
 
-
-    let remove_reads = chimera::find(inputs, &mut output, formats, chim_thres, ncov_thres);
+    let mut remove_reads: chimera::BadReadMap = HashMap::new();
+    
+    chimera::find(inputs, &mut output, formats, chim_thres, ncov_thres, &mut remove_reads);
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);
