@@ -23,7 +23,6 @@ SOFTWARE.
 /* project use */
 use chimera;
 use file;
-use io;
 use utils;
 
 /* crates use */
@@ -69,44 +68,38 @@ fn split_fasta<R: std::io::Read, W: std::io::Write>(
             }
 
             if gap[0].begin != 0 {
-                write_fasta_record(
-                    &mut writer,
-                    &format!("{}_{}", record.id(), "0"),
-                    record.desc(),
-                    &record.seq()[0 .. gap[0].begin as usize],
-                )
+                if !write_fasta_record(&mut writer, &record, 0, 0, gap[0].begin as usize) {
+                    continue;
+                }
             }
 
             for (i, objects) in gap.windows(2).enumerate() {
-                write_fasta_record(
+                if !write_fasta_record(
                     &mut writer,
-                    &format!("{}_{}", record.id(), i + 1),
-                    record.desc(),
-                    &record.seq()[objects[0].end as usize .. objects[1].begin as usize],
-                )
+                    &record,
+                    (i + 1) as u64,
+                    objects[0].end as usize,
+                    objects[1].begin as usize,
+                ) {
+                    continue;
+                }
             }
 
             if gap.last().unwrap().end as usize != record.seq().len() {
-                write_fasta_record(
+                if !write_fasta_record(
                     &mut writer,
-                    &format!("{}_{}", record.id(), &format!("{}", gap.len())),
-                    record.desc(),
-                    &record.seq()[gap.last().unwrap().end as usize .. record.seq().len()],
-                )
+                    &record,
+                    gap.len() as u64,
+                    gap.last().unwrap().end as usize,
+                    record.seq().len(),
+                ) {
+                    continue;
+                }
             }
+        } else {
+            writer.write_record(&record).unwrap();
         }
     }
-}
-
-fn write_fasta_record<W: std::io::Write>(
-    writer: &mut bio::io::fasta::Writer<W>,
-    id: &str,
-    desc: Option<&str>,
-    seq: bio::utils::TextSlice,
-) {
-    writer
-        .write_record(&bio::io::fasta::Record::with_attrs(id, desc, seq))
-        .expect("Trouble durring fasta valid sequence writing");
 }
 
 fn split_fastq<R: std::io::Read, W: std::io::Write>(
@@ -127,49 +120,103 @@ fn split_fastq<R: std::io::Read, W: std::io::Write>(
             }
 
             if gap[0].begin != 0 {
-                write_fastq_record(
-                    &mut writer,
-                    &format!("{}_{}", record.id(), "0"),
-                    record.desc(),
-                    &record.seq()[0 .. gap[0].begin as usize],
-                    &record.qual()[0 .. gap[0].begin as usize],
-                )
+                if !write_fastq_record(&mut writer, &record, 0, 0, gap[0].begin as usize) {
+                    continue;
+                }
             }
 
             for (i, objects) in gap.windows(2).enumerate() {
-                write_fastq_record(
+                if !write_fastq_record(
                     &mut writer,
-                    &format!("{}_{}", record.id(), i + 1),
-                    record.desc(),
-                    &record.seq()[objects[0].end as usize .. objects[1].begin as usize],
-                    &record.qual()[objects[0].end as usize .. objects[1].begin as usize],
-                )
+                    &record,
+                    (i + 1) as u64,
+                    objects[0].end as usize,
+                    objects[1].begin as usize,
+                ) {
+                    continue;
+                }
             }
 
             if gap.last().unwrap().end as usize != record.seq().len() {
-                write_fastq_record(
+                if !write_fastq_record(
                     &mut writer,
-                    &format!("{}_{}", record.id(), gap.len()),
-                    record.desc(),
-                    &record.seq()[gap.last().unwrap().end as usize .. record.seq().len()],
-                    &record.qual()[gap.last().unwrap().end as usize .. record.seq().len()],
-                )
+                    &record,
+                    gap.len() as u64,
+                    gap.last().unwrap().end as usize,
+                    record.seq().len(),
+                ) {
+                    continue;
+                }
             }
+        } else { 
+            writer.write_record(&record).unwrap();
         }
     }
 }
 
+fn good_order(begin: usize, end: usize) -> (usize, usize) {
+    return if begin < end {
+        (begin, end)
+    } else {
+        (end, begin)
+    };
+}
+
+fn in_read(begin: usize, end: usize, length: usize) -> bool {
+    return begin > length || end > length;
+}
+
+fn write_fasta_record<W: std::io::Write>(
+    writer: &mut bio::io::fasta::Writer<W>,
+    record: &bio::io::fasta::Record,
+    id: u64,
+    begin: usize,
+    end: usize,
+) -> bool {
+    let (begin, end) = good_order(begin, end);
+
+    match in_read(begin, end, record.seq().len()) {
+        e @ true => return e,
+        false => (),
+    };
+
+    writer
+        .write_record(&bio::io::fasta::Record::with_attrs(
+            &format!("{}_{}", record.id(), id),
+            record.desc(),
+            &record.seq()[begin..end],
+        ))
+        .expect("Trouble durring fasta valid sequence writing");
+
+    return true;
+}
+
 fn write_fastq_record<W: std::io::Write>(
     writer: &mut bio::io::fastq::Writer<W>,
-    id: &str,
-    desc: Option<&str>,
-    seq: bio::utils::TextSlice,
-    qual: &[u8]
-) {
+    record: &bio::io::fastq::Record,
+    id: u64,
+    begin: usize,
+    end: usize,
+) -> bool {
+    let (begin, end) = good_order(begin, end);
+
+    match in_read(begin, end, record.seq().len()) {
+        e @ true => return e,
+        false => (),
+    };
+
     writer
-        .write_record(&bio::io::fastq::Record::with_attrs(id, desc, seq, qual))
+        .write_record(&bio::io::fastq::Record::with_attrs(
+            &format!("{}_{}", record.id(), id),
+            record.desc(),
+            &record.seq()[begin..end],
+            &record.qual()[begin..end],
+        ))
         .expect("Trouble durring fasta valid sequence writing");
+
+    return true;
 }
+
 #[cfg(test)]
 mod test {
 
@@ -200,14 +247,10 @@ mod test {
                 "1".to_string(),
                 (
                     chimera::BadReadType::Chimeric,
-                    vec![chimera::Interval {
-                        begin: 4,
-                        end: 9,
-                    },
-                    chimera::Interval {
-                        begin: 13,
-                        end: 18,
-                    }],
+                    vec![
+                        chimera::Interval { begin: 4, end: 9 },
+                        chimera::Interval { begin: 13, end: 18 },
+                    ],
                 ),
             );
             m
@@ -228,6 +271,10 @@ ACTG
 ACTG
 >1_2
 ACTG
+>2
+ACTG
+>3
+ACTG
 ";
 
     #[test]
@@ -236,7 +283,6 @@ ACTG
 
         split_fasta(&REMOVE_READS, FASTA_FILE, &mut writer);
 
-        println!("{}", String::from_utf8_lossy(&writer));
         assert_eq!(writer, FASTA_FILE_SPLITED);
     }
 
@@ -254,7 +300,7 @@ ACTG
 !!!!
 ";
 
-    const FASTQ_FILE_FILTRED: &'static [u8] = b"@1_0
+    const FASTQ_FILE_SPLIT: &'static [u8] = b"@1_0
 ACTG
 +
 !!!!
@@ -266,6 +312,14 @@ ACTG
 ACTG
 +
 !!!!
+@2
+ACTG
++
+!!!!
+@3
+ACTG
++
+!!!!
 ";
 
     #[test]
@@ -274,8 +328,33 @@ ACTG
 
         split_fastq(&REMOVE_READS, FASTQ_FILE, &mut writer);
 
-        println!("{}", String::from_utf8_lossy(&writer));
-        assert_eq!(writer, FASTQ_FILE_FILTRED);
+        assert_eq!(writer, FASTQ_FILE_SPLIT);
+    }
+
+    const SHORT_FASTA_FILE: &'static [u8] = b">1
+ACTGGGGGGACTG
+>2
+ACTG
+>3
+ACTG
+";
+
+    const SHORT_FASTA_FILE_SPLIT: &'static [u8] = b">1_0
+ACTG
+>1_1
+ACTG
+>2
+ACTG
+>3
+ACTG
+";
+    #[test]
+    fn fasta_short() {
+        let mut writer: Vec<u8> = Vec::new();
+
+        split_fasta(&REMOVE_READS, SHORT_FASTA_FILE, &mut writer);
+
+        assert_eq!(writer, SHORT_FASTA_FILE_SPLIT);
     }
 
 }
