@@ -55,7 +55,8 @@ pub fn get_mapping_format(matches: &clap::ArgMatches, formats: &mut Vec<Format>)
 
 pub fn get_format_mapping(filename: &str) -> Option<Format> {
     return match get_format(filename) {
-        e @ Some(Format::Paf) | e @ Some(Format::Mhap) => e,
+        e @ Some(Format::Paf) |
+        e @ Some(Format::Mhap) => e,
         _ => None,
     };
 }

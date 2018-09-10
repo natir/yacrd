@@ -64,9 +64,50 @@ mod realistic_scenario {
         assert_eq!(
             child.wait_with_output().unwrap().stdout,
             vec![
-                31, 139, 8, 0, 0, 0, 0, 0, 2, 255, 115, 206, 200, 204, 77, 45, 202, 76, 230, 52,
-                228, 52, 52, 0, 2, 48, 169, 99, 98, 10, 36, 76, 129, 4, 23, 0, 157, 72, 78, 201,
-                32, 0, 0, 0,
+                31,
+                139,
+                8,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                255,
+                115,
+                206,
+                200,
+                204,
+                77,
+                45,
+                202,
+                76,
+                230,
+                52,
+                228,
+                52,
+                52,
+                0,
+                2,
+                48,
+                169,
+                99,
+                98,
+                10,
+                36,
+                76,
+                129,
+                4,
+                23,
+                0,
+                157,
+                72,
+                78,
+                201,
+                32,
+                0,
+                0,
+                0,
             ]
         );
         assert_eq!(fs::read("tests/data/test_filtered.paf").unwrap(), b"");
@@ -218,7 +259,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
             flate2::read::GzDecoder::new(proxy)
                 .read_to_end(&mut output)
                 .unwrap();
-            println!("{:?}", String::from_utf8_lossy(&output));
+
             assert_eq!(
                 String::from_utf8_lossy(&output)
                     .split("\n")
@@ -260,4 +301,30 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
 
         fs::remove_file("tests/data/test_extracted.fasta").unwrap();
     }
+
+    #[test]
+    fn file_paf_out_same_paf_split() {
+        let child = Command::new("./target/debug/yacrd")
+            .arg("-i")
+            .arg("tests/data/test.paf")
+            .arg("-s")
+            .arg("tests/data/test_large.fasta")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("Could ot run yacrd");
+
+        assert_eq!(
+            String::from_utf8_lossy(&child.wait_with_output().unwrap().stdout),
+            "Chimeric\t1\t10000\t1000,4500,5500\n"
+        );
+
+        assert_eq!(
+            fs::read("tests/data/test_large_splited.fasta").unwrap(),
+            fs::read("tests/data/test_large_splited_true.fasta").unwrap()
+        );
+
+        fs::remove_file("tests/data/test_large_splited.fasta").unwrap();
+    }
+
 }

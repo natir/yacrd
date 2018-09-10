@@ -74,18 +74,19 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
 pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
         "-" => Box::new(BufReader::new(io::stdin())),
-        _ => Box::new(BufReader::new(
-            File::open(input_name).expect(&format!("Can't open input file {}", input_name)),
-        )),
+        _ => Box::new(BufReader::new(File::open(input_name).expect(&format!(
+            "Can't open input file {}",
+            input_name
+        )))),
     }
 }
 
 fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     let mut buf = vec![0u8; 2];
 
-    in_stream
-        .read_exact(&mut buf)
-        .expect("Error durring reading first bit of file");
+    in_stream.read_exact(&mut buf).expect(
+        "Error durring reading first bit of file",
+    );
     match &buf[..] {
         [0x1F, 0x8B] => CompressionFormat::Gzip,
         [0x42, 0x5A] => CompressionFormat::Bzip,
@@ -131,9 +132,10 @@ pub fn choose_compression(
 fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
         "-" => Box::new(BufWriter::new(io::stdout())),
-        _ => Box::new(BufWriter::new(
-            File::create(output_name).expect(&format!("Can't open output file {}", output_name)),
-        )),
+        _ => Box::new(BufWriter::new(File::create(output_name).expect(&format!(
+            "Can't open output file {}",
+            output_name
+        )))),
     }
 }
 

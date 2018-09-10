@@ -43,6 +43,8 @@ mod io;
 mod split;
 mod utils;
 
+mod postdetection;
+
 /* crates use */
 use clap::{App, Arg};
 
@@ -225,9 +227,6 @@ fn main() {
     }
 
     for filename in splits {
-        let format = utils::get_format(filename).unwrap();
-        if format == utils::Format::Fasta || format == utils::Format::Fastq {
-            split::run(&remove_reads, filename, split_suffix);
-        }
+        split::run(&remove_reads, filename, split_suffix);
     }
 }

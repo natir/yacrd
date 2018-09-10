@@ -20,16 +20,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* project use */
-use utils;
-use chimera;
-use postdetection;
+pub mod paf;
+pub mod mhap;
+pub mod fasta;
+pub mod fastq;
 
-pub fn run(reads: &chimera::BadReadMap, filename: &str, extract_suffix: &str) {
-    match utils::get_format(filename).unwrap() {
-        utils::Format::Paf => postdetection::paf::Extract::run(reads, filename, extract_suffix),
-        utils::Format::Mhap => postdetection::mhap::Extract::run(reads, filename, extract_suffix),
-        utils::Format::Fasta => postdetection::fasta::Extract::run(reads, filename, extract_suffix),
-        utils::Format::Fastq => postdetection::fastq::Extract::run(reads, filename, extract_suffix),
+pub fn in_read(begin: usize, end: usize, length: usize) -> bool {
+    return begin < length || end < length;
+}
+
+pub fn generate_out_name(filename: String, suffix: &str) -> String {
+    return filename.replacen(".", &format!("{}.", suffix), 1);
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn out_name() {
+        assert_eq!(
+            generate_out_name("test.paf".to_string(), "_test"),
+            "test_test.paf"
+        );
+        assert_eq!(
+            generate_out_name("test.paf.gz".to_string(), "_test"),
+            "test_test.paf.gz"
+        );
+        assert_eq!(
+            generate_out_name("test.fasta".to_string(), "_test"),
+            "test_test.fasta"
+        );
     }
 }
