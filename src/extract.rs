@@ -94,9 +94,9 @@ fn extract_fasta<R: std::io::Read, W: std::io::Write>(
     for r in reader.records() {
         let record = r.expect("Trouble in fasta parsing process");
         if reads.contains_key(record.id()) {
-            writer
-                .write_record(&record)
-                .expect("Trouble durring fasta valid sequence writing");
+            writer.write_record(&record).expect(
+                "Trouble durring fasta valid sequence writing",
+            );
         }
     }
 }
@@ -112,9 +112,9 @@ fn extract_fastq<R: std::io::Read, W: std::io::Write>(
     for r in reader.records() {
         let record = r.expect("Trouble in fastq parsing process");
         if reads.contains_key(record.id()) {
-            writer
-                .write_record(&record)
-                .expect("Trouble durring fasta valid sequence writing");
+            writer.write_record(&record).expect(
+                "Trouble durring fasta valid sequence writing",
+            );
         }
     }
 }
@@ -163,8 +163,7 @@ mod test {
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
-    const PAF_FILE_EXTRACTED: &'static [u8] =
-        b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+    const PAF_FILE_EXTRACTED: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 

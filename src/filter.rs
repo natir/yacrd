@@ -94,9 +94,9 @@ fn filterd_fasta<R: std::io::Read, W: std::io::Write>(
     for r in reader.records() {
         let record = r.expect("Trouble in fasta parsing process");
         if !reads.contains_key(record.id()) {
-            writer
-                .write_record(&record)
-                .expect("Trouble durring fasta valid sequence writing");
+            writer.write_record(&record).expect(
+                "Trouble durring fasta valid sequence writing",
+            );
         }
     }
 }
@@ -112,9 +112,9 @@ fn filterd_fastq<R: std::io::Read, W: std::io::Write>(
     for r in reader.records() {
         let record = r.expect("Trouble in fastq parsing process");
         if !reads.contains_key(record.id()) {
-            writer
-                .write_record(&record)
-                .expect("Trouble durring fasta valid sequence writing");
+            writer.write_record(&record).expect(
+                "Trouble durring fasta valid sequence writing",
+            );
         }
     }
 }

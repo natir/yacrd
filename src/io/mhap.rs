@@ -46,20 +46,7 @@ pub struct Record {
     pub length_b: u64,
 }
 
-type RecordInner = (
-    String,
-    String,
-    f64,
-    u64,
-    char,
-    u64,
-    u64,
-    u64,
-    char,
-    u64,
-    u64,
-    u64,
-);
+type RecordInner = (String, String, f64, u64, char, u64, u64, u64, char, u64, u64, u64);
 
 pub struct Records<'a, R: 'a + std::io::Read> {
     inner: csv::DeserializeRecordsIter<'a, R, RecordInner>,
@@ -70,8 +57,19 @@ impl<'a, R: std::io::Read> Iterator for Records<'a, R> {
 
     fn next(&mut self) -> Option<csv::Result<Record>> {
         self.inner.next().map(|res| {
-            res.map(
-                |(
+            res.map(|(read_a,
+              read_b,
+              error,
+              shared_min_mers,
+              strand_a,
+              begin_a,
+              end_a,
+              length_a,
+              strand_b,
+              begin_b,
+              end_b,
+              length_b)| {
+                Record {
                     read_a,
                     read_b,
                     error,
@@ -84,23 +82,8 @@ impl<'a, R: std::io::Read> Iterator for Records<'a, R> {
                     begin_b,
                     end_b,
                     length_b,
-                )| {
-                    Record {
-                        read_a,
-                        read_b,
-                        error,
-                        shared_min_mers,
-                        strand_a,
-                        begin_a,
-                        end_a,
-                        length_a,
-                        strand_b,
-                        begin_b,
-                        end_b,
-                        length_b,
-                    }
-                },
-            )
+                }
+            })
         })
     }
 }
@@ -122,9 +105,7 @@ impl<R: std::io::Read> Reader<R> {
 
     /// Iterate over all records.
     pub fn records(&mut self) -> Records<R> {
-        Records {
-            inner: self.inner.deserialize(),
-        }
+        Records { inner: self.inner.deserialize() }
     }
 }
 

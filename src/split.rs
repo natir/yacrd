@@ -80,7 +80,8 @@ fn split_fasta<R: std::io::Read, W: std::io::Write>(
                     (i + 1) as u64,
                     objects[0].end as usize,
                     objects[1].begin as usize,
-                ) {
+                )
+                {
                     continue;
                 }
             }
@@ -92,7 +93,8 @@ fn split_fasta<R: std::io::Read, W: std::io::Write>(
                     gap.len() as u64,
                     gap.last().unwrap().end as usize,
                     record.seq().len(),
-                ) {
+                )
+                {
                     continue;
                 }
             }
@@ -132,7 +134,8 @@ fn split_fastq<R: std::io::Read, W: std::io::Write>(
                     (i + 1) as u64,
                     objects[0].end as usize,
                     objects[1].begin as usize,
-                ) {
+                )
+                {
                     continue;
                 }
             }
@@ -144,11 +147,12 @@ fn split_fastq<R: std::io::Read, W: std::io::Write>(
                     gap.len() as u64,
                     gap.last().unwrap().end as usize,
                     record.seq().len(),
-                ) {
+                )
+                {
                     continue;
                 }
             }
-        } else { 
+        } else {
             writer.write_record(&record).unwrap();
         }
     }

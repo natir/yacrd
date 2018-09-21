@@ -236,9 +236,9 @@ pub fn write_result<W: std::io::Write>(
         write_gap(interval, &mut output, gaps.len() - i);
     }
 
-    output
-        .write(b"\n")
-        .expect("Error durring writting of result");
+    output.write(b"\n").expect(
+        "Error durring writting of result",
+    );
 }
 
 fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
@@ -251,9 +251,9 @@ fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
         ))
         .expect("Error durring writting of result");
     if i > 1 {
-        output
-            .write(b";")
-            .expect("Error durring writting of result");
+        output.write(b";").expect(
+            "Error durring writting of result",
+        );
     }
 }
 
@@ -338,8 +338,7 @@ mod test {
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
-    const PAF_FILE_COV_1: &'static [u8] =
-        b"1\t10000\t0\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+    const PAF_FILE_COV_1: &'static [u8] = b"1\t10000\t0\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t10000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 1\t10000\t2000\t8000\t+\t4\t6000\t0\t6000\t6000\t6000\t255
 2\t10000\t7500\t10000\t-\t4\t6000\t0\t2500\t2500\t2500\t255
@@ -350,8 +349,7 @@ mod test {
 1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
 ";
 
-    const NOT_COVERED_FILE: &'static [u8] =
-        b"1\t10000\t1000\t10000\t-\t2\t10000\t0\t9000\t9000\t9000\t255
+    const NOT_COVERED_FILE: &'static [u8] = b"1\t10000\t1000\t10000\t-\t2\t10000\t0\t9000\t9000\t9000\t255
 1\t10000\t0\t1000\t-\t3\t10000\t9000\t10000\t1000\t1000\t255
 ";
 

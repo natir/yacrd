@@ -47,20 +47,7 @@ pub struct Record {
     pub sam_field: Vec<String>,
 }
 
-type RecordInner = (
-    String,
-    u64,
-    u64,
-    u64,
-    char,
-    String,
-    u64,
-    u64,
-    u64,
-    u64,
-    u64,
-    Vec<String>,
-);
+type RecordInner = (String, u64, u64, u64, char, String, u64, u64, u64, u64, u64, Vec<String>);
 
 pub struct Records<'a, R: 'a + std::io::Read> {
     inner: csv::DeserializeRecordsIter<'a, R, RecordInner>,
@@ -71,8 +58,26 @@ impl<'a, R: std::io::Read> Iterator for Records<'a, R> {
 
     fn next(&mut self) -> Option<csv::Result<Record>> {
         self.inner.next().map(|res| {
-            res.map(
-                |(
+            res.map(|(read_a,
+              length_a,
+              begin_a,
+              end_a,
+              strand,
+              read_b,
+              length_b,
+              begin_b,
+              end_b,
+              nb_match_base,
+              nb_base,
+              mapping_quality_and_sam)| {
+                let mapping_quality = mapping_quality_and_sam[0].parse::<u64>().unwrap();
+
+                let mut sam_field = Vec::new();
+                if mapping_quality_and_sam.len() > 1 {
+                    sam_field = mapping_quality_and_sam[1..].to_vec();
+                }
+
+                Record {
                     read_a,
                     length_a,
                     begin_a,
@@ -84,32 +89,10 @@ impl<'a, R: std::io::Read> Iterator for Records<'a, R> {
                     end_b,
                     nb_match_base,
                     nb_base,
-                    mapping_quality_and_sam,
-                )| {
-                    let mapping_quality = mapping_quality_and_sam[0].parse::<u64>().unwrap();
-
-                    let mut sam_field = Vec::new();
-                    if mapping_quality_and_sam.len() > 1 {
-                        sam_field = mapping_quality_and_sam[1..].to_vec();
-                    }
-
-                    Record {
-                        read_a,
-                        length_a,
-                        begin_a,
-                        end_a,
-                        strand,
-                        read_b,
-                        length_b,
-                        begin_b,
-                        end_b,
-                        nb_match_base,
-                        nb_base,
-                        mapping_quality,
-                        sam_field,
-                    }
-                },
-            )
+                    mapping_quality,
+                    sam_field,
+                }
+            })
         })
     }
 }
@@ -131,9 +114,7 @@ impl<R: std::io::Read> Reader<R> {
 
     /// Iterate over all records.
     pub fn records(&mut self) -> Records<R> {
-        Records {
-            inner: self.inner.deserialize(),
-        }
+        Records { inner: self.inner.deserialize() }
     }
 }
 
@@ -190,8 +171,7 @@ mod test {
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 
-    const PAF_SAM_FIELD_FILE: &'static [u8] =
-        b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255\tam:I:5
+    const PAF_SAM_FIELD_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255\tam:I:5
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255\ttest:B:true\tam:I:5
 ";
 
