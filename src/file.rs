@@ -24,18 +24,22 @@ SOFTWARE.
 use bzip2;
 use flate2;
 use xz2;
+use enum_primitive::FromPrimitive;
 
 /* standard use */
 use std::fs::File;
 use std::io;
 use std::io::{BufReader, BufWriter};
 
-#[derive(Debug, PartialEq)]
-pub enum CompressionFormat {
-    Gzip = 0x1F8B,
-    Bzip = 0x425A,
-    Lzma = 0xFD377A585A,
-    No,
+enum_from_primitive! {
+    #[repr(u64)]
+    #[derive(Debug, PartialEq)]
+    pub enum CompressionFormat {
+        Gzip = 0x1F8B,
+        Bzip = 0x425A,
+        Lzma = 0xFD377A585A,
+        No,
+    }
 }
 
 pub fn get_input(input_name: &str) -> (Box<io::Read>, CompressionFormat) {
@@ -74,22 +78,38 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
 pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
         "-" => Box::new(BufReader::new(io::stdin())),
-        _ => Box::new(BufReader::new(
-            File::open(input_name).expect(&format!("Can't open input file {}", input_name)),
-        )),
+        _ => Box::new(BufReader::new(File::open(input_name).expect(&format!(
+            "Can't open input file {}",
+            input_name
+        )))),
     }
 }
 
 fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
-    let mut buf = vec![0u8; 2];
+    let mut buf = vec![0u8; 5];
 
-    in_stream
-        .read_exact(&mut buf)
-        .expect("Error durring reading first bit of file");
-    match &buf[..] {
-        [0x1F, 0x8B] => CompressionFormat::Gzip,
-        [0x42, 0x5A] => CompressionFormat::Bzip,
-        [0xFD, 0x37] => CompressionFormat::Lzma, // match on 5 value when syntax for subslices in slice are stabilized
+    in_stream.read_exact(&mut buf).expect(
+        "Error durring reading first bit of file",
+    );
+
+
+    let mut five_bit_val: u64 = 0;
+    for i in 0..5 {
+        five_bit_val |= (buf[i] as u64) << 8 * (4 - i);
+    }
+
+    if CompressionFormat::from_u64(five_bit_val) == Some(CompressionFormat::Lzma) {
+        return CompressionFormat::Lzma;
+    }
+
+    let mut two_bit_val: u64 = 0;
+    for i in 0..2 {
+        two_bit_val |= (buf[i] as u64) << 8 * (1 - i);
+    }
+
+    match CompressionFormat::from_u64(two_bit_val) {
+        e @ Some(CompressionFormat::Gzip) |
+        e @ Some(CompressionFormat::Bzip) => e.unwrap(),
         _ => CompressionFormat::No,
     }
 }
@@ -131,9 +151,10 @@ pub fn choose_compression(
 fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
         "-" => Box::new(BufWriter::new(io::stdout())),
-        _ => Box::new(BufWriter::new(
-            File::create(output_name).expect(&format!("Can't open output file {}", output_name)),
-        )),
+        _ => Box::new(BufWriter::new(File::create(output_name).expect(&format!(
+            "Can't open output file {}",
+            output_name
+        )))),
     }
 }
 
@@ -142,9 +163,9 @@ mod test {
 
     use super::*;
 
-    const GZIP_FILE: &'static [u8] = &[0o037, 0o213];
-    const BZIP_FILE: &'static [u8] = &[0o102, 0o132];
-    const LZMA_FILE: &'static [u8] = &[0o375, 0o067];
+    const GZIP_FILE: &'static [u8] = &[0o037, 0o213, 0o0, 0o0, 0o0];
+    const BZIP_FILE: &'static [u8] = &[0o102, 0o132, 0o0, 0o0, 0o0];
+    const LZMA_FILE: &'static [u8] = &[0o375, 0o067, 0o172, 0o130, 0o132];
 
     #[test]
     fn compression_from_file() {
