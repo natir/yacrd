@@ -27,12 +27,13 @@ use utils;
 
 /* crates use */
 use bio;
+use std::path::Path;
 
 /* standard use */
 use std;
 
 pub fn run(reads: &chimera::BadReadMap, filename: &str, split_suffix: &str) {
-    let split_name = &generate_split_name(filename.to_owned(), split_suffix);
+    let split_name = &generate_split_name(filename, split_suffix);
 
     let (raw_input, compression) = file::get_readable_file(filename);
 
@@ -46,8 +47,16 @@ pub fn run(reads: &chimera::BadReadMap, filename: &str, split_suffix: &str) {
     }
 }
 
-fn generate_split_name(filename: String, split_suffix: &str) -> String {
-    return filename.replacen(".", &format!("{}.", split_suffix), 1);
+fn generate_split_name(filename: &str, filterd_suffix: &str) -> String {
+    let path = Path::new(filename);
+    let mut filename = path.file_name().unwrap().to_str().unwrap().to_string();
+    
+    filename = filename.replacen(".", &format!("{}.", filterd_suffix), 1);
+
+    let mut buffer = path.to_path_buf();
+    buffer.set_file_name(filename);
+
+    return buffer.to_str().unwrap().to_string();
 }
 
 fn split_fasta<R: std::io::Read, W: std::io::Write>(
@@ -231,16 +240,24 @@ mod test {
     #[test]
     fn split_name() {
         assert_eq!(
-            generate_split_name("test.paf".to_string(), "_test"),
+            generate_split_name("test.paf", "_test"),
             "test_test.paf"
         );
         assert_eq!(
-            generate_split_name("test.paf.gz".to_string(), "_test"),
+            generate_split_name("test.paf.gz", "_test"),
             "test_test.paf.gz"
         );
         assert_eq!(
-            generate_split_name("test.fasta".to_string(), "_test"),
+            generate_split_name("test.fasta", "_test"),
             "test_test.fasta"
+        );
+        assert_eq!(
+            generate_split_name("../something/test.fasta", "_filtred"),
+            "../something/test_filtred.fasta"
+        );
+        assert_eq!(
+            generate_split_name("../something.other/test.fasta", "_filtred"),
+            "../something.other/test_filtred.fasta"
         );
     }
 

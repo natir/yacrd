@@ -31,13 +31,14 @@ use bio;
 
 /* standard use */
 use std;
+use std::path::Path;
 
 pub fn run(reads: &chimera::BadReadMap, filename: &str, filterd_suffix: &str) {
-    let filterd_name = &generate_filterd_name(filename.to_owned(), filterd_suffix);
+    let filterd_name = generate_filterd_name(filename, filterd_suffix);
 
     let (raw_input, compression) = file::get_readable_file(filename);
     let input = Box::new(raw_input);
-    let output = Box::new(file::get_output(filterd_name, compression));
+    let output = Box::new(file::get_output(&filterd_name, compression));
 
     match utils::get_format(filename).unwrap() {
         utils::Format::Paf => filterd_paf(reads, input, output),
@@ -47,8 +48,16 @@ pub fn run(reads: &chimera::BadReadMap, filename: &str, filterd_suffix: &str) {
     }
 }
 
-fn generate_filterd_name(filename: String, filterd_suffix: &str) -> String {
-    return filename.replacen(".", &format!("{}.", filterd_suffix), 1);
+fn generate_filterd_name(filename: &str, filterd_suffix: &str) -> String {
+    let path = Path::new(filename);
+    let mut filename = path.file_name().unwrap().to_str().unwrap().to_string();
+    
+    filename = filename.replacen(".", &format!("{}.", filterd_suffix), 1);
+
+    let mut buffer = path.to_path_buf();
+    buffer.set_file_name(filename);
+
+    return buffer.to_str().unwrap().to_string();
 }
 
 fn filterd_paf<R: std::io::Read, W: std::io::Write>(
@@ -129,16 +138,24 @@ mod test {
     #[test]
     fn filtred_name() {
         assert_eq!(
-            generate_filterd_name("test.paf".to_string(), "_test"),
+            generate_filterd_name("test.paf", "_test"),
             "test_test.paf"
         );
         assert_eq!(
-            generate_filterd_name("test.paf.gz".to_string(), "_test"),
+            generate_filterd_name("test.paf.gz", "_test"),
             "test_test.paf.gz"
         );
         assert_eq!(
-            generate_filterd_name("test.fasta".to_string(), "_filtred"),
+            generate_filterd_name("test.fasta", "_filtred"),
             "test_filtred.fasta"
+        );
+        assert_eq!(
+            generate_filterd_name("../something/test.fasta", "_filtred"),
+            "../something/test_filtred.fasta"
+        );
+        assert_eq!(
+            generate_filterd_name("../something.other/test.fasta", "_filtred"),
+            "../something.other/test_filtred.fasta"
         );
     }
 
