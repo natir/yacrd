@@ -22,7 +22,7 @@ SOFTWARE.
 
 use std::process::Command;
 
-static HELP_MESSAGE: &'static str = "yacrd 0.4 Mew
+static HELP_MESSAGE: &'static str = "yacrd 0.4 Doduo
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
@@ -90,7 +90,7 @@ mod not_run {
             .output()
             .expect("Could not run yacrd");
 
-        assert_eq!(output.stdout, b"yacrd 0.4 Mew\n");
+        assert_eq!(output.stdout, b"yacrd 0.4 Doduo\n");
         println!("{:?}", output);
     }
 

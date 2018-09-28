@@ -58,7 +58,7 @@ conda install yacrd
 ```
 git clone https://github.com/natir/yacrd.git
 cd yacrd
-git checkout v0.3
+git checkout v0.4
 
 cargo build
 cargo test
@@ -71,7 +71,7 @@ cargo install
 2)
 
 ```
-yacrd 0.3 Ninetales
+yacrd 0.3 Doduo
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 

@@ -60,7 +60,7 @@ use std::collections::HashMap;
 
 fn main() {
     let matches = App::new("yacrd")
-        .version("0.4 Mew")
+        .version("0.4 Doduo")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
         .usage("yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>

@@ -573,7 +573,7 @@ dependencies = [
 
 [[package]]
 name = "yacrd"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bio 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bzip2 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
