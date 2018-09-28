@@ -25,6 +25,7 @@ extern crate xz2;
 
 use std::collections::HashSet;
 use std::fs;
+#[allow(unused_imports)]
 use std::io::Read;
 use std::process::{Command, Stdio};
 

@@ -116,6 +116,7 @@ pub struct Writer<W: std::io::Write> {
 
 impl Writer<fs::File> {
     /// Write to a given file path in given format.
+    #[allow(dead_code)]
     pub fn to_file<P: AsRef<Path>>(path: P) -> std::io::Result<Self> {
         fs::File::create(path).map(|f| Writer::new(f))
     }
