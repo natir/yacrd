@@ -135,7 +135,7 @@ impl PostDetectionOperationFasta for Split {
             if a == b {
                 continue; // empty interval
             }
-            
+
             if !postdetection::in_read(a as usize, b as usize, record.seq().len()) {
                 continue; // interval not in record position
             }

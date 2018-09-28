@@ -46,9 +46,9 @@ pub fn get_mapping_format(matches: &clap::ArgMatches, formats: &mut Vec<Format>)
         }
     } else {
         for input_name in matches.values_of("input").unwrap() {
-            formats.push(
-                get_format_mapping(input_name).expect("Format of input can be determinate check file extension (paf and mhap are allowed)")
-            );
+            formats.push(get_format_mapping(input_name).expect(
+                "Format of input can be determinate check file extension (paf and mhap only)",
+            ));
         }
     }
 }

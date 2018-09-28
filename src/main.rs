@@ -63,7 +63,7 @@ fn main() {
         .version("0.4 Mew")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
-        .usage("yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
+        .usage("yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>
 \tyacrd -i map_file.paf -o map_file.yacrd
 \tyacrd -i map_file.mhap -o map_file.yacrd
 \tyacrd -i map_file.xyz -F paf -o map_file.yacrd
@@ -223,15 +223,13 @@ fn main() {
 
     let mut remove_reads: chimera::BadReadMap = HashMap::new();
 
-    chimera::find(
-        inputs,
-        formats,
-        chim_thres,
-        ncov_thres,
-        &mut remove_reads,
-    );
+    chimera::find(inputs, formats, chim_thres, ncov_thres, &mut remove_reads);
 
-    chimera::write(&mut output, &remove_reads, matches.is_present("json-output"));
+    chimera::write(
+        &mut output,
+        &remove_reads,
+        matches.is_present("json-output"),
+    );
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);

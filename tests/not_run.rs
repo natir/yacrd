@@ -27,7 +27,7 @@ Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
 USAGE:
-    yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
+    yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>
 	yacrd -i map_file.paf -o map_file.yacrd
 	yacrd -i map_file.mhap -o map_file.yacrd
 	yacrd -i map_file.xyz -F paf -o map_file.yacrd

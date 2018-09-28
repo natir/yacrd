@@ -32,4 +32,3 @@ pub fn run(reads: &chimera::BadReadMap, filename: &str, split_suffix: &str) {
         _ => (),
     }
 }
-

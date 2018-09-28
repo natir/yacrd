@@ -223,23 +223,23 @@ pub fn find<R: std::io::Read>(
     }
 }
 
-pub fn write<W: std::io::Write>(
-    mut output: &mut W,
-    remove_reads: &BadReadMap,
-    json: bool,
-) {
+pub fn write<W: std::io::Write>(mut output: &mut W, remove_reads: &BadReadMap, json: bool) {
     if json {
         let mut map = serde_json::map::Map::new();
         for (id, (label, len, gaps)) in remove_reads {
-                map.insert(id.to_string(), json!({
+            map.insert(
+                id.to_string(),
+                json!({
                     "type": label.as_str(),
                     "length": len,
                     "gaps": gaps
-                }));
+                }),
+            );
         }
-        output.write(&json!(map).to_string().into_bytes()).expect("Error durring write result in json format");
-    }
-    else {
+        output.write(&json!(map).to_string().into_bytes()).expect(
+            "Error durring write result in json format",
+        );
+    } else {
         for (id, (label, len, gaps)) in remove_reads {
             write_result(&mut output, &label, &id, &len, &gaps);
         }
@@ -373,7 +373,7 @@ mod test {
     const PAF_FILE_NOTCOV_PRIOR: &'static [u8] = b"1\t10000\t4000\t4500\t-\t2\t10000\t1000\t9000\t7000\t7000\t255
 1\t10000\t5000\t5500\t-\t3\t10000\t1000\t9000\t7000\t7000\t255
 ";
-    
+
     const PAF_FILE_NOTCOV_OVEXT: &'static [u8] = b"1\t10000\t500\t1500\t-\t2\t10000\t1000\t9000\t7000\t7000\t255
 1\t10000\t9000\t9500\t-\t3\t10000\t1000\t9000\t7000\t7000\t255
 ";
@@ -401,11 +401,7 @@ mod test {
             &mut remove_reads,
         );
 
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
+        write(&mut writer, &remove_reads, false);
 
         assert_eq!(writer, good.to_vec());
 
@@ -418,13 +414,9 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
-        
+
+        write(&mut writer, &remove_reads, false);
+
         assert_eq!(writer, good.to_vec());
     }
 
@@ -442,12 +434,8 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
+
+        write(&mut writer, &remove_reads, false);
 
         assert_eq!(
             String::from_utf8_lossy(&writer)
@@ -456,7 +444,7 @@ mod test {
             good
         );
     }
-    
+
     #[test]
     fn find_chimera_json_output() {
         let result = "{\"1\":{\"gaps\":[{\"begin\":0,\"end\":20},{\"begin\":4500,\"end\":5500},{\"begin\":10000,\"end\":12000}],\"length\":12000,\"type\":\"Chimeric\"}}".to_string();
@@ -471,12 +459,8 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            true,
-        );
+
+        write(&mut writer, &remove_reads, true);
 
         assert_eq!(
             String::from_utf8_lossy(&writer)
@@ -485,10 +469,11 @@ mod test {
             good
         );
     }
-    
+
     #[test]
     fn notcovered_prior_to_chimera() {
-        let result = "Not_covered\t1\t10000\t4000,0,4000;500,4500,5000;4500,5500,10000\n".to_string();
+        let result = "Not_covered\t1\t10000\t4000,0,4000;500,4500,5000;4500,5500,10000\n"
+            .to_string();
         let good: HashSet<&str> = result.split("\n").collect();
         let mut remove_reads: BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
@@ -500,12 +485,8 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
+
+        write(&mut writer, &remove_reads, false);
 
         assert_eq!(
             String::from_utf8_lossy(&writer)
@@ -514,7 +495,7 @@ mod test {
             good
         );
     }
-    
+
     #[test]
     fn notcovered_overlap_extremity() {
         let result = "Not_covered\t1\t10000\t500,0,500;7500,1500,9000;500,9500,10000\n".to_string();
@@ -529,12 +510,8 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
+
+        write(&mut writer, &remove_reads, false);
 
         assert_eq!(
             String::from_utf8_lossy(&writer)
@@ -543,7 +520,7 @@ mod test {
             good
         );
     }
-    
+
     #[test]
     fn find_not_covered() {
         let mut remove_reads: BadReadMap = HashMap::new();
@@ -556,12 +533,8 @@ mod test {
             0.8,
             &mut remove_reads,
         );
-        
-        write(
-            &mut writer,
-            &remove_reads,
-            false,
-        );
+
+        write(&mut writer, &remove_reads, false);
 
         let good = b"Not_covered\t3\t10000\t9000,0,9000\n";
         assert_eq!(writer, good.to_vec());

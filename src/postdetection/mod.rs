@@ -35,7 +35,7 @@ pub fn in_read(begin: usize, end: usize, length: usize) -> bool {
 fn generate_out_name(filename: &str, suffix: &str) -> String {
     let path = Path::new(filename);
     let mut filename = path.file_name().unwrap().to_str().unwrap().to_string();
-    
+
     filename = filename.replacen(".", &format!("{}.", suffix), 1);
 
     let mut buffer = path.to_path_buf();
@@ -51,10 +51,7 @@ mod test {
 
     #[test]
     fn out_name() {
-        assert_eq!(
-            generate_out_name("test.paf", "_test"),
-            "test_test.paf"
-        );
+        assert_eq!(generate_out_name("test.paf", "_test"), "test_test.paf");
         assert_eq!(
             generate_out_name("test.paf.gz", "_test"),
             "test_test.paf.gz"
