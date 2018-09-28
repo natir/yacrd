@@ -30,7 +30,7 @@ use std;
 use std::fs;
 use std::path::Path;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Record {
     pub read_a: String,
     pub length_a: u64,
