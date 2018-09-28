@@ -25,6 +25,7 @@ use io;
 use utils;
 
 /* crates use */
+use serde_json;
 
 /* standard use */
 use std;
@@ -34,7 +35,7 @@ use std::hash::{Hash, Hasher};
 
 /* begin of type declaration */
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum BadReadType {
     Chimeric,
     NotCovered,
@@ -73,7 +74,7 @@ impl Hash for NameLen {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Interval {
     pub begin: u64,
     pub end: u64,
@@ -126,18 +127,18 @@ impl Ord for MinInteger {
     }
 }
 
-pub type BadReadMap = HashMap<String, (BadReadType, Vec<Interval>)>;
+pub type BadReadMap = HashMap<String, (BadReadType, u64, Vec<Interval>)>;
 
 /* End of type declaration */
 
-pub fn find<R: std::io::Read, W: std::io::Write>(
+pub fn find<R: std::io::Read>(
     inputs: Vec<R>,
-    mut output: W,
     formats: Vec<utils::Format>,
     chim_thres: u64,
     ncov_thres: f64,
     remove_reads: &mut BadReadMap,
 ) {
+
     let mut read2mapping: HashMap<NameLen, Vec<Interval>> = HashMap::new();
 
     for (input, format) in inputs.into_iter().zip(formats.iter()) {
@@ -214,9 +215,30 @@ pub fn find<R: std::io::Read, W: std::io::Write>(
                 });
             }
 
-            write_result(&mut output, &label, &key.name, &key.len, &middle_gaps);
+            remove_reads.insert(key.name.to_string(), (label, key.len, middle_gaps.clone()));
+        }
+    }
+}
 
-            remove_reads.insert(key.name.to_string(), (label, middle_gaps.clone()));
+pub fn write<W: std::io::Write>(
+    mut output: &mut W,
+    remove_reads: &BadReadMap,
+    json: bool,
+) {
+    if json {
+        let mut map = serde_json::map::Map::new();
+        for (id, (label, len, gaps)) in remove_reads {
+                map.insert(id.to_string(), json!({
+                    "type": label.as_str(),
+                    "length": len,
+                    "gaps": gaps
+                }));
+        }
+        output.write(&json!(map).to_string().into_bytes()).expect("Error durring write result in json format");
+    }
+    else {
+        for (id, (label, len, gaps)) in remove_reads {
+            write_result(&mut output, &label, &id, &len, &gaps);
         }
     }
 }
@@ -362,24 +384,36 @@ mod test {
 
         find(
             vec![PAF_FILE],
-            &mut writer,
             vec![utils::Format::Paf],
             0,
             0.8,
             &mut remove_reads,
         );
 
+        write(
+            &mut writer,
+            &remove_reads,
+            false,
+        );
+
         assert_eq!(writer, good.to_vec());
 
         writer.clear();
+
         find(
             vec![MHAP_FILE],
-            &mut writer,
             vec![utils::Format::Mhap],
             0,
             0.8,
             &mut remove_reads,
         );
+        
+        write(
+            &mut writer,
+            &remove_reads,
+            false,
+        );
+        
         assert_eq!(writer, good.to_vec());
     }
 
@@ -392,11 +426,45 @@ mod test {
 
         find(
             vec![PAF_FILE_COV_1],
-            &mut writer,
             vec![utils::Format::Paf],
             1,
             0.8,
             &mut remove_reads,
+        );
+        
+        write(
+            &mut writer,
+            &remove_reads,
+            false,
+        );
+
+        assert_eq!(
+            String::from_utf8_lossy(&writer)
+                .split("\n")
+                .collect::<HashSet<&str>>(),
+            good
+        );
+    }
+    
+    #[test]
+    fn find_chimera_json_output() {
+        let result = "{\"1\":{\"gaps\":[{\"begin\":0,\"end\":20},{\"begin\":4500,\"end\":5500},{\"begin\":10000,\"end\":12000}],\"length\":12000,\"type\":\"Chimeric\"}}".to_string();
+        let good: HashSet<&str> = result.split("\n").collect();
+        let mut remove_reads: BadReadMap = HashMap::new();
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(
+            vec![PAF_FILE],
+            vec![utils::Format::Paf],
+            0,
+            0.8,
+            &mut remove_reads,
+        );
+        
+        write(
+            &mut writer,
+            &remove_reads,
+            true,
         );
 
         assert_eq!(
@@ -414,11 +482,16 @@ mod test {
 
         find(
             vec![NOT_COVERED_FILE],
-            &mut writer,
             vec![utils::Format::Paf],
             0,
             0.8,
             &mut remove_reads,
+        );
+        
+        write(
+            &mut writer,
+            &remove_reads,
+            false,
         );
 
         let good = b"Not_covered\t3\t10000\t9000,0,9000\n";

@@ -25,6 +25,7 @@ extern crate bzip2;
 extern crate clap;
 extern crate csv;
 extern crate flate2;
+extern crate serde;
 extern crate xz2;
 
 #[macro_use]
@@ -32,6 +33,9 @@ extern crate enum_primitive;
 
 #[macro_use]
 extern crate serde_derive;
+
+#[macro_use]
+extern crate serde_json;
 
 #[cfg(test)]
 #[macro_use]
@@ -161,6 +165,13 @@ fn main() {
              .possible_values(&["gzip", "bzip2", "lzma", "no"])
              .help("Overlap depth threshold below which a gap should be created")
              )
+        .arg(Arg::with_name("json-output")
+             .short("j")
+             .display_order(110)
+             .takes_value(false)
+             .long("json")
+             .help("Yacrd report are write in json format")
+             )
         .get_matches();
 
     let mut compression: file::CompressionFormat = file::CompressionFormat::No;
@@ -214,12 +225,13 @@ fn main() {
 
     chimera::find(
         inputs,
-        &mut output,
         formats,
         chim_thres,
         ncov_thres,
         &mut remove_reads,
     );
+
+    chimera::write(&mut output, &remove_reads, matches.is_present("json-output"));
 
     for filename in filters {
         filter::run(&remove_reads, filename, filterd_suffix);

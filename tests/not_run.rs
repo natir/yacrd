@@ -37,6 +37,7 @@ USAGE:
 	Or any combination of this.
 
 FLAGS:
+    -j, --json       Yacrd report are write in json format
     -h, --help       Prints help information
     -V, --version    Prints version information
 

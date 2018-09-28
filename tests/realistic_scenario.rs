@@ -326,5 +326,35 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
 
         fs::remove_file("tests/data/test_large_splited.fasta").unwrap();
     }
+    
+    #[test]
+    fn in_paf_no_file_same_no_other_default_jsonoutput() {
+        let expected = "{\"1\":{\"gaps\":[{\"begin\":0,\"end\":2000},{\"begin\":4500,\"end\":5500},{\"begin\":8000,\"end\":10000}],\"length\":10000,\"type\":\"Chimeric\"},\"4\":{\"gaps\":[{\"begin\":2500,\"end\":3500}],\"length\":6000,\"type\":\"Chimeric\"}}";
+        let good: HashSet<&str> = expected.split("\n").collect();
+
+        Command::new("./target/debug/yacrd")
+            .arg("-i")
+            .arg("-")
+            .arg("-o")
+            .arg("tests/data/test.json")
+            .arg("-c")
+            .arg("1")
+            .arg("-j")
+            .stdin(Stdio::from(
+                fs::File::open("tests/data/test_cov_1.paf").unwrap(),
+            ))
+            .stdout(Stdio::piped())
+            .output()
+            .expect("Could ot run yacrd");
+
+        assert_eq!(
+            String::from_utf8_lossy(&fs::read("tests/data/test.json").unwrap())
+                .split("\n")
+                .collect::<HashSet<&str>>(),
+            good
+        );
+
+        fs::remove_file("tests/data/test.json").unwrap();
+    }
 
 }

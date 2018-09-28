@@ -109,6 +109,7 @@ mod test {
                 "1".to_string(),
                 (
                     chimera::BadReadType::Chimeric,
+                    6000,
                     vec![chimera::Interval {
                         begin: 4500,
                         end: 5500,

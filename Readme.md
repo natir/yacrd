@@ -86,6 +86,7 @@ USAGE:
 	Or any combination of this.
 
 FLAGS:
+    -j, --json	     Yacrd report are write in json format
     -h, --help       Prints help information
     -V, --version    Prints version information
 
@@ -132,3 +133,34 @@ Chimeric    readB   10452   862,1260,2122;3209,4319,7528
 ```
 
 Here, readB is chimeric with 2 zero-coverage regions: one between bases 1260 and 2122, another between 3209 and 7528.
+
+### JSON
+
+If flag `-j` are present output are write in json format, an example:
+
+```
+{
+	"1": {
+		"gaps": [{
+			"begin": 0,
+			"end": 2000
+		}, {
+			"begin": 4500,
+			"end": 5500
+		}, {
+			"begin": 8000,
+			"end": 10000
+		}],
+		"length": 10000,
+		"type": "Chimeric"
+	},
+	"4": {
+		"gaps": [{
+			"begin": 2500,
+			"end": 3500
+		}],
+		"length": 6000,
+		"type": "Chimeric"
+	}
+}
+```

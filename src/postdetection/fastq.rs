@@ -118,7 +118,7 @@ impl PostDetectionOperationFastq for Split {
             return vec![record.clone()];
         }
 
-        let (read_type, gaps) = reads.get(record.id()).unwrap();
+        let (read_type, _, gaps) = reads.get(record.id()).unwrap();
 
         if *read_type == chimera::BadReadType::NotCovered {
             return vec![]; // if read is not covered we discard him
@@ -166,6 +166,7 @@ mod test {
                 "1".to_string(),
                 (
                     chimera::BadReadType::Chimeric,
+                    6000,
                     vec![
                         chimera::Interval { begin: 4, end: 9,},
                         chimera::Interval { begin: 13, end: 18,},
@@ -297,7 +298,6 @@ ACTG
             }
         }
 
-        println!("{:?}", String::from_utf8_lossy(&out));
         assert_eq!(out, FASTQ_FILE_SPLIT);
     }
 }
