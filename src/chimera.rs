@@ -187,9 +187,12 @@ pub fn find<R: std::io::Read>(
             stack.pop();
         }
 
-        let uncovered_extremities = first_covered + (key.len - last_covered);
+        let mut uncovered_len = first_covered + (key.len - last_covered);
+        for gap in middle_gaps.iter() {
+            uncovered_len += gap.end - gap.begin
+        }
 
-        let label = if uncovered_extremities > (ncov_thres * key.len as f64) as u64 {
+        let label = if uncovered_len > (ncov_thres * key.len as f64) as u64 {
             BadReadType::NotCovered
         } else if !middle_gaps.is_empty() {
             BadReadType::Chimeric
@@ -370,6 +373,10 @@ mod test {
     const PAF_FILE_NOTCOV_PRIOR: &'static [u8] = b"1\t10000\t4000\t4500\t-\t2\t10000\t1000\t9000\t7000\t7000\t255
 1\t10000\t5000\t5500\t-\t3\t10000\t1000\t9000\t7000\t7000\t255
 ";
+    
+    const PAF_FILE_NOTCOV_OVEXT: &'static [u8] = b"1\t10000\t500\t1500\t-\t2\t10000\t1000\t9000\t7000\t7000\t255
+1\t10000\t9000\t9500\t-\t3\t10000\t1000\t9000\t7000\t7000\t255
+";
 
     const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
 1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
@@ -488,6 +495,35 @@ mod test {
 
         find(
             vec![PAF_FILE_NOTCOV_PRIOR],
+            vec![utils::Format::Paf],
+            0,
+            0.8,
+            &mut remove_reads,
+        );
+        
+        write(
+            &mut writer,
+            &remove_reads,
+            false,
+        );
+
+        assert_eq!(
+            String::from_utf8_lossy(&writer)
+                .split("\n")
+                .collect::<HashSet<&str>>(),
+            good
+        );
+    }
+    
+    #[test]
+    fn notcovered_overlap_extremity() {
+        let result = "Not_covered\t1\t10000\t500,0,500;7500,1500,9000;500,9500,10000\n".to_string();
+        let good: HashSet<&str> = result.split("\n").collect();
+        let mut remove_reads: BadReadMap = HashMap::new();
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(
+            vec![PAF_FILE_NOTCOV_OVEXT],
             vec![utils::Format::Paf],
             0,
             0.8,
