@@ -74,8 +74,8 @@ OPTIONS:
             Change the suffix of file generate by split option [default: _splited]
 
     -C, --compression-out <compression-out>
-            Overlap depth threshold below which a gap should be created [possible values: gzip, bzip2, lzma, no]
-
+            Output compression format, the input compression format is chosen by default [possible values: gzip, bzip2,
+            lzma, no]
 ";
 
 #[cfg(test)]

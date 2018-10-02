@@ -163,7 +163,7 @@ fn main() {
              .takes_value(true)
              .long("compression-out")
              .possible_values(&["gzip", "bzip2", "lzma", "no"])
-             .help("Overlap depth threshold below which a gap should be created")
+             .help("Output compression format, the input compression format is chosen by default")
              )
         .arg(Arg::with_name("json-output")
              .short("j")
