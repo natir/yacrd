@@ -71,7 +71,7 @@ cargo install
 2)
 
 ```
-yacrd 0.4 Doduo
+yacrd 0.4.1 Hypno
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
