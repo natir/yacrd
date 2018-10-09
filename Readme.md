@@ -71,12 +71,12 @@ cargo install
 2)
 
 ```
-yacrd 0.3 Doduo
+yacrd 0.4 Doduo
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
 USAGE:
-    yacrd [-i|--input] <input> [-o|--output] <output> [-f|--filter] <file1, file2, …> 
+    yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>
 	yacrd -i map_file.paf -o map_file.yacrd
 	yacrd -i map_file.mhap -o map_file.yacrd
 	yacrd -i map_file.xyz -F paf -o map_file.yacrd
@@ -91,15 +91,21 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -i, --input <input>
+    -i, --input <input>...
             Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no
             compression allowed, paf format by default) [default: -]
     -o, --output <output>
             Path where yacrd report are writen, use - for write in standard output same compression as input or use
             --compression-out [default: -]
     -f, --filter <filter>...
-            File containing reads that will be filtered (fasta|fastq|mhap|paf), new file are create like
-            {original_path}_fileterd.{original_extension}
+            Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format
+            support fasta|fastq|mhap|paf
+    -e, --extract <extract>...
+            Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support
+            fasta|fastq|mhap|paf
+    -s, --split <split>...
+            Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format
+            support fasta|fastq
     -F, --format <format>                                  Force the format used [possible values: paf, mhap]
     -c, --chimeric-threshold <chimeric-threshold>
             Overlap depth threshold below which a gap should be created [default: 0]
@@ -109,6 +115,12 @@ OPTIONS:
 
         --filtered-suffix <filtered-suffix>
             Change the suffix of file generate by filter option [default: _filtered]
+
+        --extracted-suffix <extracted-suffix>
+            Change the suffix of file generate by extract option [default: _extracted]
+
+        --splited-suffix <splited-suffix>
+            Change the suffix of file generate by split option [default: _splited]
 
     -C, --compression-out <compression-out>
 	    Output compression format, the input compression format is chosen by default [possible values: gzip, bzip2,
