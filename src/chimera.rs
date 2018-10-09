@@ -381,6 +381,10 @@ mod test {
     const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
 1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
 ";
+    
+    const MHAP_FILE_MIN_MERS_FLOAT: &'static [u8] = b"1 2 0.1 2.0 0 20 4500 12000 0 5500 10000 10000
+1 3 0.1 2.0 0 5500 10000 12000 0 0 4500 10000
+";
 
     const NOT_COVERED_FILE: &'static [u8] = b"1\t10000\t1000\t10000\t-\t2\t10000\t0\t9000\t9000\t9000\t255
 1\t10000\t0\t1000\t-\t3\t10000\t9000\t10000\t1000\t1000\t255
@@ -409,6 +413,26 @@ mod test {
 
         find(
             vec![MHAP_FILE],
+            vec![utils::Format::Mhap],
+            0,
+            0.8,
+            &mut remove_reads,
+        );
+
+        write(&mut writer, &remove_reads, false);
+
+        assert_eq!(writer, good.to_vec());
+    }
+    
+    #[test]
+    fn find_chimera_mhap_min_mers_float() {
+        let good = b"Chimeric\t1\t12000\t20,0,20;1000,4500,5500;2000,10000,12000\n";
+
+        let mut remove_reads: BadReadMap = HashMap::new();
+        let mut writer: Vec<u8> = Vec::new();
+
+        find(
+            vec![MHAP_FILE_MIN_MERS_FLOAT],
             vec![utils::Format::Mhap],
             0,
             0.8,

@@ -35,7 +35,7 @@ pub struct Record {
     pub read_a: String,
     pub read_b: String,
     pub error: f64,
-    pub shared_min_mers: u64,
+    pub shared_min_mers: f64,
     pub strand_a: char,
     pub begin_a: u64,
     pub end_a: u64,
@@ -46,7 +46,7 @@ pub struct Record {
     pub length_b: u64,
 }
 
-type RecordInner = (String, String, f64, u64, char, u64, u64, u64, char, u64, u64, u64);
+type RecordInner = (String, String, f64, f64, char, u64, u64, u64, char, u64, u64, u64);
 
 pub struct Records<'a, R: 'a + std::io::Read> {
     inner: csv::DeserializeRecordsIter<'a, R, RecordInner>,
@@ -165,7 +165,7 @@ mod test {
     const READ_A: &'static [&str; 2] = &["1", "1"];
     const READ_B: &'static [&str; 2] = &["2", "3"];
     const ERROR: &'static [f64; 2] = &[0.1, 0.1];
-    const SHARED_MIN_MERS: &'static [u64; 2] = &[2, 2];
+    const SHARED_MIN_MERS: &'static [f64; 2] = &[2.0, 2.0];
     const STRAND_A: &'static [char; 2] = &['0', '0'];
     const STRAND_B: &'static [char; 2] = &['0', '0'];
     const BEGIN_A: &'static [u64; 2] = &[100, 550];
