@@ -65,10 +65,36 @@ cargo test
 cargo install
 ```
 
-## Usage
+## How to use Yacrd
 
-1) Run Minimap2: `minimap2 reads.fq reads.fq > mapping.paf` or any other long reads overlapper.
-2)
+### Find chimera
+
+```
+minimap2 reads.fq reads.fq | yacrd -o reads.yacrd
+```
+
+If you want save mapping intermediate file:
+```
+minimap2 reads.fq reads.fq > mapping.paf
+yacrd -i mapping.paf -o reads.yacrd
+```
+
+### Find chimera and run post-detection operation
+
+yacrd can perform thrid post-detection operation, on mapping or sequence file:
+
+- filtering: yacrd generate a new file with only record without chimeric reads
+- extracting: yacrd generate a new file with only record with chimeric reads
+- spliting (only on sequence file) : yacrd generate a new file without chimeric region 
+
+```
+minimap2 reads.fq reads.fq > mapping.paf
+yacrd -i mapping.paf -f reads.fasta > reads.yacrd # produce reads_fileterd.fasta
+yacrd -i mapping.paf -e reads.fasta > reads.yacrd # produce reads_extracted.fasta
+yacrd -i mapping.paf -s reads.fasta > reads.yacrd # produce reads_splited.fasta
+```
+
+### Complet Usage
 
 ```
 yacrd 0.4.1 Hypno
