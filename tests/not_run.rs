@@ -106,9 +106,9 @@ mod not_run {
 
     #[test]
     fn no_argument() {
-        let output = Command::new("./target/debug/yacrd").output().expect(
-            "Could not run yacrd",
-        );
+        let output = Command::new("./target/debug/yacrd")
+            .output()
+            .expect("Could not run yacrd");
 
         assert_eq!(&output.stdout, b"");
     }

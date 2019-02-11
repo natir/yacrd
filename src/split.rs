@@ -21,9 +21,9 @@ SOFTWARE.
 */
 
 /* project use */
-use utils;
 use chimera;
 use postdetection;
+use utils;
 
 pub fn run(reads: &chimera::BadReadMap, filename: &str, split_suffix: &str) {
     match utils::get_format(filename).unwrap() {

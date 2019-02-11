@@ -18,7 +18,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
+ */
 
 extern crate bio;
 extern crate bzip2;
@@ -47,6 +47,7 @@ mod extract;
 mod file;
 mod filter;
 mod io;
+mod overlap;
 mod split;
 mod utils;
 
@@ -71,6 +72,30 @@ fn main() {
 \tzcat map_file.paf.gz | yacrd -i - -o map_file.yacrd
 \tminimap2 sequence.fasta sequence.fasta | yacrd -o map_file.yacrd --fileterd-suffix _test -f sequence.fastq sequence2.fasta other.fastq
 \tOr any combination of this.")
+        .arg(Arg::with_name("chimeric-threshold")
+             .short("c")
+             .display_order(60)
+             .takes_value(true)
+             .default_value("0")
+             .long("chimeric-threshold")
+             .help("Overlap depth threshold below which a gap should be created")
+        )
+        .arg(Arg::with_name("not-covered-threshold")
+             .short("n")
+             .display_order(70)
+             .takes_value(true)
+             .default_value("0.80")
+             .long("not-covered-threshold")
+             .help("Coverage depth threshold above which a read are marked as not covered")
+        )
+        .arg(Arg::with_name("format")
+             .short("F")
+             .long("format")
+             .display_order(50)
+             .takes_value(true)
+             .help("Force the format used")
+             .possible_values(&["paf", "mhap"])
+        )
         .arg(Arg::with_name("input")
              .short("i")
              .long("input")
@@ -79,7 +104,7 @@ fn main() {
              .takes_value(true)
              .default_value("-")
              .help("Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed, paf format by default)")
-             )
+        )
         .arg(Arg::with_name("output")
              .short("o")
              .long("output")
@@ -87,15 +112,14 @@ fn main() {
              .takes_value(true)
              .default_value("-")
              .help("Path where yacrd report are writen, use - for write in standard output same compression as input or use --compression-out")
-             )
-        .arg(Arg::with_name("filter")
-             .short("f")
-             .long("filter")
-             .multiple(true)
-             .display_order(30)
-             .takes_value(true)
-             .help("Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format support fasta|fastq|mhap|paf")
-             )
+        )        .arg(Arg::with_name("filter")
+                      .short("f")
+                      .long("filter")
+                      .multiple(true)
+                      .display_order(30)
+                      .takes_value(true)
+                      .help("Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format support fasta|fastq|mhap|paf")
+        )
         .arg(Arg::with_name("extract")
              .short("e")
              .long("extract")
@@ -103,7 +127,7 @@ fn main() {
              .display_order(40)
              .takes_value(true)
              .help("Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support fasta|fastq|mhap|paf")
-             )
+        )
         .arg(Arg::with_name("split")
              .short("s")
              .long("split")
@@ -111,52 +135,28 @@ fn main() {
              .display_order(45)
              .takes_value(true)
              .help("Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format support fasta|fastq")
-             )
-        .arg(Arg::with_name("format")
-             .short("F")
-             .long("format")
-             .display_order(50)
-             .takes_value(true)
-             .help("Force the format used")
-             .possible_values(&["paf", "mhap"])
-             )
-        .arg(Arg::with_name("chimeric-threshold")
-             .short("c")
-             .display_order(60)
-             .takes_value(true)
-             .default_value("0")
-             .long("chimeric-threshold")
-             .help("Overlap depth threshold below which a gap should be created")
-             )
-        .arg(Arg::with_name("not-covered-threshold")
-             .short("n")
-             .display_order(70)
-             .takes_value(true)
-             .default_value("0.80")
-             .long("not-covered-threshold")
-             .help("Coverage depth threshold above which a read are marked as not covered")
-             )
+        )
         .arg(Arg::with_name("filtered-suffix")
              .display_order(80)
              .takes_value(true)
              .long("filtered-suffix")
              .default_value("_filtered")
              .help("Change the suffix of file generate by filter option")
-             )
+        )
         .arg(Arg::with_name("extracted-suffix")
              .display_order(90)
              .takes_value(true)
              .long("extracted-suffix")
              .default_value("_extracted")
              .help("Change the suffix of file generate by extract option")
-             )
+        )
         .arg(Arg::with_name("splited-suffix")
              .display_order(95)
              .takes_value(true)
              .long("splited-suffix")
              .default_value("_splited")
              .help("Change the suffix of file generate by split option")
-             )
+        )
         .arg(Arg::with_name("compression-out")
              .short("C")
              .display_order(100)
@@ -164,18 +164,19 @@ fn main() {
              .long("compression-out")
              .possible_values(&["gzip", "bzip2", "lzma", "no"])
              .help("Output compression format, the input compression format is chosen by default")
-             )
+        )
         .arg(Arg::with_name("json-output")
              .short("j")
              .display_order(110)
              .takes_value(false)
              .long("json")
              .help("Yacrd report are write in json format")
-             )
+        )
         .get_matches();
 
     let mut compression: file::CompressionFormat = file::CompressionFormat::No;
     let mut inputs: Vec<Box<std::io::Read>> = Vec::new();
+
     for input_name in matches.values_of("input").unwrap() {
         let tmp = file::get_input(input_name);
         inputs.push(tmp.0);
@@ -207,8 +208,10 @@ fn main() {
     let extract_suffix = matches.value_of("extracted-suffix").unwrap();
     let split_suffix = matches.value_of("splited-suffix").unwrap();
 
+    let mut remove_reads: chimera::BadReadMap = HashMap::new();
+
     let mut formats: Vec<utils::Format> = Vec::new();
-    utils::get_mapping_format(&matches, &mut formats);;
+    utils::get_mapping_formats(&matches, &mut formats);
 
     let chim_thres = matches
         .value_of("chimeric-threshold")
@@ -221,9 +224,7 @@ fn main() {
         .parse::<f64>()
         .unwrap();
 
-    let mut remove_reads: chimera::BadReadMap = HashMap::new();
-
-    chimera::find(inputs, formats, chim_thres, ncov_thres, &mut remove_reads);
+    overlap::find(inputs, formats, chim_thres, ncov_thres, &mut remove_reads);
 
     chimera::write(
         &mut output,

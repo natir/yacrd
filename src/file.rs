@@ -22,9 +22,9 @@ SOFTWARE.
 
 /* crates use */
 use bzip2;
+use enum_primitive::FromPrimitive;
 use flate2;
 use xz2;
-use enum_primitive::FromPrimitive;
 
 /* standard use */
 use std::fs::File;
@@ -78,20 +78,18 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
 pub fn get_readable(input_name: &str) -> Box<io::Read> {
     match input_name {
         "-" => Box::new(BufReader::new(io::stdin())),
-        _ => Box::new(BufReader::new(File::open(input_name).expect(&format!(
-            "Can't open input file {}",
-            input_name
-        )))),
+        _ => Box::new(BufReader::new(
+            File::open(input_name).expect(&format!("Can't open input file {}", input_name)),
+        )),
     }
 }
 
 fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     let mut buf = vec![0u8; 5];
 
-    in_stream.read_exact(&mut buf).expect(
-        "Error durring reading first bit of file",
-    );
-
+    in_stream
+        .read_exact(&mut buf)
+        .expect("Error durring reading first bit of file");
 
     let mut five_bit_val: u64 = 0;
     for i in 0..5 {
@@ -108,8 +106,7 @@ fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     }
 
     match CompressionFormat::from_u64(two_bit_val) {
-        e @ Some(CompressionFormat::Gzip) |
-        e @ Some(CompressionFormat::Bzip) => e.unwrap(),
+        e @ Some(CompressionFormat::Gzip) | e @ Some(CompressionFormat::Bzip) => e.unwrap(),
         _ => CompressionFormat::No,
     }
 }
@@ -151,10 +148,9 @@ pub fn choose_compression(
 fn get_writable(output_name: &str) -> Box<io::Write> {
     match output_name {
         "-" => Box::new(BufWriter::new(io::stdout())),
-        _ => Box::new(BufWriter::new(File::create(output_name).expect(&format!(
-            "Can't open output file {}",
-            output_name
-        )))),
+        _ => Box::new(BufWriter::new(
+            File::create(output_name).expect(&format!("Can't open output file {}", output_name)),
+        )),
     }
 }
 

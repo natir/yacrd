@@ -20,10 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-pub mod paf;
-pub mod mhap;
 pub mod fasta;
 pub mod fastq;
+pub mod mhap;
+pub mod paf;
 
 /* standard use */
 use std::path::Path;

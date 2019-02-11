@@ -21,8 +21,8 @@ SOFTWARE.
 */
 
 use chimera;
-use io;
 use file;
+use io;
 use postdetection;
 
 pub trait PostDetectionOperationMhap {
@@ -113,6 +113,7 @@ mod test {
                     vec![chimera::Interval {
                         begin: 4500,
                         end: 5500,
+                        int_type: chimera::IntervalType::Sure,
                     }],
                 ),
             );

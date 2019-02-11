@@ -21,8 +21,8 @@ SOFTWARE.
 */
 
 use chimera;
-use io;
 use file;
+use io;
 use postdetection;
 
 pub trait PostDetectionOperationPaf {
@@ -113,6 +113,7 @@ mod test {
                     vec![chimera::Interval {
                         begin: 4500,
                         end: 5500,
+                        int_type: chimera::IntervalType::Sure,
                     }],
                 ),
             );
@@ -145,7 +146,8 @@ mod test {
         assert_eq!(out, PAF_FILE_FILTRED);
     }
 
-    const PAF_FILE_EXTRACTED: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+    const PAF_FILE_EXTRACTED: &'static [u8] =
+        b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
 1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
 ";
 

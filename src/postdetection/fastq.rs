@@ -168,8 +168,16 @@ mod test {
                     chimera::BadReadType::Chimeric,
                     6000,
                     vec![
-                        chimera::Interval { begin: 4, end: 9,},
-                        chimera::Interval { begin: 13, end: 18,},
+                        chimera::Interval {
+                            begin: 4,
+                            end: 9,
+                            int_type: chimera::IntervalType::Sure,
+                        },
+                        chimera::Interval {
+                            begin: 13,
+                            end: 18,
+                            int_type: chimera::IntervalType::Sure,
+                        },
                     ],
                 ),
             );
