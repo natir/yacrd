@@ -32,7 +32,7 @@ pub fn in_read(begin: usize, end: usize, length: usize) -> bool {
     return begin < length || end < length;
 }
 
-fn generate_out_name(filename: &str, suffix: &str) -> String {
+pub fn generate_out_name(filename: &str, suffix: &str) -> String {
     let path = Path::new(filename);
     let mut filename = path.file_name().unwrap().to_str().unwrap().to_string();
 

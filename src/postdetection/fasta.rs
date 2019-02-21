@@ -131,6 +131,10 @@ impl PostDetectionOperationFasta for Split {
         }
         position.push(record.seq().len() as u64);
 
+        if position.len() == 2 && position[0] == 0 && position[1] as usize == record.seq().len() {
+            return vec![record.clone()];
+        }
+        
         for (a, b) in position.chunks(2).map(|x| (x[0], x[1])) {
             if a == b {
                 continue; // empty interval
@@ -168,7 +172,7 @@ mod test {
                     6000,
                     vec![
                         chimera::Interval {
-                            begin: 4,
+                            begin: 0,
                             end: 9,
                             int_type: chimera::IntervalType::Sure,
                         },
@@ -184,6 +188,57 @@ mod test {
         };
     }
 
+    lazy_static! {
+        static ref REMOVE_READS_ALL: Box<chimera::BadReadMap> = {
+            let mut m = Box::new(HashMap::new());
+            m.insert(
+                "1".to_string(),
+                (
+                    chimera::BadReadType::Chimeric,
+                    6000,
+                    vec![
+                        chimera::Interval {
+                            begin: 0,
+                            end: 9,
+                            int_type: chimera::IntervalType::Sure,
+                        },
+                        chimera::Interval {
+                            begin: 13,
+                            end: 18,
+                            int_type: chimera::IntervalType::Sure,
+                        },
+                    ],
+                ));
+            m.insert(
+                "2".to_string(),
+                (
+                    chimera::BadReadType::NotBad,
+                    6000,
+                    vec![
+                        chimera::Interval {
+                            begin: 0,
+                            end: 1,
+                            int_type: chimera::IntervalType::Sure,
+                        },
+                        chimera::Interval {
+                            begin: 3,
+                            end: 4,
+                            int_type: chimera::IntervalType::Sure,
+                        },
+                    ],
+                ));
+            m.insert(
+                "3".to_string(),
+                (
+                    chimera::BadReadType::NotBad,
+                    6000,
+                    vec![],
+                ),
+            );
+            m
+        };
+    }
+    
     const FASTA_FILE: &'static [u8] = b">1
 ACTG
 >2
@@ -248,9 +303,7 @@ ACTG
 ACTG
 ";
 
-    const FASTA_FILE_SPLITED: &'static [u8] = b">1_0_4
-ACTG
->1_9_13
+    const FASTA_FILE_SPLITED: &'static [u8] = b">1_9_13
 ACTG
 >1_18_22
 ACTG
@@ -280,6 +333,37 @@ ACTG
         assert_eq!(out, FASTA_FILE_SPLITED);
     }
 
+    const FASTA_FILE_SPLITED_ALL: &'static [u8] = b">1_9_13
+ACTG
+>1_18_22
+ACTG
+>2_1_3
+CT
+>3
+ACTG
+";
+
+    #[test]
+    fn split_all() {
+        let mut out: Vec<u8> = Vec::new();
+
+        let f = Split {};
+        {
+            let reader = bio::io::fasta::Reader::new(FASTA_FILE_SPLITABLE);
+            let mut writer = bio::io::fasta::Writer::new(&mut out);
+
+            for result in reader.records() {
+                let record = result.unwrap();
+                for out in f.check(&REMOVE_READS_ALL, &record) {
+                    writer.write_record(&out).unwrap()
+                }
+            }
+        }
+
+        assert_eq!(out, FASTA_FILE_SPLITED_ALL);
+    }
+
+    
     const SHORT_FASTA_FILE: &'static [u8] = b">1
 ACTGGGGGGACTG
 >2
@@ -288,9 +372,7 @@ ACTG
 ACTG
 ";
 
-    const SHORT_FASTA_FILE_SPLIT: &'static [u8] = b">1_0_4
-ACTG
->1_9_13
+    const SHORT_FASTA_FILE_SPLIT: &'static [u8] = b">1_9_13
 ACTG
 >2
 ACTG
