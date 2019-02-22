@@ -89,68 +89,20 @@ yacrd can perform thrid post-detection operation, on mapping or sequence file:
 
 ```
 minimap2 reads.fq reads.fq > mapping.paf
-yacrd -i mapping.paf -f reads.fasta > reads.yacrd # produce reads_fileterd.fasta
-yacrd -i mapping.paf -e reads.fasta > reads.yacrd # produce reads_extracted.fasta
-yacrd -i mapping.paf -s reads.fasta > reads.yacrd # produce reads_splited.fasta
+yacrd chimeric -i mapping.paf -f reads.fasta > reads.yacrd # produce reads_fileterd.fasta
+yacrd chimeric -i mapping.paf -e reads.fasta > reads.yacrd # produce reads_extracted.fasta
+yacrd chimeric -i mapping.paf -s reads.fasta > reads.yacrd # produce reads_splited.fasta
 ```
 
-### Complet Usage
+### Scrubber read 
+
+yacrd support a scrubbing mode to remove all not supported part of read.
 
 ```
-yacrd 0.4.1 Hypno
-Pierre Marijon <pierre.marijon@inria.fr>
-Yet Another Chimeric Read Detector
-
-USAGE:
-    yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>
-	yacrd -i map_file.paf -o map_file.yacrd
-	yacrd -i map_file.mhap -o map_file.yacrd
-	yacrd -i map_file.xyz -F paf -o map_file.yacrd
-	yacrd -i map_file.paf -f sequence.fasta -o map_file.yacrd
-	zcat map_file.paf.gz | yacrd -i - -o map_file.yacrd
-	minimap2 sequence.fasta sequence.fasta | yacrd -o map_file.yacrd --fileterd-suffix _test -f sequence.fastq sequence2.fasta other.fastq
-	Or any combination of this.
-
-FLAGS:
-    -j, --json	     Yacrd report are write in json format
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -i, --input <input>...
-            Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no
-            compression allowed, paf format by default) [default: -]
-    -o, --output <output>
-            Path where yacrd report are writen, use - for write in standard output same compression as input or use
-            --compression-out [default: -]
-    -f, --filter <filter>...
-            Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format
-            support fasta|fastq|mhap|paf
-    -e, --extract <extract>...
-            Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support
-            fasta|fastq|mhap|paf
-    -s, --split <split>...
-            Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format
-            support fasta|fastq
-    -F, --format <format>                                  Force the format used [possible values: paf, mhap]
-    -c, --chimeric-threshold <chimeric-threshold>
-            Overlap depth threshold below which a gap should be created [default: 0]
-
-    -n, --not-covered-threshold <not-covered-threshold>
-            Coverage depth threshold above which a read are marked as not covered [default: 0.80]
-
-        --filtered-suffix <filtered-suffix>
-            Change the suffix of file generate by filter option [default: _filtered]
-
-        --extracted-suffix <extracted-suffix>
-            Change the suffix of file generate by extract option [default: _extracted]
-
-        --splited-suffix <splited-suffix>
-            Change the suffix of file generate by split option [default: _splited]
-
-    -C, --compression-out <compression-out>
-	    Output compression format, the input compression format is chosen by default [possible values: gzip, bzip2,
-	    lzma, no]
+minimap2 reads.fq reads.fq > mapping.paf
+yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -r report.yacrd
+yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -r report.yacrd -c 10 # Remove part not covered by 10 reads
+yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -j -r report.yacrd.json
 ```
 
 ## Output

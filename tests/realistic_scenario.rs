@@ -37,6 +37,7 @@ mod realistic_scenario {
     #[test]
     fn default() {
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .stdin(Stdio::from(fs::File::open("tests/data/test.paf").unwrap()))
             .stdout(Stdio::piped())
             .spawn()
@@ -51,6 +52,7 @@ mod realistic_scenario {
     #[test]
     fn file_mhap_gz_out_same_paf_default_default() {
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test.mhap.gz")
             .arg("-F")
@@ -78,6 +80,7 @@ mod realistic_scenario {
     #[test]
     fn file_mhapgzpafxz_out_same_paf_default_default() {
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test.mhap.gz")
             .arg("tests/data/test.paf.bz2")
@@ -102,6 +105,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
         let good: HashSet<&str> = expected.split("\n").collect();
 
         Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("-")
             .arg("-o")
@@ -134,6 +138,7 @@ Not_covered	3	10000	5500,4500,10000
         let good: HashSet<&str> = expected.split("\n").collect();
 
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test.paf.bz2")
             .arg("-o")
@@ -194,6 +199,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
         let good: HashSet<&str> = expected.split("\n").collect();
 
         Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test_cov_1.mhap.xz")
             .arg("-o")
@@ -240,6 +246,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
     #[test]
     fn file_paf_out_same_paf_extract() {
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test.paf")
             .arg("-e")
@@ -265,6 +272,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
     #[test]
     fn file_paf_out_same_paf_split() {
         let child = Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("tests/data/test.paf")
             .arg("-s")
@@ -293,6 +301,7 @@ Chimeric	1	10000	2000,0,2000;1000,4500,5500;2000,8000,10000
         let good: HashSet<&str> = expected.split("\n").collect();
 
         Command::new("./target/debug/yacrd")
+            .arg("chimeric")
             .arg("-i")
             .arg("-")
             .arg("-o")
