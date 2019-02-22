@@ -23,9 +23,9 @@ SOFTWARE.
 /* local use */
 
 /* crates use */
-use serde_json;
 use serde::ser::SerializeStruct;
-    
+use serde_json;
+
 /* standard use */
 use std;
 use std::cmp::Ordering;

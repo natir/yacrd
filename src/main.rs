@@ -61,7 +61,7 @@ use std::collections::HashMap;
 
 fn main() {
     let matches = App::new("yacrd")
-        .version("0.5 Omanyte")
+        .version("0.5.1 Omanyte")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
         .subcommand(SubCommand::with_name("chimeric")
@@ -252,8 +252,10 @@ fn main() {
             chimeric_matches.is_present("compression-out"),
             chimeric_matches.value_of("compression-out").unwrap_or("no"),
         );
-        let mut output: Box<std::io::Write> =
-            file::get_output(chimeric_matches.value_of("output").unwrap(), out_compression);
+        let mut output: Box<std::io::Write> = file::get_output(
+            chimeric_matches.value_of("output").unwrap(),
+            out_compression,
+        );
 
         let filters: Vec<_> = match chimeric_matches.is_present("filter") {
             true => chimeric_matches.values_of("filter").unwrap().collect(),
@@ -288,7 +290,14 @@ fn main() {
             .parse::<f64>()
             .unwrap();
 
-        overlap::find(inputs, formats, chim_thres, ncov_thres, &mut remove_reads, false);
+        overlap::find(
+            inputs,
+            formats,
+            chim_thres,
+            ncov_thres,
+            &mut remove_reads,
+            false,
+        );
 
         chimera::write(
             &mut output,
@@ -307,24 +316,28 @@ fn main() {
         for filename in splits {
             split::run(&remove_reads, filename, split_suffix);
         }
-    }
-    else if let Some(scrubbing_matches) = matches.subcommand_matches("scrubbing") {
-        println!("{:?}", scrubbing_matches);
-        let (mapping, map_compression) = file::get_input(scrubbing_matches.value_of("mapping").unwrap());
-        let mut format = utils::get_mapping_format(scrubbing_matches.value_of("mapping").unwrap()).unwrap();
+    } else if let Some(scrubbing_matches) = matches.subcommand_matches("scrubbing") {
+        let (mapping, map_compression) =
+            file::get_input(scrubbing_matches.value_of("mapping").unwrap());
+        let mut format =
+            utils::get_mapping_format(scrubbing_matches.value_of("mapping").unwrap()).unwrap();
 
         let mut raw_path = scrubbing_matches.value_of("sequence").unwrap();
         let mut scrubbed_path = scrubbing_matches.value_of("scrubbed").unwrap();
-        
+
         let out_compression = file::choose_compression(
             map_compression,
             scrubbing_matches.is_present("compression-out"),
-            scrubbing_matches.value_of("compression-out").unwrap_or("no"),
+            scrubbing_matches
+                .value_of("compression-out")
+                .unwrap_or("no"),
         );
 
-        let mut report: Box<std::io::Write> =
-            file::get_output(scrubbing_matches.value_of("report").unwrap(), out_compression);
-        
+        let mut report: Box<std::io::Write> = file::get_output(
+            scrubbing_matches.value_of("report").unwrap(),
+            out_compression,
+        );
+
         let chim_thres = scrubbing_matches
             .value_of("chimeric-threshold")
             .unwrap()
@@ -337,8 +350,15 @@ fn main() {
             .unwrap();
 
         let mut remove_reads: chimera::BadReadMap = HashMap::new();
-        
-        overlap::find(vec![mapping], vec![format], chim_thres, ncov_thres, &mut remove_reads, true);
+
+        overlap::find(
+            vec![mapping],
+            vec![format],
+            chim_thres,
+            ncov_thres,
+            &mut remove_reads,
+            true,
+        );
         split::run(&remove_reads, raw_path, "_splited");
 
         chimera::write(
@@ -347,9 +367,8 @@ fn main() {
             scrubbing_matches.is_present("json-output"),
         );
 
-        
         let tmp_name = postdetection::generate_out_name(raw_path, "_splited");
-        
+
         std::fs::rename(tmp_name, scrubbed_path).unwrap();
     }
 }

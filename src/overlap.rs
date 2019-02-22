@@ -62,7 +62,7 @@ pub fn find<R: std::io::Read>(
     chim_thres: u64,
     ncov_thres: f64,
     remove_reads: &mut chimera::BadReadMap,
-    report_all: bool
+    report_all: bool,
 ) {
     let mut read2mapping: HashMap<chimera::NameLen, Vec<chimera::Interval>> = HashMap::new();
 
@@ -287,7 +287,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -302,7 +302,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -323,7 +323,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -344,7 +344,7 @@ mod test {
             1,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -370,7 +370,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, true);
@@ -397,7 +397,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -423,7 +423,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -447,7 +447,7 @@ mod test {
             0,
             0.8,
             &mut remove_reads,
-            false
+            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -518,7 +518,7 @@ mod test {
     #[test]
     fn find_chimera_report_all() {
         let result = "NotBad\t3\t10000\t7500,2500,10000\nChimeric\t4\t6000\t1000,2500,3500\nChimeric\t1\t10000\t2000,0,2000;1000,4500,5500;2000,8000,10000\nNotBad\t2\t10000\t7500,0,7500\n".to_string();
-        
+
         let good: HashSet<&str> = result.split("\n").collect();
         let mut remove_reads: chimera::BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
@@ -529,7 +529,7 @@ mod test {
             1,
             0.8,
             &mut remove_reads,
-            true
+            true,
         );
 
         chimera::write(&mut writer, &remove_reads, false);

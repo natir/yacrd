@@ -125,12 +125,26 @@ impl PostDetectionOperationFastq for Split {
         }
 
         let mut position = vec![0];
+        let mut passed_pos = std::collections::HashSet::new();
         for inter in gaps.iter() {
-            position.push(inter.begin);
-            position.push(inter.end);
+            if !passed_pos.contains(&inter.begin) {
+                position.push(inter.begin);
+                passed_pos.insert(inter.begin);
+            }
+            if !passed_pos.contains(&inter.end) {
+                position.push(inter.end);
+                passed_pos.insert(inter.end);
+            }
         }
-        position.push(record.seq().len() as u64);
 
+        if position.len() % 2 == 1 {
+            position.push(record.seq().len() as u64);
+        }
+        
+        if position.len() == 2 && position[0] == 0 && position[1] as usize == record.seq().len() {
+            return vec![record.clone()];
+        }
+        
         for (a, b) in position.chunks(2).map(|x| (x[0], x[1])) {
             if a == b {
                 continue; // empty interval

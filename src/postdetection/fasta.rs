@@ -125,16 +125,26 @@ impl PostDetectionOperationFasta for Split {
         }
 
         let mut position = vec![0];
+        let mut passed_pos = std::collections::HashSet::new();
         for inter in gaps.iter() {
-            position.push(inter.begin);
-            position.push(inter.end);
+            if !passed_pos.contains(&inter.begin) {
+                position.push(inter.begin);
+                passed_pos.insert(inter.begin);
+            }
+            if !passed_pos.contains(&inter.end) {
+                position.push(inter.end);
+                passed_pos.insert(inter.end);
+            }
         }
-        position.push(record.seq().len() as u64);
 
+        if position.len() % 2 == 1 {
+            position.push(record.seq().len() as u64);
+        }
+        
         if position.len() == 2 && position[0] == 0 && position[1] as usize == record.seq().len() {
             return vec![record.clone()];
         }
-        
+
         for (a, b) in position.chunks(2).map(|x| (x[0], x[1])) {
             if a == b {
                 continue; // empty interval
@@ -208,7 +218,8 @@ mod test {
                             int_type: chimera::IntervalType::Sure,
                         },
                     ],
-                ));
+                ),
+            );
             m.insert(
                 "2".to_string(),
                 (
@@ -226,19 +237,16 @@ mod test {
                             int_type: chimera::IntervalType::Sure,
                         },
                     ],
-                ));
+                ),
+            );
             m.insert(
                 "3".to_string(),
-                (
-                    chimera::BadReadType::NotBad,
-                    6000,
-                    vec![],
-                ),
+                (chimera::BadReadType::NotBad, 6000, vec![]),
             );
             m
         };
     }
-    
+
     const FASTA_FILE: &'static [u8] = b">1
 ACTG
 >2
@@ -363,7 +371,6 @@ ACTG
         assert_eq!(out, FASTA_FILE_SPLITED_ALL);
     }
 
-    
     const SHORT_FASTA_FILE: &'static [u8] = b">1
 ACTGGGGGGACTG
 >2
@@ -395,6 +402,9 @@ ACTG
                 }
             }
         }
+
+        println!("{}", String::from_utf8_lossy(&out));
+        println!("{}", String::from_utf8_lossy(SHORT_FASTA_FILE_SPLIT));
         assert_eq!(out, SHORT_FASTA_FILE_SPLIT);
     }
 }

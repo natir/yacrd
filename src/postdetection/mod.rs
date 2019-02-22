@@ -29,7 +29,7 @@ pub mod paf;
 use std::path::Path;
 
 pub fn in_read(begin: usize, end: usize, length: usize) -> bool {
-    return begin < length || end < length;
+    return begin <= length && end <= length;
 }
 
 pub fn generate_out_name(filename: &str, suffix: &str) -> String {

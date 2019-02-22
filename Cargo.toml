@@ -1,6 +1,6 @@
 [package]
 name = "yacrd"
-version = "0.5.1-alpha"
+version = "0.5.1"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 
 exclude = ["image/*", "validation/*", "tests/*"]
