@@ -61,7 +61,7 @@ use std::collections::HashMap;
 
 fn main() {
     let matches = App::new("yacrd")
-        .version("0.4.1 Hypno")
+        .version("0.5 Omanyte")
         .author("Pierre Marijon <pierre.marijon@inria.fr>")
         .about("Yet Another Chimeric Read Detector")
         .subcommand(SubCommand::with_name("chimeric")

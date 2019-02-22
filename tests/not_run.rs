@@ -22,60 +22,21 @@ SOFTWARE.
 
 use std::process::Command;
 
-static HELP_MESSAGE: &'static str = "yacrd 0.4.1 Hypno
+static HELP_MESSAGE: &'static str = "yacrd 0.5 Omanyte
 Pierre Marijon <pierre.marijon@inria.fr>
 Yet Another Chimeric Read Detector
 
 USAGE:
-    yacrd [-i|--input] <input1, input2, …> [-o|--output] <output> [-f|--filter] <file1, file2, …>
-	yacrd -i map_file.paf -o map_file.yacrd
-	yacrd -i map_file.mhap -o map_file.yacrd
-	yacrd -i map_file.xyz -F paf -o map_file.yacrd
-	yacrd -i map_file.paf -f sequence.fasta -o map_file.yacrd
-	zcat map_file.paf.gz | yacrd -i - -o map_file.yacrd
-	minimap2 sequence.fasta sequence.fasta | yacrd -o map_file.yacrd --fileterd-suffix _test -f sequence.fastq sequence2.fasta other.fastq
-	Or any combination of this.
+    yacrd [SUBCOMMAND]
 
 FLAGS:
-    -j, --json       Yacrd report are write in json format
     -h, --help       Prints help information
     -V, --version    Prints version information
 
-OPTIONS:
-    -i, --input <input>...
-            Mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no
-            compression allowed, paf format by default) [default: -]
-    -o, --output <output>
-            Path where yacrd report are writen, use - for write in standard output same compression as input or use
-            --compression-out [default: -]
-    -f, --filter <filter>...
-            Create a new file {original_path}_fileterd.{original_extension} with only not chimeric records, format
-            support fasta|fastq|mhap|paf
-    -e, --extract <extract>...
-            Create a new file {original_path}_extracted.{original_extension} with only chimeric records, format support
-            fasta|fastq|mhap|paf
-    -s, --split <split>...
-            Create a new file {original_path}_splited.{original_extension} where chimeric records are split, format
-            support fasta|fastq
-    -F, --format <format>                                  Force the format used [possible values: paf, mhap]
-    -c, --chimeric-threshold <chimeric-threshold>
-            Overlap depth threshold below which a gap should be created [default: 0]
-
-    -n, --not-covered-threshold <not-covered-threshold>
-            Coverage depth threshold above which a read are marked as not covered [default: 0.80]
-
-        --filtered-suffix <filtered-suffix>
-            Change the suffix of file generate by filter option [default: _filtered]
-
-        --extracted-suffix <extracted-suffix>
-            Change the suffix of file generate by extract option [default: _extracted]
-
-        --splited-suffix <splited-suffix>
-            Change the suffix of file generate by split option [default: _splited]
-
-    -C, --compression-out <compression-out>
-            Output compression format, the input compression format is chosen by default [possible values: gzip, bzip2,
-            lzma, no]
+SUBCOMMANDS:
+    chimeric     In chimeric mode yacrd detect chimera if coverage gap are in middle of read
+    help         Prints this message or the help of the given subcommand(s)
+    scrubbing    In scrubbing mode yacrd remove all part of read not covered
 ";
 
 #[cfg(test)]
@@ -90,7 +51,7 @@ mod not_run {
             .output()
             .expect("Could not run yacrd");
 
-        assert_eq!(output.stdout, b"yacrd 0.4.1 Hypno\n");
+        assert_eq!(output.stdout, b"yacrd 0.5 Omanyte\n");
         println!("{:?}", output);
     }
 
