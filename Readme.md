@@ -58,7 +58,7 @@ conda install yacrd
 ```
 git clone https://github.com/natir/yacrd.git
 cd yacrd
-git checkout v0.4
+git checkout v0.5.0
 
 cargo build
 cargo test
