@@ -76,7 +76,7 @@ minimap2 reads.fq reads.fq | yacrd -o reads.yacrd
 If you want save mapping intermediate file:
 ```
 minimap2 reads.fq reads.fq > mapping.paf
-yacrd -i mapping.paf -o reads.yacrd
+yacrd chimeric -i mapping.paf -o reads.yacrd
 ```
 
 ### Find chimera and run post-detection operation
