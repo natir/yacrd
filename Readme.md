@@ -21,10 +21,12 @@ Long read error-correction tools usually detect and also remove chimeras. But it
 
 DAStrim (from the [DASCRUBBER suite](https://github.com/thegenemyers/DASCRUBBER) does a similar job to yacrd but relies on a different mapping step, and uses different (likely more advanced) heuristics. Yacrd is simpler and easier to use.
 
+This [repository](https://gitlab.inria.fr/pmarijon/yacrd-and-fpa-upstream-tools-for-lr-genome-assembly) contains a set of scripts to evaluate yacrd against other similar tools such as [DASCRUBBER](https://github.com/thegenemyers/DASCRUBBER/) and [miniscrub](https://bitbucket.org/berkeleylab/jgi-miniscrub) on real data sets.
+
 ## Input
 
-Any set of long reads (PacBio, Nanopore, anything that can be given to [minimap2](https://github.com/lh3/minimap2) ).
-yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or MHAP file from some other long reads overlapper as input.
+Any set of long reads (PacBio, Nanopore, anything that can be given to [minimap2](https://github.com/lh3/minimap2)).
+yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or BLASR m4 file from some other long reads overlapper as input.
 
 ## Requirements
 
@@ -94,16 +96,25 @@ yacrd chimeric -i mapping.paf -e reads.fasta > reads.yacrd # produce reads_extra
 yacrd chimeric -i mapping.paf -s reads.fasta > reads.yacrd # produce reads_splited.fasta
 ```
 
-### Scrubber read 
+### Read scrubbing
 
 yacrd support a scrubbing mode to remove all not supported part of read.
 
+For nanopore data, we recommand to use minimap2 with all-vs-all nanopore preset with maximal distance between seeds fixe to 500 (option `-g 500`) to generate overlap. We recommand to run yacrd with minimal coverage fixed to 4 (option `-c`) and minimal coverage of read fixed to 0.4 (option `-n`).
+
+This is an exemple of how run a yacrd scrubbing:
 ```
-minimap2 reads.fq reads.fq > mapping.paf
-yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -r report.yacrd
-yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -r report.yacrd -c 10 # Remove part not covered by 10 reads
-yacrd scrubbing -m mapping.paf -s reads.fq -S reads_scrubbed.fq -j -r report.yacrd.json
+minimap2 -x ava-ont -g 500 reads.fasta reads.fasta > overlap.paf
+yacrd scrubbing -c 4 -n 0.4 -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
 ```
+
+For pacbio data, we recommand to use minimap2 with all-vs-all pacbio preset with maximal distance between seeds fixe to XXX (option `-g XXX`) to generate overlap. We recommand to run yacrd with minimal coverage fixed to X (option `-c X`) and minimal coverage of read fixed to X.X (option `-n X.X`).
+
+```
+minimap2 -x ava-pb -g XXX reads.fasta reads.fasta > overlap.paf
+yacrd scrubbing -c X -n X.X -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
+```
+
 
 ## Output
 
