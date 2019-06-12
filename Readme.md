@@ -108,13 +108,19 @@ minimap2 -x ava-ont -g 500 reads.fasta reads.fasta > overlap.paf
 yacrd scrubbing -c 4 -n 0.4 -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
 ```
 
-For pacbio data, we recommand to use minimap2 with all-vs-all pacbio preset with maximal distance between seeds fixe to XXX (option `-g XXX`) to generate overlap. We recommand to run yacrd with minimal coverage fixed to X (option `-c X`) and minimal coverage of read fixed to X.X (option `-n X.X`).
+For pacbio P6-C4 data, we recommand to use minimap2 with all-vs-all pacbio preset with maximal distance between seeds fixe to 800 (option `-g 800`) to generate overlap. We recommand to run yacrd with minimal coverage fixed to 4 (option `-c 4`) and minimal coverage of read fixed to 0.4 (option `-n 0.4`).
 
 ```
-minimap2 -x ava-pb -g XXX reads.fasta reads.fasta > overlap.paf
-yacrd scrubbing -c X -n X.X -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
+minimap2 -x ava-pb -g 800 reads.fasta reads.fasta > overlap.paf
+yacrd scrubbing -c 4 -n 0.4 -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
 ```
 
+For pacbio Sequel data, we recommand to use minimap2 with all-vs-all pacbio preset with maximal distance between seeds fixe to 5000 (option `-g 5000`) to generate overlap. We recommand to run yacrd with minimal coverage fixed to 3 (option `-c 3`) and minimal coverage of read fixed to 0.4 (option `-n 0.4`).
+
+```
+minimap2 -x ava-pb -g 5000 reads.fasta reads.fasta > overlap.paf
+yacrd scrubbing -c 3 -n 0.4 -m overlap.paf -s reads.fasta -S reads_scrubbed.fasta -r scrubbed_report.yacrd
+```
 
 ## Output
 
