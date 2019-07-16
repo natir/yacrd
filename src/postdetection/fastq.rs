@@ -140,11 +140,11 @@ impl PostDetectionOperationFastq for Split {
         if position.len() % 2 == 1 {
             position.push(record.seq().len() as u64);
         }
-        
+
         if position.len() == 2 && position[0] == 0 && position[1] as usize == record.seq().len() {
             return vec![record.clone()];
         }
-        
+
         for (a, b) in position.chunks(2).map(|x| (x[0], x[1])) {
             if a == b {
                 continue; // empty interval

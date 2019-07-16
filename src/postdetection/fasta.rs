@@ -140,7 +140,7 @@ impl PostDetectionOperationFasta for Split {
         if position.len() % 2 == 1 {
             position.push(record.seq().len() as u64);
         }
-        
+
         if position.len() == 2 && position[0] == 0 && position[1] as usize == record.seq().len() {
             return vec![record.clone()];
         }

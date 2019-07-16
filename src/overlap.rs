@@ -57,18 +57,15 @@ impl Ord for MinInteger {
 /* End of type declaration */
 
 pub fn find<R: std::io::Read>(
-    inputs: Vec<R>,
-    formats: Vec<utils::Format>,
+    input: R,
+    format: utils::Format,
     chim_thres: u64,
     ncov_thres: f64,
     remove_reads: &mut chimera::BadReadMap,
-    report_all: bool,
 ) {
     let mut read2mapping: HashMap<chimera::NameLen, Vec<chimera::Interval>> = HashMap::new();
 
-    for (input, format) in inputs.into_iter().zip(formats.iter()) {
-        parse(input, format, &mut read2mapping);
-    }
+    parse(input, &format, &mut read2mapping);
 
     let mut middle_gaps: Vec<chimera::Interval> = Vec::new();
     let mut stack: BinaryHeap<MinInteger> = BinaryHeap::new();
@@ -126,28 +123,26 @@ pub fn find<R: std::io::Read>(
             chimera::BadReadType::NotBad
         };
 
-        if label != chimera::BadReadType::NotBad || report_all {
-            if first_covered != 0 {
-                middle_gaps.insert(
-                    0,
-                    chimera::Interval {
-                        begin: 0,
-                        end: first_covered,
-                        int_type: chimera::IntervalType::Sure,
-                    },
-                );
-            }
-
-            if last_covered != key.len {
-                middle_gaps.push(chimera::Interval {
-                    begin: last_covered,
-                    end: key.len,
+        if first_covered != 0 {
+            middle_gaps.insert(
+                0,
+                chimera::Interval {
+                    begin: 0,
+                    end: first_covered,
                     int_type: chimera::IntervalType::Sure,
-                });
-            }
-
-            remove_reads.insert(key.name.to_string(), (label, key.len, middle_gaps.clone()));
+                },
+            );
         }
+
+        if last_covered != key.len {
+            middle_gaps.push(chimera::Interval {
+                begin: last_covered,
+                end: key.len,
+                int_type: chimera::IntervalType::Sure,
+            });
+        }
+
+        remove_reads.insert(key.name.to_string(), (label, key.len, middle_gaps.clone()));
     }
 }
 
@@ -282,12 +277,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE],
-            vec![utils::Format::Paf],
+            PAF_FILE,
+            utils::Format::Paf,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -297,12 +291,11 @@ mod test {
         writer.clear();
 
         find(
-            vec![MHAP_FILE],
-            vec![utils::Format::Mhap],
+            MHAP_FILE,
+            utils::Format::Mhap,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -318,12 +311,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![MHAP_FILE_MIN_MERS_FLOAT],
-            vec![utils::Format::Mhap],
+            MHAP_FILE_MIN_MERS_FLOAT,
+            utils::Format::Mhap,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -339,12 +331,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE_COV_1],
-            vec![utils::Format::Paf],
+            PAF_FILE_COV_1,
+            utils::Format::Paf,
             1,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -365,12 +356,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE],
-            vec![utils::Format::Paf],
+            PAF_FILE,
+            utils::Format::Paf,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, true);
@@ -392,12 +382,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE_NOTCOV_PRIOR],
-            vec![utils::Format::Paf],
+            PAF_FILE_NOTCOV_PRIOR,
+            utils::Format::Paf,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -418,12 +407,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE_NOTCOV_OVEXT],
-            vec![utils::Format::Paf],
+            PAF_FILE_NOTCOV_OVEXT,
+            utils::Format::Paf,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -442,12 +430,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![NOT_COVERED_FILE],
-            vec![utils::Format::Paf],
+            NOT_COVERED_FILE,
+            utils::Format::Paf,
             0,
             0.8,
             &mut remove_reads,
-            false,
         );
 
         chimera::write(&mut writer, &remove_reads, false);
@@ -524,12 +511,11 @@ mod test {
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            vec![PAF_FILE_COV_1],
-            vec![utils::Format::Paf],
+            PAF_FILE_COV_1,
+            utils::Format::Paf,
             1,
             0.8,
             &mut remove_reads,
-            true,
         );
 
         chimera::write(&mut writer, &remove_reads, false);

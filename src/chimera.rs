@@ -149,41 +149,6 @@ pub fn write<W: std::io::Write>(mut output: &mut W, remove_reads: &BadReadMap, j
     }
 }
 
-pub fn write_result<W: std::io::Write>(
-    mut output: &mut W,
-    label: &BadReadType,
-    name: &str,
-    len: &u64,
-    gaps: &Vec<Interval>,
-) {
-    output
-        .write_fmt(format_args!("{}\t{}\t{}\t", label.as_str(), name, len))
-        .expect("Error durring writting of result");
-
-    for (i, interval) in gaps.iter().enumerate() {
-        write_gap(interval, &mut output, gaps.len() - i);
-    }
-
-    output
-        .write(b"\n")
-        .expect("Error durring writting of result");
-}
-
-fn write_gap<W: std::io::Write>(gap: &Interval, output: &mut W, i: usize) {
-    output
-        .write_fmt(format_args!(
-            "{},{},{}",
-            gap.end - gap.begin,
-            gap.begin,
-            gap.end
-        ))
-        .expect("Error durring writting of result");
-    if i > 1 {
-        output
-            .write(b";")
-            .expect("Error durring writting of result");
-    }
-}
 
 #[cfg(test)]
 mod test {
