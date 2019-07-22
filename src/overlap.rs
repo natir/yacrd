@@ -150,7 +150,7 @@ fn parse<R: std::io::Read>(
 ) {
     match format {
         utils::Format::Paf => parse_paf(input, read2mapping),
-        utils::Format::Mhap => parse_mhap(input, read2mapping),
+        utils::Format::M4 => parse_m4(input, read2mapping),
         _ => panic!("Isn't a mapping format"),
     }
 }
@@ -187,11 +187,11 @@ fn parse_paf<R: std::io::Read>(
     }
 }
 
-fn parse_mhap<R: std::io::Read>(
+fn parse_m4<R: std::io::Read>(
     input: R,
     read2mapping: &mut HashMap<chimera::NameLen, Vec<chimera::Interval>>,
 ) {
-    let mut reader = io::mhap::Reader::new(input);
+    let mut reader = io::m4::Reader::new(input);
 
     for result in reader.records() {
         let record = result.unwrap();
@@ -248,11 +248,11 @@ mod test {
 1\t10000\t9000\t9500\t-\t3\t10000\t1000\t9000\t7000\t7000\t255
 ";
 
-    const MHAP_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
+    const M4_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
 1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
 ";
 
-    const MHAP_FILE_MIN_MERS_FLOAT: &'static [u8] =
+    const M4_FILE_MIN_MERS_FLOAT: &'static [u8] =
         b"1 2 0.1 2.0 0 20 4500 12000 0 5500 10000 10000
 1 3 0.1 2.0 0 5500 10000 12000 0 0 4500 10000
 ";
@@ -277,7 +277,7 @@ mod test {
 
         writer.clear();
 
-        find(MHAP_FILE, utils::Format::Mhap, 0, 0.8, &mut remove_reads);
+        find(M4_FILE, utils::Format::M4, 0, 0.8, &mut remove_reads);
 
         chimera::write(&mut writer, &remove_reads, false);
 
@@ -285,15 +285,15 @@ mod test {
     }
 
     #[test]
-    fn find_chimera_mhap_min_mers_float() {
+    fn find_chimera_m4_min_mers_float() {
         let good = b"Chimeric\t1\t12000\t20,0,20;1000,4500,5500;2000,10000,12000\n";
 
         let mut remove_reads: chimera::BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
         find(
-            MHAP_FILE_MIN_MERS_FLOAT,
-            utils::Format::Mhap,
+            M4_FILE_MIN_MERS_FLOAT,
+            utils::Format::M4,
             0,
             0.8,
             &mut remove_reads,
@@ -469,7 +469,7 @@ mod test {
         assert_eq!(*READ2MAPPING, hash);
 
         hash.clear();
-        parse(Box::new(MHAP_FILE), &utils::Format::Mhap, &mut hash);
+        parse(Box::new(M4_FILE), &utils::Format::M4, &mut hash);
         assert_eq!(*READ2MAPPING, hash);
     }
 

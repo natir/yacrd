@@ -24,10 +24,8 @@ SOFTWARE.
 
 /* crates use */
 use serde::ser::SerializeStruct;
-use serde_json;
 
 /* standard use */
-use std;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
@@ -71,12 +69,6 @@ impl Hash for NameLen {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name.hash(state);
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub enum IntervalType {
-    Sure,
-    Check,
 }
 
 #[derive(Debug, Clone)]

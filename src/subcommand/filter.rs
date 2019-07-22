@@ -39,8 +39,8 @@ pub fn run<'a>(reads_info: &chimera::BadReadMap, matches: ArgMatches<'a>) {
 fn parse<'a>(
     matches: ArgMatches,
 ) -> (
-    std::io::BufReader<Box<std::io::Read>>,
-    std::io::BufWriter<Box<std::io::Write>>,
+    std::io::BufReader<Box<dyn std::io::Read>>,
+    std::io::BufWriter<Box<dyn std::io::Write>>,
     utils::Format,
     bool,
     bool,
@@ -69,8 +69,8 @@ fn parse<'a>(
 }
 
 fn paf(
-    input: std::io::BufReader<Box<std::io::Read>>,
-    output: std::io::BufWriter<Box<std::io::Write>>,
+    input: std::io::BufReader<Box<dyn std::io::Read>>,
+    output: std::io::BufWriter<Box<dyn std::io::Write>>,
     reads_info: &chimera::BadReadMap,
     chimeric: bool,
     not_covered: bool,

@@ -33,7 +33,7 @@ pub fn app<'a, 'b>() -> App<'a, 'b> {
              .long("input")
              .takes_value(true)
              .default_value("-")
-             .help("mapping input file in PAF or MHAP format (with .paf or .mhap extension), use - for read standard input (no compression allowed, paf format by default)")
+             .help("mapping input file in PAF or M4 format (with .paf or .mhap extension), use - for read standard input (no compression allowed, paf format by default)")
         )
         .arg(Arg::with_name("chimeric-threshold")
              .short("c")

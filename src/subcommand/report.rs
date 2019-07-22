@@ -63,13 +63,13 @@ pub fn run<'a>(reads_info: &chimera::BadReadMap, matches: ArgMatches<'a>) {
 fn parse<'a>(
     matches: ArgMatches,
 ) -> (
-    std::io::BufWriter<Box<std::io::Write>>,
+    std::io::BufWriter<Box<dyn std::io::Write>>,
     bool,
     bool,
     bool,
     bool,
 ) {
-    let output: std::io::BufWriter<Box<std::io::Write>> =
+    let output: std::io::BufWriter<Box<dyn std::io::Write>> =
         std::io::BufWriter::new(file::get_output(
             matches.value_of("output").unwrap(),
             file::CompressionFormat::No,

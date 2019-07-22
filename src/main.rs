@@ -52,7 +52,6 @@ mod subcommand;
 mod utils;
 
 /* crates use */
-use clap::{App, Arg, SubCommand};
 
 /* standard use */
 use std::collections::HashMap;
@@ -67,7 +66,7 @@ fn main() {
     let subcmd = cli::get_subcmd(&mut app);
 
     /* Manage input and output file */
-    let (input, compression) = file::get_input(matches.value_of("input").unwrap());
+    let (input, _) = file::get_input(matches.value_of("input").unwrap());
 
     let mut format: utils::Format = utils::get_mapping_format(&matches);
 

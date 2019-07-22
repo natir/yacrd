@@ -42,8 +42,8 @@ pub fn run<'a>(reads_info: &chimera::BadReadMap, matches: ArgMatches<'a>) {
 fn parse<'a>(
     matches: ArgMatches,
 ) -> (
-    std::io::BufReader<Box<std::io::Read>>,
-    std::io::BufWriter<Box<std::io::Write>>,
+    std::io::BufReader<Box<dyn std::io::Read>>,
+    std::io::BufWriter<Box<dyn std::io::Write>>,
     utils::Format,
 ) {
     let input_path = matches.value_of("input").unwrap();
@@ -62,8 +62,8 @@ fn parse<'a>(
 }
 
 fn fasta(
-    input: std::io::BufReader<Box<std::io::Read>>,
-    output: std::io::BufWriter<Box<std::io::Write>>,
+    input: std::io::BufReader<Box<dyn std::io::Read>>,
+    output: std::io::BufWriter<Box<dyn std::io::Write>>,
     reads_info: &chimera::BadReadMap,
 ) -> () {
     let reader = bio::io::fasta::Reader::new(input);
@@ -78,8 +78,8 @@ fn fasta(
 }
 
 fn fastq(
-    input: std::io::BufReader<Box<std::io::Read>>,
-    output: std::io::BufWriter<Box<std::io::Write>>,
+    input: std::io::BufReader<Box<dyn std::io::Read>>,
+    output: std::io::BufWriter<Box<dyn std::io::Write>>,
     reads_info: &chimera::BadReadMap,
 ) -> () {
     let reader = bio::io::fastq::Reader::new(input);
@@ -123,7 +123,7 @@ impl Scrubable<bio::io::fasta::Record> for bio::io::fasta::Record {
     fn scrubb(self: &Self, reads: &chimera::BadReadMap) -> Vec<bio::io::fasta::Record> {
         let mut subrecord = vec![];
 
-        let (read_type, _, gaps) = reads.get(self.id()).unwrap();
+        let (_, _, gaps) = reads.get(self.id()).unwrap();
 
         for int_of_good in get_good_pos(gaps, self.seq().len() as u64) {
             let a = int_of_good.begin;

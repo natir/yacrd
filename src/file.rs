@@ -42,7 +42,7 @@ enum_from_primitive! {
     }
 }
 
-pub fn get_input(input_name: &str) -> (Box<io::Read>, CompressionFormat) {
+pub fn get_input(input_name: &str) -> (Box<dyn io::Read>, CompressionFormat) {
     // choose std::io::stdin or open file
     if input_name == "-" {
         return (Box::new(get_readable(input_name)), CompressionFormat::No);
@@ -51,7 +51,7 @@ pub fn get_input(input_name: &str) -> (Box<io::Read>, CompressionFormat) {
     return get_readable_file(input_name);
 }
 
-pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat) {
+pub fn get_readable_file(input_name: &str) -> (Box<dyn io::Read>, CompressionFormat) {
     let raw_input = get_readable(input_name);
 
     // check compression
@@ -75,7 +75,7 @@ pub fn get_readable_file(input_name: &str) -> (Box<io::Read>, CompressionFormat)
     }
 }
 
-pub fn get_readable(input_name: &str) -> Box<io::Read> {
+pub fn get_readable(input_name: &str) -> Box<dyn io::Read> {
     match input_name {
         "-" => Box::new(BufReader::new(io::stdin())),
         _ => Box::new(BufReader::new(
@@ -84,7 +84,7 @@ pub fn get_readable(input_name: &str) -> Box<io::Read> {
     }
 }
 
-fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
+fn get_compression(mut in_stream: Box<dyn io::Read>) -> CompressionFormat {
     let mut buf = vec![0u8; 5];
 
     in_stream
@@ -111,7 +111,7 @@ fn get_compression(mut in_stream: Box<io::Read>) -> CompressionFormat {
     }
 }
 
-pub fn get_output(output_name: &str, format: CompressionFormat) -> Box<io::Write> {
+pub fn get_output(output_name: &str, format: CompressionFormat) -> Box<dyn io::Write> {
     match format {
         CompressionFormat::Gzip => Box::new(flate2::write::GzEncoder::new(
             get_writable(output_name),
@@ -145,7 +145,7 @@ pub fn choose_compression(
     }
 }
 
-fn get_writable(output_name: &str) -> Box<io::Write> {
+fn get_writable(output_name: &str) -> Box<dyn io::Write> {
     match output_name {
         "-" => Box::new(BufWriter::new(io::stdout())),
         _ => Box::new(BufWriter::new(

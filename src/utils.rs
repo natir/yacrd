@@ -28,7 +28,7 @@ use clap;
 #[derive(Debug, PartialEq)]
 pub enum Format {
     Paf,
-    Mhap,
+    M4,
     Fasta,
     Fastq,
 }
@@ -37,12 +37,12 @@ pub fn get_mapping_format(matches: &clap::ArgMatches) -> Format {
     return if matches.is_present("format") {
         match matches.value_of("format").unwrap() {
             "paf" => Format::Paf,
-            "mhap" => Format::Mhap,
+            "m4" => Format::M4,
             _ => panic!("You can't be her send your command line to pierre.marijon@inria.fr"),
         }
     } else {
         get_mapping_format_name(matches.value_of("input").unwrap())
-            .expect("Format of input can be determinate check file extension (paf and mhap only)")
+            .expect("Format of input can be determinate check file extension (paf and m4 only)")
     };
 }
 
@@ -60,7 +60,7 @@ pub fn get_sequence_formats(matches: &clap::ArgMatches, formats: &mut Vec<Format
     } else {
         for input_name in matches.values_of("input").unwrap() {
             formats.push(get_sequence_format(input_name).expect(
-                "Format of input can be determinate check file extension (paf and mhap only)",
+                "Format of input can be determinate check file extension (paf and m4 only)",
             ));
         }
     }
@@ -68,7 +68,7 @@ pub fn get_sequence_formats(matches: &clap::ArgMatches, formats: &mut Vec<Format
 
 pub fn get_mapping_format_name(filename: &str) -> Option<Format> {
     return match get_format(filename) {
-        e @ Some(Format::Paf) | e @ Some(Format::Mhap) => e,
+        e @ Some(Format::Paf) | e @ Some(Format::M4) => e,
         _ => None,
     };
 }
@@ -86,7 +86,7 @@ pub fn get_format(filename: &str) -> Option<Format> {
     } else if filename.contains(".paf") {
         Some(Format::Paf)
     } else if filename.contains(".mhap") {
-        Some(Format::Mhap)
+        Some(Format::M4)
     } else if filename.contains(".fasta") {
         Some(Format::Fasta)
     } else if filename.contains(".fastq") {
@@ -108,7 +108,7 @@ mod test {
     #[test]
     fn filename_mapping_only() {
         assert_eq!(get_mapping_format_name("t.paf").unwrap(), Format::Paf);
-        assert_eq!(get_mapping_format_name("t.mhap").unwrap(), Format::Mhap);
+        assert_eq!(get_mapping_format_name("t.mhap").unwrap(), Format::M4);
         assert_eq!(get_mapping_format_name("t.fasta"), None);
         assert_eq!(get_mapping_format_name("t.fastq"), None);
     }
@@ -116,7 +116,7 @@ mod test {
     #[test]
     fn filename_based() {
         assert_eq!(get_format("t.paf").unwrap(), Format::Paf);
-        assert_eq!(get_format("t.mhap").unwrap(), Format::Mhap);
+        assert_eq!(get_format("t.mhap").unwrap(), Format::M4);
         assert_eq!(get_format("t.fasta").unwrap(), Format::Fasta);
         assert_eq!(get_format("t.fastq").unwrap(), Format::Fastq);
     }
@@ -124,7 +124,7 @@ mod test {
     #[test]
     fn filename_based_compressed() {
         assert_eq!(get_format("t.paf.gz").unwrap(), Format::Paf);
-        assert_eq!(get_format("t.mhap.xz").unwrap(), Format::Mhap);
+        assert_eq!(get_format("t.mhap.xz").unwrap(), Format::M4);
         assert_eq!(get_format("t.fasta.something").unwrap(), Format::Fasta);
         assert_eq!(get_format("t.fastq.zip").unwrap(), Format::Fastq);
     }
