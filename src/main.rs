@@ -25,6 +25,7 @@ extern crate bzip2;
 extern crate clap;
 extern crate csv;
 extern crate flate2;
+extern crate itertools;
 extern crate serde;
 extern crate xz2;
 
@@ -44,16 +45,11 @@ extern crate lazy_static;
 /* local mod */
 mod chimera;
 mod cli;
-mod extract;
 mod file;
-mod filter;
 mod io;
 mod overlap;
-mod split;
 mod subcommand;
 mod utils;
-
-mod postdetection;
 
 /* crates use */
 use clap::{App, Arg, SubCommand};
@@ -90,17 +86,14 @@ fn main() {
 
     let mut reads_info: chimera::BadReadMap = HashMap::new();
 
-    overlap::find(
-        input,
-        format,
-        chimeric_th,
-        not_covered_th,
-        &mut reads_info,
-    );
+    overlap::find(input, format, chimeric_th, not_covered_th, &mut reads_info);
 
     for (cmd, arg) in subcmd {
         match cmd.as_ref() {
             "report" => subcommand::report::run(&reads_info, arg),
+            "filter" => subcommand::filter::run(&reads_info, arg),
+            "scrubbing" => subcommand::scrubbing::run(&reads_info, arg),
+
             _ => (),
         }
     }

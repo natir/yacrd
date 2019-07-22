@@ -83,7 +83,12 @@ pub enum IntervalType {
 pub struct Interval {
     pub begin: u64,
     pub end: u64,
-    pub int_type: IntervalType,
+}
+
+impl Interval {
+    pub fn new(b: u64, e: u64) -> Self {
+        Interval { begin: b, end: e }
+    }
 }
 
 impl serde::ser::Serialize for Interval {
@@ -125,30 +130,6 @@ impl PartialEq for Interval {
 impl Eq for Interval {}
 
 pub type BadReadMap = HashMap<String, (BadReadType, u64, Vec<Interval>)>;
-
-pub fn write<W: std::io::Write>(mut output: &mut W, remove_reads: &BadReadMap, json: bool) {
-    if json {
-        let mut map = serde_json::map::Map::new();
-        for (id, (label, len, gaps)) in remove_reads {
-            map.insert(
-                id.to_string(),
-                json!({
-                    "type": label.as_str(),
-                    "length": len,
-                    "gaps": gaps
-                }),
-            );
-        }
-        output
-            .write(&json!(map).to_string().into_bytes())
-            .expect("Error durring write result in json format");
-    } else {
-        for (id, (label, len, gaps)) in remove_reads {
-            write_result(&mut output, &label, &id, &len, &gaps);
-        }
-    }
-}
-
 
 #[cfg(test)]
 mod test {

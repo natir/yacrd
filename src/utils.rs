@@ -96,6 +96,10 @@ pub fn get_format(filename: &str) -> Option<Format> {
     };
 }
 
+pub fn in_read(begin: usize, end: usize, length: usize) -> bool {
+    return begin <= length && end <= length;
+}
+
 #[cfg(test)]
 mod test {
 

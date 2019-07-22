@@ -92,7 +92,6 @@ pub fn find<R: std::io::Read>(
                     middle_gaps.push(chimera::Interval {
                         begin: last_covered,
                         end: interval.begin,
-                        int_type: chimera::IntervalType::Sure,
                     });
                 } else {
                     first_covered = interval.begin;
@@ -129,7 +128,6 @@ pub fn find<R: std::io::Read>(
                 chimera::Interval {
                     begin: 0,
                     end: first_covered,
-                    int_type: chimera::IntervalType::Sure,
                 },
             );
         }
@@ -138,7 +136,6 @@ pub fn find<R: std::io::Read>(
             middle_gaps.push(chimera::Interval {
                 begin: last_covered,
                 end: key.len,
-                int_type: chimera::IntervalType::Sure,
             });
         }
 
@@ -174,7 +171,6 @@ fn parse_paf<R: std::io::Read>(
         let val_a = chimera::Interval {
             begin: record.begin_a,
             end: record.end_a,
-            int_type: chimera::IntervalType::Sure,
         };
 
         let key_b = chimera::NameLen {
@@ -184,7 +180,6 @@ fn parse_paf<R: std::io::Read>(
         let val_b = chimera::Interval {
             begin: record.begin_b,
             end: record.end_b,
-            int_type: chimera::IntervalType::Sure,
         };
 
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
@@ -208,7 +203,6 @@ fn parse_mhap<R: std::io::Read>(
         let val_a = chimera::Interval {
             begin: record.begin_a,
             end: record.end_a,
-            int_type: chimera::IntervalType::Sure,
         };
 
         let key_b = chimera::NameLen {
@@ -218,7 +212,6 @@ fn parse_mhap<R: std::io::Read>(
         let val_b = chimera::Interval {
             begin: record.begin_b,
             end: record.end_b,
-            int_type: chimera::IntervalType::Sure,
         };
 
         read2mapping.entry(key_a).or_insert(Vec::new()).push(val_a);
@@ -276,13 +269,7 @@ mod test {
         let mut remove_reads: chimera::BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
-        find(
-            PAF_FILE,
-            utils::Format::Paf,
-            0,
-            0.8,
-            &mut remove_reads,
-        );
+        find(PAF_FILE, utils::Format::Paf, 0, 0.8, &mut remove_reads);
 
         chimera::write(&mut writer, &remove_reads, false);
 
@@ -290,13 +277,7 @@ mod test {
 
         writer.clear();
 
-        find(
-            MHAP_FILE,
-            utils::Format::Mhap,
-            0,
-            0.8,
-            &mut remove_reads,
-        );
+        find(MHAP_FILE, utils::Format::Mhap, 0, 0.8, &mut remove_reads);
 
         chimera::write(&mut writer, &remove_reads, false);
 
@@ -355,13 +336,7 @@ mod test {
         let mut remove_reads: chimera::BadReadMap = HashMap::new();
         let mut writer: Vec<u8> = Vec::new();
 
-        find(
-            PAF_FILE,
-            utils::Format::Paf,
-            0,
-            0.8,
-            &mut remove_reads,
-        );
+        find(PAF_FILE, utils::Format::Paf, 0, 0.8, &mut remove_reads);
 
         chimera::write(&mut writer, &remove_reads, true);
 
@@ -455,7 +430,6 @@ mod test {
                 vec![chimera::Interval {
                     begin: 0,
                     end: 4500,
-                    int_type: chimera::IntervalType::Sure,
                 }],
             );
             m.insert(
@@ -466,7 +440,6 @@ mod test {
                 vec![chimera::Interval {
                     begin: 5500,
                     end: 10000,
-                    int_type: chimera::IntervalType::Sure,
                 }],
             );
             m.insert(
@@ -478,12 +451,10 @@ mod test {
                     chimera::Interval {
                         begin: 20,
                         end: 4500,
-                        int_type: chimera::IntervalType::Sure,
                     },
                     chimera::Interval {
                         begin: 5500,
                         end: 10000,
-                        int_type: chimera::IntervalType::Sure,
                     },
                 ],
             );

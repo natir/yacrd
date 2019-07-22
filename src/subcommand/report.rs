@@ -31,10 +31,16 @@ pub fn run<'a>(reads_info: &chimera::BadReadMap, matches: ArgMatches<'a>) {
     let (mut output, chimeric, not_covered, not_bad, json) = parse(matches);
 
     for (id, (label, len, gaps)) in reads_info {
-        if label == &chimera::BadReadType::Chimeric && chimeric {continue;}
-        if label == &chimera::BadReadType::NotCovered && not_covered {continue;}
-        if label == &chimera::BadReadType::NotBad && not_bad {continue;}
-        
+        if label == &chimera::BadReadType::Chimeric && chimeric {
+            continue;
+        }
+        if label == &chimera::BadReadType::NotCovered && not_covered {
+            continue;
+        }
+        if label == &chimera::BadReadType::NotBad && not_bad {
+            continue;
+        }
+
         if json {
             let mut map = serde_json::map::Map::new();
             map.insert(
