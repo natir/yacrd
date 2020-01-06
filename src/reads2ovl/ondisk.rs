@@ -49,7 +49,7 @@ impl OnDisk {
 
     fn clean_buffer(&mut self) -> Result<()> {
         for (key, values) in self.reads2ovl.iter_mut() {
-            let filename = format!("{}{}", self.prefix, key);
+            let filename = format!("{}{}.yovl", self.prefix, key);
             let raw_out = std::fs::OpenOptions::new()
                 .create(true)
                 .append(true)
@@ -90,7 +90,7 @@ impl reads2ovl::Reads2Ovl for OnDisk {
     }
 
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        let filename = format!("{}{}", self.prefix, id);
+        let filename = format!("{}{}.yovl", self.prefix, id);
         if std::path::Path::new(&filename).exists() {
             let mut reader = csv::ReaderBuilder::new()
                 .delimiter(b',')
@@ -137,7 +137,7 @@ impl reads2ovl::Reads2Ovl for OnDisk {
         self.reads2len.entry(id).or_insert(length);
     }
 
-    fn get_reads(&self) -> Vec<String> {
+    fn get_reads(&self) -> std::collections::HashSet<String> {
         self.reads2len.keys().map(|x| x.to_string()).collect()
     }
 }

@@ -112,9 +112,14 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
+		if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+		    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+		    break;
+		}
+		
                 writer
                     .write(
-                        &format!("{}_{}_{}", record.id(), pos[0], poss[1]),
+                        &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
                         record.desc(),
                         &record.seq()[(pos[0] as usize)..(pos[1] as usize)],
                     )
@@ -171,9 +176,14 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
-                writer
+		if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+		    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+		    break;
+		}
+
+		writer
                     .write(
-                        &format!("{}_{}_{}", record.id(), pos[0], poss[1]),
+                        &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
                         record.desc(),
                         &record.seq()[(pos[0] as usize)..(pos[1] as usize)],
                         &record.qual()[(pos[0] as usize)..(pos[1] as usize)],
@@ -186,4 +196,94 @@ where
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use reads2ovl;
+    use reads2ovl::Reads2Ovl;
+
+    const FASTA_FILE: &'static [u8] = b">1
+ACTGGGGGGACTGGGGGGACTG
+>2
+ACTG
+>3
+ACTG
+";
+
+    const FASTA_FILE_SPLITED: &'static [u8] = b">1_0_13
+ACTGGGGGGACTG
+>1_18_22
+ACTG
+>2
+ACTG
+>3
+ACTG
+";
+
+    #[test]
+    fn fasta_file() -> () {
+	let mut ovlst = reads2ovl::FullMemory::new();
+
+	ovlst.add_length("1".to_string(), 22);
+	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+	assert_eq!(FASTA_FILE_SPLITED, &output[..]);
+    }
+
+    const FASTQ_FILE: &'static [u8] = b"@1
+ACTGGGGGGACTGGGGGGACTG
++
+??????????????????????
+@2
+ACTG
++
+????
+@3
+ACTG
++
+????
+";
+
+    const FASTQ_FILE_FILTRED: &'static [u8] = b"@1_0_13
+ACTGGGGGGACTG
++
+?????????????
+@1_18_22
+ACTG
++
+????
+@2
+ACTG
++
+????
+@3
+ACTG
++
+????
+";
+
+    #[test]
+    fn fastq_file() {
+	let mut ovlst = reads2ovl::FullMemory::new();
+	
+	ovlst.add_length("1".to_string(), 22);
+	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+	assert_eq!(FASTQ_FILE_FILTRED, &output[..]);
+    }
 }

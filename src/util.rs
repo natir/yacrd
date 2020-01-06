@@ -37,7 +37,7 @@ pub enum FileType {
 }
 
 pub fn get_file_type(filename: &str) -> Option<FileType> {
-    if filename.contains(".m4") || filename.contains("mhap") {
+    if filename.contains(".m4") || filename.contains(".mhap") {
         Some(FileType::M4)
     } else if filename.contains(".paf") {
         Some(FileType::Paf)
@@ -47,6 +47,8 @@ pub fn get_file_type(filename: &str) -> Option<FileType> {
         Some(FileType::Fastq)
     } else if filename.contains(".fasta") || filename.contains(".fa") {
         Some(FileType::Fasta)
+    } else if filename.contains(".yovl") {
+        Some(FileType::YacrdOverlap)
     } else {
         None
     }
@@ -94,4 +96,186 @@ pub fn str2u32(val: &str) -> Result<u32> {
             val
         )
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod str2usize {
+        use super::*;
+
+        #[test]
+        fn failed() {
+            match str2usize("2,5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2usize('2,5') return {}", a),
+            }
+
+            match str2usize("2.5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2usize('2.5') return {}", a),
+            }
+        }
+
+        #[test]
+        fn succeeded() {
+            match str2usize("2") {
+                Ok(a) => assert!(true, "Value {}", a),
+                Err(e) => assert!(false, "str2usize('2') return {}", e),
+            }
+        }
+    }
+
+    mod str2u32 {
+        use super::*;
+
+        #[test]
+        fn failed() {
+            match str2u32("2,5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2u32('2,5') return {}", a),
+            }
+
+            match str2u32("2.5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2u32('2.5') return {}", a),
+            }
+        }
+
+        #[test]
+        fn succeeded() {
+            match str2u32("2") {
+                Ok(a) => assert!(true, "Value {}", a),
+                Err(e) => assert!(false, "str2u32('2') return {}", e),
+            }
+        }
+    }
+
+    mod file_type {
+        use super::*;
+
+        #[test]
+        fn m4() {
+            assert_eq!(Some(FileType::M4), get_file_type("test.m4"));
+        }
+
+        #[test]
+        fn m4_with_other_ext() {
+            assert_eq!(Some(FileType::M4), get_file_type("test.m4.other_ext"));
+        }
+
+        #[test]
+        fn m4_with_nopoint() {
+            assert_eq!(None, get_file_type("m4.other_ext"));
+        }
+
+        #[test]
+        fn mhap() {
+            assert_eq!(Some(FileType::M4), get_file_type("test.mhap"));
+        }
+
+        #[test]
+        fn mhap_with_other_ext() {
+            assert_eq!(Some(FileType::M4), get_file_type("test.mhap.other_ext"));
+        }
+
+        #[test]
+        fn mhap_with_nopoint() {
+            assert_eq!(None, get_file_type("mhap.other_ext"));
+        }
+
+        #[test]
+        fn paf() {
+            assert_eq!(Some(FileType::Paf), get_file_type("test.paf"));
+        }
+
+        #[test]
+        fn paf_with_other_ext() {
+            assert_eq!(Some(FileType::Paf), get_file_type("test.paf.other_ext"));
+        }
+
+        #[test]
+        fn paf_with_nopoint() {
+            assert_eq!(None, get_file_type("paf.other_ext"));
+        }
+
+        #[test]
+        fn fasta() {
+            assert_eq!(Some(FileType::Fasta), get_file_type("test.fasta"));
+        }
+
+        #[test]
+        fn fasta_with_other_ext() {
+            assert_eq!(Some(FileType::Fasta), get_file_type("test.fasta.other_ext"));
+        }
+
+        #[test]
+        fn fasta_with_nopoint() {
+            assert_eq!(None, get_file_type("fasta.other_ext"));
+        }
+
+        #[test]
+        fn fa() {
+            assert_eq!(Some(FileType::Fasta), get_file_type("test.fa"));
+        }
+
+        #[test]
+        fn fa_with_other_ext() {
+            assert_eq!(Some(FileType::Fasta), get_file_type("test.fa.other_ext"));
+        }
+
+        #[test]
+        fn fa_with_nopoint() {
+            assert_eq!(None, get_file_type("fa.other_ext"));
+        }
+
+        #[test]
+        fn fastq() {
+            assert_eq!(Some(FileType::Fastq), get_file_type("test.fastq"));
+        }
+
+        #[test]
+        fn fastq_with_other_ext() {
+            assert_eq!(Some(FileType::Fastq), get_file_type("test.fastq.other_ext"));
+        }
+
+        #[test]
+        fn fastq_with_nopoint() {
+            assert_eq!(None, get_file_type("fastq.other_ext"));
+        }
+
+        #[test]
+        fn fq() {
+            assert_eq!(Some(FileType::Fastq), get_file_type("test.fq"));
+        }
+
+        #[test]
+        fn fq_with_other_ext() {
+            assert_eq!(Some(FileType::Fastq), get_file_type("test.fq.other_ext"));
+        }
+
+        #[test]
+        fn fq_with_nopoint() {
+            assert_eq!(None, get_file_type("fq.other_ext"));
+        }
+
+        #[test]
+        fn yacrd_overlap() {
+            assert_eq!(Some(FileType::YacrdOverlap), get_file_type("test.yovl"));
+        }
+
+        #[test]
+        fn yacrd_overlap_with_other_ext() {
+            assert_eq!(
+                Some(FileType::YacrdOverlap),
+                get_file_type("test.yovl.other_ext")
+            );
+        }
+
+        #[test]
+        fn yacrd_overlap_with_nopoint() {
+            assert_eq!(None, get_file_type("yovl.other_ext"));
+        }
+    }
 }

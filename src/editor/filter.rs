@@ -220,3 +220,126 @@ where
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use reads2ovl;
+    use reads2ovl::Reads2Ovl;
+    
+    const FASTA_FILE: &'static [u8] = b">1
+ACTG
+>2
+ACTG
+>3
+ACTG
+";
+
+    const FASTA_FILE_FILTRED: &'static [u8] = b">2
+ACTG
+>3
+ACTG
+";
+
+    #[test]
+    fn fasta_file() -> () {
+	let mut ovlst = reads2ovl::FullMemory::new();
+
+	ovlst.add_length("1".to_string(), 1000);
+	ovlst.add_overlap("1".to_string(), (10, 490)).unwrap();
+	ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+	
+	assert_eq!(FASTA_FILE_FILTRED, &output[..]);
+    }
+
+    const FASTQ_FILE: &'static [u8] = b"@1
+ACTG
++
+????
+@2
+ACTG
++
+????
+@3
+ACTG
++
+????
+";
+
+    const FASTQ_FILE_FILTRED: &'static [u8] = b"@2
+ACTG
++
+????
+@3
+ACTG
++
+????
+";
+
+    #[test]
+    fn fastq_file() {
+	let mut ovlst = reads2ovl::FullMemory::new();
+
+	ovlst.add_length("1".to_string(), 1000);
+	ovlst.add_overlap("1".to_string(), (10, 490)).unwrap();
+	ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+	
+	assert_eq!(FASTQ_FILE_FILTRED, &output[..]);
+    }
+
+    
+    const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
+";
+
+    const PAF_FILE_FILTRED: &'static [u8] = b"";
+
+    #[test]
+    fn paf_file() {
+	let mut ovlst = reads2ovl::FullMemory::new();
+
+	ovlst.add_length("1".to_string(), 1000);
+	ovlst.add_overlap("1".to_string(), (10, 490)).unwrap();
+	ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	paf(PAF_FILE, &mut output, &mut stack, 0.8).unwrap();
+	
+	assert_eq!(PAF_FILE_FILTRED, &output[..]);
+    }
+
+    const M4_FILE: &'static [u8] = b"1 2 0.1 2 0 100 450 1000 0 550 900 1000
+1 3 0.1 2 0 550 900 1000 0 100 450 1000
+";
+
+    const M4_FILE_FILTRED: &'static [u8] = b"";
+
+    #[test]
+    fn m4_file() {
+	let mut ovlst = reads2ovl::FullMemory::new();
+
+	ovlst.add_length("1".to_string(), 1000);
+	ovlst.add_overlap("1".to_string(), (10, 490)).unwrap();
+	ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
+	
+	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+	let mut output: Vec<u8> = Vec::new();
+	m4(M4_FILE, &mut output, &mut stack, 0.8).unwrap();
+	
+	assert_eq!(M4_FILE_FILTRED, &output[..]);
+    }
+}

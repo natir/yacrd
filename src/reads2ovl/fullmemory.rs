@@ -27,8 +27,7 @@ use anyhow::Result;
 use reads2ovl;
 
 pub struct FullMemory {
-    reads2ovl: std::collections::HashMap<String, Vec<(u32, u32)>>,
-    reads2len: std::collections::HashMap<String, usize>,
+    reads2ovl: std::collections::HashMap<String, (Vec<(u32, u32)>, usize)>,
     no_overlap: Vec<(u32, u32)>,
 }
 
@@ -36,7 +35,6 @@ impl FullMemory {
     pub fn new() -> Self {
         FullMemory {
             reads2ovl: std::collections::HashMap::new(),
-            reads2len: std::collections::HashMap::new(),
             no_overlap: Vec::new(),
         }
     }
@@ -44,28 +42,36 @@ impl FullMemory {
 
 impl reads2ovl::Reads2Ovl for FullMemory {
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        Ok(self
-            .reads2ovl
-            .get(&id.to_string())
-            .unwrap_or(&self.no_overlap)
-            .to_vec())
+        if let Some((vec, _)) = self.reads2ovl.get(&id.to_string()) {
+            Ok(vec.to_vec())
+        } else {
+            Ok(self.no_overlap.to_vec())
+        }
     }
 
     fn length(&self, id: &str) -> usize {
-        *self.reads2len.get(&id.to_string()).unwrap_or(&0)
+        if let Some((_, len)) = self.reads2ovl.get(&id.to_string()) {
+            *len
+        } else {
+            0
+        }
     }
 
     fn add_overlap(&mut self, id: String, ovl: (u32, u32)) -> Result<()> {
-        self.reads2ovl.entry(id).or_insert_with(Vec::new).push(ovl);
+        self.reads2ovl
+            .entry(id)
+            .or_insert((Vec::new(), 0))
+            .0
+            .push(ovl);
 
         Ok(())
     }
 
     fn add_length(&mut self, id: String, length: usize) {
-        self.reads2len.entry(id).or_insert(length);
+        self.reads2ovl.entry(id).or_insert((Vec::new(), 0)).1 = length;
     }
 
-    fn get_reads(&self) -> Vec<String> {
-        self.reads2len.keys().map(|x| x.to_string()).collect()
+    fn get_reads(&self) -> std::collections::HashSet<String> {
+        self.reads2ovl.keys().map(|x| x.to_string()).collect()
     }
 }

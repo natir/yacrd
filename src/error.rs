@@ -28,7 +28,9 @@ use util;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Reading of the file '{filename:}' impossible, does it exist and can be read by the user?")]
+    #[error(
+        "Reading of the file '{filename:}' impossible, does it exist and can be read by the user?"
+    )]
     CantReadFile { filename: String },
 
     #[error("Creation/opening of the file '{filename:}' impossible, directory in path exist? can be write by the user?")]
@@ -37,7 +39,9 @@ pub enum Error {
     #[error("Format detection for '{filename:}' file not possible, filename need to contains .fasta, .fa, .fastq, fq, .paf, .m4, .mhap or .yacrd")]
     UnableToDetectFileFormat { filename: String },
 
-    #[error("This operation {operation:} can't be run on this type ({filetype:?}) of file {filename:}")]
+    #[error(
+        "This operation {operation:} can't be run on this type ({filetype:?}) of file {filename:}"
+    )]
     CantRunOperationOnFile {
         operation: String,
         filetype: util::FileType,

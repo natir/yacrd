@@ -1,24 +1,24 @@
 /*
-   Copyright (c) 2019 Pierre Marijon <pmarijon@mpi-inf.mpg.de>
+Copyright (c) 2019 Pierre Marijon <pmarijon@mpi-inf.mpg.de>
 
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-   The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   SOFTWARE.
-*/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 
 /* crate use */
 use anyhow::{anyhow, Context, Result};
@@ -89,6 +89,12 @@ pub trait Reads2Ovl {
                 format: util::FileType::Paf,
             })?;
 
+            if result.len() < 9 {
+                bail!(error::Error::ReadingErrorNoFilename {
+                    format: util::FileType::Paf,
+                });
+            }
+	    
             let id_a = result[0].to_string();
             let id_b = result[5].to_string();
 
@@ -119,6 +125,12 @@ pub trait Reads2Ovl {
                 format: util::FileType::M4,
             })?;
 
+            if result.len() < 12 {
+                bail!(error::Error::ReadingErrorNoFilename {
+                    format: util::FileType::M4,
+                });
+            }
+
             let id_a = result[0].to_string();
             let id_b = result[1].to_string();
 
@@ -144,5 +156,80 @@ pub trait Reads2Ovl {
     fn add_overlap(&mut self, id: String, ovl: (u32, u32)) -> Result<()>;
     fn add_length(&mut self, id: String, ovl: usize);
 
-    fn get_reads(&self) -> Vec<String>;
+    fn get_reads(&self) -> std::collections::HashSet<String>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::io::Write;
+
+    extern crate tempfile;
+
+    const PAF_FILE: &'static [u8] = b"1\t12000\t20\t4500\t-\t2\t10000\t5500\t10000\t4500\t4500\t255
+1\t12000\t5500\t10000\t-\t3\t10000\t0\t4500\t4500\t4500\t255
+";
+
+    const M4_FILE: &'static [u8] = b"1 2 0.1 2 0 20 4500 12000 0 5500 10000 10000
+1 3 0.1 2 0 5500 10000 12000 0 0 4500 10000
+";
+
+    #[test]
+    fn paf() {
+        let mut paf = tempfile::Builder::new()
+            .suffix(".paf")
+            .tempfile()
+            .expect("Can't create tmpfile");
+
+        paf.as_file_mut()
+            .write_all(PAF_FILE)
+            .expect("Error durring write of paf in temp file");
+
+        let mut ovl = FullMemory::new();
+
+        ovl.init(paf.into_temp_path().to_str().unwrap())
+            .expect("Error in overlap init");
+
+        assert_eq!(
+            ["1".to_string(), "2".to_string(), "3".to_string(),]
+                .iter()
+                .cloned()
+                .collect::<std::collections::HashSet<String>>(),
+            ovl.get_reads()
+        );
+
+        assert_eq!(vec![(20, 4500), (5500, 10000)], ovl.overlap("1").unwrap());
+        assert_eq!(vec![(5500, 10000)], ovl.overlap("2").unwrap());
+        assert_eq!(vec![(0, 4500)], ovl.overlap("3").unwrap());
+    }
+
+    #[test]
+    fn m4() {
+        let mut m4 = tempfile::Builder::new()
+            .suffix(".m4")
+            .tempfile()
+            .expect("Can't create tmpfile");
+
+        m4.as_file_mut()
+            .write_all(M4_FILE)
+            .expect("Error durring write of paf in temp file");
+
+        let mut ovl = FullMemory::new();
+
+        ovl.init(m4.into_temp_path().to_str().unwrap())
+            .expect("Error in overlap init");
+
+        assert_eq!(
+            ["1".to_string(), "2".to_string(), "3".to_string(),]
+                .iter()
+                .cloned()
+                .collect::<std::collections::HashSet<String>>(),
+            ovl.get_reads()
+        );
+
+        assert_eq!(vec![(20, 4500), (5500, 10000)], ovl.overlap("1").unwrap());
+        assert_eq!(vec![(5500, 10000)], ovl.overlap("2").unwrap());
+        assert_eq!(vec![(0, 4500)], ovl.overlap("3").unwrap());
+    }
 }

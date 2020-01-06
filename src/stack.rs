@@ -34,7 +34,7 @@ use util;
 pub trait BadPart {
     fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)>;
 
-    fn get_reads(&self) -> Vec<String>;
+    fn get_reads(&self) -> std::collections::HashSet<String>;
 }
 
 pub struct FromOverlap {
@@ -57,7 +57,9 @@ impl FromOverlap {
         let mut stack: std::collections::BinaryHeap<Reverse<u32>> =
             std::collections::BinaryHeap::new();
 
-        let ovl = self.ovl.overlap(&id)?;
+        let mut ovl = self.ovl.overlap(&id)?;
+        ovl.sort();
+
         let length = self.ovl.length(&id);
 
         let mut first_covered = 0;
@@ -125,7 +127,7 @@ impl BadPart for FromOverlap {
             })?)
     }
 
-    fn get_reads(&self) -> Vec<String> {
+    fn get_reads(&self) -> std::collections::HashSet<String> {
         self.ovl.get_reads()
     }
 }
@@ -201,7 +203,119 @@ impl BadPart for FromReport {
         }
     }
 
-    fn get_reads(&self) -> Vec<String> {
+    fn get_reads(&self) -> std::collections::HashSet<String> {
         self.buffer.keys().map(|x| x.to_string()).collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::io::Write;
+
+    extern crate tempfile;
+    use self::tempfile::NamedTempFile;
+
+    use reads2ovl::Reads2Ovl;
+
+    #[test]
+    fn from_report() {
+        let mut report = NamedTempFile::new().expect("Can't create tmpfile");
+
+        write!(
+            report.as_file_mut(),
+            "NotBad	SRR8494940.65223	2706	1131,0,1131;16,2690,2706
+NotCovered	SRR8494940.141626	30116	326,0,326;27159,2957,30116
+Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691
+"
+        )
+        .expect("Error durring write of report in temp file");
+
+        let mut stack = FromReport::new(report.into_temp_path().to_str().unwrap())
+            .expect("Error when create stack object");
+
+        assert_eq!(
+            [
+                "SRR8494940.65223".to_string(),
+                "SRR8494940.141626".to_string(),
+                "SRR8494940.91655".to_string()
+            ]
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<String>>(),
+            stack.get_reads()
+        );
+
+        assert_eq!(
+            &(vec![(0, 1131), (2690, 2706)], 2706),
+            stack.get_bad_part("SRR8494940.65223").unwrap()
+        );
+        assert_eq!(
+            &(vec![(0, 326), (2957, 30116)], 30116),
+            stack.get_bad_part("SRR8494940.141626").unwrap()
+        );
+        assert_eq!(
+            &(vec![(0, 151), (7213, 11269), (15633, 15691)], 15691),
+            stack.get_bad_part("SRR8494940.91655").unwrap()
+        );
+    }
+
+    #[test]
+    fn from_overlap() {
+        let mut ovl = reads2ovl::FullMemory::new();
+
+        ovl.add_overlap("A".to_string(), (10, 990)).unwrap();
+        ovl.add_length("A".to_string(), 1000);
+
+        ovl.add_overlap("B".to_string(), (10, 90)).unwrap();
+        ovl.add_length("B".to_string(), 1000);
+
+        ovl.add_overlap("C".to_string(), (10, 490)).unwrap();
+        ovl.add_overlap("C".to_string(), (510, 990)).unwrap();
+        ovl.add_length("C".to_string(), 1000);
+
+        ovl.add_overlap("D".to_string(), (0, 990)).unwrap();
+        ovl.add_length("D".to_string(), 1000);
+
+        ovl.add_overlap("E".to_string(), (10, 1000)).unwrap();
+        ovl.add_length("E".to_string(), 1000);
+
+        ovl.add_overlap("F".to_string(), (0, 490)).unwrap();
+        ovl.add_overlap("F".to_string(), (510, 1000)).unwrap();
+        ovl.add_length("F".to_string(), 1000);
+
+        let mut stack = FromOverlap::new(Box::new(ovl), 0);
+
+        assert_eq!(
+            [
+                "A".to_string(),
+                "B".to_string(),
+                "C".to_string(),
+                "D".to_string(),
+                "E".to_string(),
+                "F".to_string()
+            ]
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<String>>(),
+            stack.get_reads()
+        );
+
+        assert_eq!(
+            &(vec![(0, 10), (990, 1000)], 1000),
+            stack.get_bad_part("A").unwrap()
+        );
+        assert_eq!(
+            &(vec![(0, 10), (90, 1000)], 1000),
+            stack.get_bad_part("B").unwrap()
+        );
+        assert_eq!(
+            &(vec![(0, 10), (490, 510), (990, 1000)], 1000),
+            stack.get_bad_part("C").unwrap()
+        );
+        assert_eq!(&(vec![(990, 1000)], 1000), stack.get_bad_part("D").unwrap());
+        assert_eq!(&(vec![(0, 10)], 1000), stack.get_bad_part("E").unwrap());
+        assert_eq!(&(vec![(490, 510)], 1000), stack.get_bad_part("F").unwrap());
     }
 }

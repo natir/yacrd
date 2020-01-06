@@ -106,3 +106,25 @@ fn bad_region_format(bads: &[(u32, u32)]) -> String {
         .collect::<Vec<String>>()
         .join(";")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn read_type_assignation() {
+        let a = (vec![(0, 10), (990, 1000)], 1000);
+        let b = (vec![(0, 10), (90, 1000)], 1000);
+        let c = (vec![(0, 10), (490, 510), (990, 1000)], 1000);
+        let d = (vec![(990, 1000)], 1000);
+        let e = (vec![(0, 10)], 1000);
+        let f = (vec![(490, 510)], 1000);
+	
+	assert_eq!(ReadType::NotBad, type_of_read(a.1, &a.0, 0.8));
+	assert_eq!(ReadType::NotCovered, type_of_read(b.1, &b.0, 0.8));
+	assert_eq!(ReadType::Chimeric, type_of_read(c.1, &c.0, 0.8));
+	assert_eq!(ReadType::NotBad, type_of_read(d.1, &d.0, 0.8));
+	assert_eq!(ReadType::NotBad, type_of_read(e.1, &e.0, 0.8));
+	assert_eq!(ReadType::Chimeric, type_of_read(f.1, &f.0, 0.8));	
+    }
+}

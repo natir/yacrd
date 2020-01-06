@@ -25,6 +25,8 @@ SOFTWARE.
 extern crate structopt;
 #[macro_use]
 extern crate anyhow;
+#[macro_use]
+extern crate log;
 extern crate bio;
 extern crate csv;
 extern crate niffler;
@@ -43,6 +45,8 @@ mod stack;
 mod util;
 
 fn main() -> Result<()> {
+    env_logger::init();
+    
     let params = cli::Command::from_args();
 
     /* Get bad region of reads */
@@ -63,9 +67,11 @@ fn main() -> Result<()> {
         };
 
     /* Write report */
-    let raw_out = Box::new(std::io::BufWriter::new(std::fs::File::create(
-        &params.output,
-    ).with_context(|| error::Error::CantWriteFile{ filename: params.output.clone() })?));
+    let raw_out = Box::new(std::io::BufWriter::new(
+        std::fs::File::create(&params.output).with_context(|| error::Error::CantWriteFile {
+            filename: params.output.clone(),
+        })?,
+    ));
 
     let mut out = niffler::get_writer(
         raw_out,
@@ -110,8 +116,8 @@ fn main() -> Result<()> {
 
     if let Some(prefix) = params.split {
         for read in reads2badregion.get_reads() {
-            let filename = format!("{}{}", prefix, read);
-            std::fs::remove_file(std::path::Path::new(&filename)).with_context(|| anyhow!("We failled to remove file {}, yacrd finish analysis but temporary file isn't remove", filename))?;
+            let filename = format!("{}{}.yovl", prefix, read);
+            std::fs::remove_file(std::path::Path::new(&filename)).with_context(|| anyhow!("We failled to remove file {}, yacrd finish analysis but temporary file isn't removed", filename))?;
         }
     }
 
