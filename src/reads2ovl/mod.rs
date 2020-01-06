@@ -94,7 +94,7 @@ pub trait Reads2Ovl {
                     format: util::FileType::Paf,
                 });
             }
-	    
+
             let id_a = result[0].to_string();
             let id_b = result[5].to_string();
 

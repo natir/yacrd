@@ -46,7 +46,7 @@ mod util;
 
 fn main() -> Result<()> {
     env_logger::init();
-    
+
     let params = cli::Command::from_args();
 
     /* Get bad region of reads */

@@ -112,11 +112,11 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
-		if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-		    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
-		    break;
-		}
-		
+                if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+                    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+                    break;
+                }
+
                 writer
                     .write(
                         &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
@@ -176,12 +176,12 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
-		if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-		    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
-		    break;
-		}
+                if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+                    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+                    break;
+                }
 
-		writer
+                writer
                     .write(
                         &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
                         record.desc(),
@@ -225,18 +225,18 @@ ACTG
 
     #[test]
     fn fasta_file() -> () {
-	let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
-	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+        ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
 
-	let mut output: Vec<u8> = Vec::new();
-	fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
 
-	assert_eq!(FASTA_FILE_SPLITED, &output[..]);
+        let mut output: Vec<u8> = Vec::new();
+        fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTA_FILE_SPLITED, &output[..]);
     }
 
     const FASTQ_FILE: &'static [u8] = b"@1
@@ -273,17 +273,17 @@ ACTG
 
     #[test]
     fn fastq_file() {
-	let mut ovlst = reads2ovl::FullMemory::new();
-	
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
-	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	let mut output: Vec<u8> = Vec::new();
-	fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+        ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
 
-	assert_eq!(FASTQ_FILE_FILTRED, &output[..]);
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+        let mut output: Vec<u8> = Vec::new();
+        fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTQ_FILE_FILTRED, &output[..]);
     }
 }

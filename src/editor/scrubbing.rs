@@ -93,7 +93,7 @@ where
 
         if rtype == editor::ReadType::NotCovered {
             continue;
-        } else if badregion.len() == 0 {
+        } else if badregion.is_empty() {
             writer
                 .write_record(&record)
                 .with_context(|| error::Error::WritingErrorNoFilename {
@@ -106,14 +106,18 @@ where
                 poss.push(interval.1);
             }
 
-	    if poss.last() != Some(&(*length as u32)) {
-		poss.push(*length as u32);
-	    };
-	    
-	    let iter = if poss[0] == 0 && poss[1] == 0 { &poss[2..] } else { &poss[..] };
-	    
-	    for pos in iter.chunks_exact(2) {
-		writer
+            if poss.last() != Some(&(*length as u32)) {
+                poss.push(*length as u32);
+            };
+
+            let iter = if poss[0] == 0 && poss[1] == 0 {
+                &poss[2..]
+            } else {
+                &poss[..]
+            };
+
+            for pos in iter.chunks_exact(2) {
+                writer
                     .write(
                         &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
                         record.desc(),
@@ -153,7 +157,7 @@ where
 
         if rtype == editor::ReadType::NotCovered {
             continue;
-        } else if badregion.len() == 0 {
+        } else if badregion.is_empty() {
             writer
                 .write_record(&record)
                 .with_context(|| error::Error::WritingErrorNoFilename {
@@ -165,13 +169,17 @@ where
                 poss.push(interval.0);
                 poss.push(interval.1);
             }
-            
-	    if poss.last() != Some(&(*length as u32)) {
-		poss.push(*length as u32);
-	    };
-	    
-	    let iter = if poss[0] == 0 && poss[1] == 0 { &poss[2..] } else { &poss[..] };
-	    
+
+            if poss.last() != Some(&(*length as u32)) {
+                poss.push(*length as u32);
+            };
+
+            let iter = if poss[0] == 0 && poss[1] == 0 {
+                &poss[2..]
+            } else {
+                &poss[..]
+            };
+
             for pos in iter.chunks_exact(2) {
                 writer
                     .write(
@@ -219,22 +227,22 @@ ACTG
 
     #[test]
     fn fasta_keep_begin_end() -> () {
-	let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
-	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
-	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
+        ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+        ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
 
-	let mut output: Vec<u8> = Vec::new();
-	fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
 
-	assert_eq!(FASTA_FILE_SCRUBBED, &output[..]);
+        let mut output: Vec<u8> = Vec::new();
+        fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTA_FILE_SCRUBBED, &output[..]);
     }
 
-        const FASTA_FILE_SCRUBBED2: &'static [u8] = b">1_4_18
+    const FASTA_FILE_SCRUBBED2: &'static [u8] = b">1_4_18
 GGGGGACTGGGGGG
 >2
 ACTG
@@ -244,20 +252,19 @@ ACTG
 
     #[test]
     fn fasta_keep_middle() -> () {
-	let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();
 
-	let mut output: Vec<u8> = Vec::new();
-	fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
 
-	assert_eq!(FASTA_FILE_SCRUBBED2, &output[..]);
+        let mut output: Vec<u8> = Vec::new();
+        fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTA_FILE_SCRUBBED2, &output[..]);
     }
 
-    
     const FASTQ_FILE: &'static [u8] = b"@1
 ACTGGGGGGACTGGGGGGACTG
 +
@@ -296,19 +303,19 @@ ACTG
 
     #[test]
     fn fastq_keep_begin_end() {
-	let mut ovlst = reads2ovl::FullMemory::new();
-	
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
-	ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
-	ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	let mut output: Vec<u8> = Vec::new();
-	fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
+        ovlst.add_overlap("1".to_string(), (9, 13)).unwrap();
+        ovlst.add_overlap("1".to_string(), (18, 22)).unwrap();
 
-	assert_eq!(FASTQ_FILE_SCRUBBED, &output[..]);
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+        let mut output: Vec<u8> = Vec::new();
+        fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTQ_FILE_SCRUBBED, &output[..]);
     }
 
     const FASTQ_FILE_SCRUBBED2: &'static [u8] = b"@1_4_18
@@ -324,19 +331,19 @@ ACTG
 +
 ????
 ";
-    
+
     #[test]
     fn fastq_keep_middle() {
-	let mut ovlst = reads2ovl::FullMemory::new();
-	
-	ovlst.add_length("1".to_string(), 22);
-	ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();
-	
-	let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+        let mut ovlst = reads2ovl::FullMemory::new();
 
-	let mut output: Vec<u8> = Vec::new();
-	fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+        ovlst.add_length("1".to_string(), 22);
+        ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();
 
-	assert_eq!(FASTQ_FILE_SCRUBBED2, &output[..]);
+        let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+        let mut output: Vec<u8> = Vec::new();
+        fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
+
+        assert_eq!(FASTQ_FILE_SCRUBBED2, &output[..]);
     }
 }

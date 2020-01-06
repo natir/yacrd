@@ -223,12 +223,11 @@ mod tests {
     fn from_report() {
         let mut report = NamedTempFile::new().expect("Can't create tmpfile");
 
-        write!(
+        writeln!(
             report.as_file_mut(),
             "NotBad	SRR8494940.65223	2706	1131,0,1131;16,2690,2706
 NotCovered	SRR8494940.141626	30116	326,0,326;27159,2957,30116
-Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691
-"
+Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
         )
         .expect("Error durring write of report in temp file");
 
