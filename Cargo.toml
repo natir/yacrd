@@ -3,7 +3,7 @@ name = "yacrd"
 version = "0.6.0"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 
-exclude = ["image/*", "validation/*", "tests/*"]
+exclude = ["image/*", "tests/*"]
 
 description = "Using all-against-all read mapping, yacrd performs: computation of pile-up coverage for each read and detection of chimeras"
 homepage = "https://github.com/natir/yacrd"

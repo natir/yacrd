@@ -87,25 +87,25 @@ fn main() -> Result<()> {
 
     /* Run post operation on read or overlap */
     match params.subcmd {
-        Some(cli::SubCommand::Scrubbing(s)) => editor::scrubbing(
+        Some(cli::SubCommand::Scrubb(s)) => editor::scrubbing(
             &s.input,
             &s.output,
             &mut *reads2badregion,
             params.not_coverage,
         )?,
-        Some(cli::SubCommand::Filtering(f)) => editor::filter(
+        Some(cli::SubCommand::Filter(f)) => editor::filter(
             &f.input,
             &f.output,
             &mut *reads2badregion,
             params.not_coverage,
         )?,
-        Some(cli::SubCommand::Extracting(e)) => editor::extract(
+        Some(cli::SubCommand::Extract(e)) => editor::extract(
             &e.input,
             &e.output,
             &mut *reads2badregion,
             params.not_coverage,
         )?,
-        Some(cli::SubCommand::Spliting(s)) => editor::split(
+        Some(cli::SubCommand::Split(s)) => editor::split(
             &s.input,
             &s.output,
             &mut *reads2badregion,

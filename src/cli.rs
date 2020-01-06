@@ -22,7 +22,7 @@ SOFTWARE.
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    version = "0.6",
+    version = "0.6b Mew",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
     name = "yacrd",
     about = "
@@ -91,17 +91,17 @@ pub struct Command {
 #[derive(StructOpt, Debug)]
 pub enum SubCommand {
     #[structopt(about = "All bad region of read is removed")]
-    Scrubbing(Scrubbing),
+    Scrubb(Scrubb),
     #[structopt(about = "Record mark as chimeric or Not_covered is filter")]
-    Filtering(Filtering),
+    Filter(Filter),
     #[structopt(about = "Record mark as chimeric or Not_covered is extract")]
-    Extracting(Extracting),
+    Extract(Extract),
     #[structopt(about = "Record mark as chimeric or Not_covered is split")]
-    Spliting(Spliting),
+    Split(Split),
 }
 
 #[derive(StructOpt, Debug)]
-pub struct Scrubbing {
+pub struct Scrubb {
     #[structopt(
         short = "i",
         long = "input",
@@ -120,7 +120,7 @@ pub struct Scrubbing {
 }
 
 #[derive(StructOpt, Debug)]
-pub struct Filtering {
+pub struct Filter {
     #[structopt(
         short = "i",
         long = "input",
@@ -139,7 +139,7 @@ pub struct Filtering {
 }
 
 #[derive(StructOpt, Debug)]
-pub struct Extracting {
+pub struct Extract {
     #[structopt(
         short = "i",
         long = "input",
@@ -158,7 +158,7 @@ pub struct Extracting {
 }
 
 #[derive(StructOpt, Debug)]
-pub struct Spliting {
+pub struct Split {
     #[structopt(
         short = "i",
         long = "input",
