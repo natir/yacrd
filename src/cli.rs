@@ -86,11 +86,11 @@ pub struct Command {
 
     #[structopt(
         long = "ondisk-buffer-size",
-	default_value = "64000000",
+        default_value = "64000000",
         help = "with the default value yacrd in ondisk mode use around 800 MBytes, you can increase to reduce runtime but increase memory usage"
     )]
     pub ondisk_buffer_size: String,
-        
+
     #[structopt(subcommand)]
     pub subcmd: Option<SubCommand>,
 }

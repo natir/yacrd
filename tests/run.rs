@@ -107,8 +107,11 @@ mod tests {
 
     #[test]
     fn detection_ondisk() {
-        std::fs::remove_dir_all(std::path::Path::new("tests/ondisk/"))
-            .expect("We can't delete temporary directory of ondisk test");
+        if std::path::Path::new("tests/ondisk").exists() {
+            std::fs::remove_dir_all(std::path::Path::new("tests/ondisk/"))
+                .expect("We can't delete temporary directory of ondisk test");
+        }
+
         std::fs::create_dir(std::path::Path::new("tests/ondisk/"))
             .expect("We can't create temporary directory for ondisk test");
 

@@ -45,7 +45,7 @@ impl OnDisk {
             reads2len: std::collections::HashMap::new(),
             prefix,
             number_of_value: 0,
-	    buffer_size,
+            buffer_size,
         }
     }
 

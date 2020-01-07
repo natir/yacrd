@@ -185,7 +185,7 @@ mod tests {
             }
         }
     }
-    
+
     mod file_type {
         use super::*;
 

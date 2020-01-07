@@ -57,7 +57,10 @@ fn main() -> Result<()> {
         } else {
             /* Get bad part from overlap */
             let mut reads2ovl: Box<dyn reads2ovl::Reads2Ovl> = match params.ondisk.clone() {
-                Some(prefix) => Box::new(reads2ovl::OnDisk::new(prefix, util::str2u64(&params.ondisk_buffer_size)?)),
+                Some(prefix) => Box::new(reads2ovl::OnDisk::new(
+                    prefix,
+                    util::str2u64(&params.ondisk_buffer_size)?,
+                )),
                 None => Box::new(reads2ovl::FullMemory::new()),
             };
 
@@ -123,5 +126,3 @@ fn main() -> Result<()> {
 
     Ok(())
 }
-
-
