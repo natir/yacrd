@@ -56,8 +56,8 @@ fn main() -> Result<()> {
             Box::new(stack::FromReport::new(&params.input)?)
         } else {
             /* Get bad part from overlap */
-            let mut reads2ovl: Box<dyn reads2ovl::Reads2Ovl> = match params.split.clone() {
-                Some(prefix) => Box::new(reads2ovl::OnDisk::new(prefix)),
+            let mut reads2ovl: Box<dyn reads2ovl::Reads2Ovl> = match params.ondisk.clone() {
+                Some(prefix) => Box::new(reads2ovl::OnDisk::new(prefix, util::str2u64(&params.ondisk_buffer_size)?)),
                 None => Box::new(reads2ovl::FullMemory::new()),
             };
 
@@ -114,7 +114,7 @@ fn main() -> Result<()> {
         None => (),
     };
 
-    if let Some(prefix) = params.split {
+    if let Some(prefix) = params.ondisk {
         for read in reads2badregion.get_reads() {
             let filename = format!("{}{}.yovl", prefix, read);
             std::fs::remove_file(std::path::Path::new(&filename)).with_context(|| anyhow!("We failled to remove file {}, yacrd finish analysis but temporary file isn't removed", filename))?;
@@ -123,3 +123,5 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+

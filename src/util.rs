@@ -98,6 +98,15 @@ pub fn str2u32(val: &str) -> Result<u32> {
     })
 }
 
+pub fn str2u64(val: &str) -> Result<u64> {
+    val.parse::<u64>().with_context(|| {
+        anyhow!(
+            "Error durring parsing of number from string {:?} in u64",
+            val
+        )
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,6 +161,31 @@ mod tests {
         }
     }
 
+    mod str2u64 {
+        use super::*;
+
+        #[test]
+        fn failed() {
+            match str2u64("2,5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2u64('2,5') return {}", a),
+            }
+
+            match str2u64("2.5") {
+                Err(e) => assert!(true, "Error message {:?}", e),
+                Ok(a) => assert!(false, "str2u64('2.5') return {}", a),
+            }
+        }
+
+        #[test]
+        fn succeeded() {
+            match str2u64("2") {
+                Ok(a) => assert!(true, "Value {}", a),
+                Err(e) => assert!(false, "str2u64('2') return {}", e),
+            }
+        }
+    }
+    
     mod file_type {
         use super::*;
 

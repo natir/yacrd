@@ -78,12 +78,19 @@ pub struct Command {
     pub not_coverage: f64,
 
     #[structopt(
-        short = "s",
-        long = "split",
-        help = "if it set yacrd create tempory file loke like {split}{read id} where overlap position to reduce memory usage but increase the runtime"
+        short = "d",
+        long = "ondisk",
+        help = "if it set yacrd create tempory file, with value of this parameter as prefix, to reduce memory usage but increase the runtime"
     )]
-    pub split: Option<String>,
+    pub ondisk: Option<String>,
 
+    #[structopt(
+        long = "ondisk-buffer-size",
+	default_value = "64000000",
+        help = "with the default value yacrd in ondisk mode use around 800 MBytes, you can increase to reduce runtime but increase memory usage"
+    )]
+    pub ondisk_buffer_size: String,
+        
     #[structopt(subcommand)]
     pub subcmd: Option<SubCommand>,
 }

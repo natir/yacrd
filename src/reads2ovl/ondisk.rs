@@ -35,15 +35,17 @@ pub struct OnDisk {
     reads2len: std::collections::HashMap<String, usize>,
     prefix: String,
     number_of_value: u64,
+    buffer_size: u64,
 }
 
 impl OnDisk {
-    pub fn new(prefix: String) -> Self {
+    pub fn new(prefix: String, buffer_size: u64) -> Self {
         OnDisk {
             reads2ovl: std::collections::HashMap::new(),
             reads2len: std::collections::HashMap::new(),
             prefix,
             number_of_value: 0,
+	    buffer_size,
         }
     }
 
@@ -131,7 +133,7 @@ impl reads2ovl::Reads2Ovl for OnDisk {
 
         self.number_of_value += 1;
 
-        if self.number_of_value >= 64_000_000 {
+        if self.number_of_value >= self.buffer_size {
             self.clean_buffer()?;
         }
 
