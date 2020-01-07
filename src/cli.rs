@@ -34,8 +34,8 @@ If ratio of 'bad' region length on total read length is larger than threshold th
 Yacrd can make some other actions:
 - filter: for sequence or overlap file, record with reads marked as Chimeric or Not_covered isn't write in output
 - extract: for sequence or overlap file, record contain reads marked as Chimeric or Not_covered is write in output
-- spliting: for sequence file bad region in middle of reads are removed, Not_covered read is removed
-- scrubbing: for sequence file all bad region are removed, Not_covered read is removed
+- split: for sequence file bad region in middle of reads are removed, Not_covered read is removed
+- scrubb: for sequence file all bad region are removed, Not_covered read is removed
 "
 )]
 pub struct Command {

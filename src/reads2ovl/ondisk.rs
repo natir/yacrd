@@ -48,6 +48,11 @@ impl OnDisk {
     }
 
     fn clean_buffer(&mut self) -> Result<()> {
+        info!(
+            "Clear cache, number of value in cache is {}",
+            self.number_of_value
+        );
+
         for (key, values) in self.reads2ovl.iter_mut() {
             let filename = format!("{}{}.yovl", self.prefix, key);
             let raw_out = std::fs::OpenOptions::new()
