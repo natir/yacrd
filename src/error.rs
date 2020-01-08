@@ -66,6 +66,12 @@ pub enum Error {
     #[error("Error durring writing of file in format {format:?}")]
     WritingErrorNoFilename { format: util::FileType },
 
+    #[error("Error durring yacrd overlap path creation {path:?}")]
+    PathCreationError { path: std::path::PathBuf },
+
+    #[error("Error durring yacrd overlap path destruction {path:?}")]
+    PathDestructionError { path: std::path::PathBuf },
+
     #[error("If you get this error please contact the author with this message and command line you use: {name:?}")]
     NotReachableCode { name: String },
 }

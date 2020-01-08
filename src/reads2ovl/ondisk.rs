@@ -1,24 +1,24 @@
 /*
-   Copyright (c) 2019 Pierre Marijon <pmarijon@mpi-inf.mpg.de>
+Copyright (c) 2019 Pierre Marijon <pmarijon@mpi-inf.mpg.de>
 
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-   The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   SOFTWARE.
-*/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 
 use std::io::Write;
 
@@ -56,21 +56,13 @@ impl OnDisk {
         );
 
         for (key, values) in self.reads2ovl.iter_mut() {
-            let filename = format!("{}{}.yovl", self.prefix, key);
-            let raw_out = std::fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&filename)
-                .with_context(|| error::Error::CantWriteFile {
-                    filename: filename.clone(),
-                })?;
-
-            let mut output = std::io::BufWriter::new(raw_out);
+	    let prefix = self.prefix.clone();
+            let mut output = std::io::BufWriter::new(OnDisk::create_yacrd_ovl_file(&prefix, key)?);
 
             for v in values.iter() {
                 writeln!(output, "{},{}", v.0, v.1).with_context(|| {
                     error::Error::WritingError {
-                        filename: filename.clone(),
+                        filename: format!("{}{}", &prefix, key),
                         format: util::FileType::YacrdOverlap,
                     }
                 })?;
@@ -83,6 +75,37 @@ impl OnDisk {
 
         Ok(())
     }
+
+    fn create_yacrd_ovl_file(prefix: &str, id: &str) -> Result<std::fs::File> {
+	/* build path */
+	let path = prefix_id2pathbuf(prefix, id);
+	
+	/* create parent directory if it's required */
+	if let Some(parent_path) = path.parent() {
+	    std::fs::create_dir_all(parent_path).with_context(||
+		error::Error::PathCreationError {
+                    path: parent_path.to_path_buf(),
+		}
+	    )?;
+	}
+
+	/* create file */
+        std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+            .with_context(|| error::Error::CantWriteFile {
+                filename: path.to_string_lossy().to_string(),
+            })
+    }
+}
+
+pub(crate) fn prefix_id2pathbuf(prefix: &str, id: &str) -> std::path::PathBuf {
+    let mut path = std::path::PathBuf::from(prefix);
+    path.push(id);
+    path.set_extension("yovl");
+
+    path
 }
 
 impl reads2ovl::Reads2Ovl for OnDisk {
