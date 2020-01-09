@@ -157,7 +157,7 @@ Here, readA doesn't have sufficient coverage, there is a zero-coverage region of
 Chimeric    readB   10452   862,1260,2122;3209,4319,7528
 ```
 
-Here, readB is chimeric with 2 zero-coverage regions: one between bases 1260 and 2122, another between 3209 and 7528.
+Here, readB is chimeric with 2 zero-coverage regions: one between bases 1260 and 2122, another between 4319 and 7528.
 
 ## Citation
 
