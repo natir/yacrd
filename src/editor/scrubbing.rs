@@ -117,6 +117,11 @@ where
             };
 
             for pos in iter.chunks_exact(2) {
+		if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+                    error!("For read {} scrubb position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
+                    break;
+                }
+		
                 writer
                     .write(
                         &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
@@ -181,6 +186,11 @@ where
             };
 
             for pos in iter.chunks_exact(2) {
+                if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
+                    error!("For read {} scrubb position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
+                    break;
+                }
+		
                 writer
                     .write(
                         &format!("{}_{}_{}", record.id(), pos[0], pos[1]),

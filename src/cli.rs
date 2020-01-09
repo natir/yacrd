@@ -80,7 +80,7 @@ pub struct Command {
     #[structopt(
         short = "d",
         long = "ondisk",
-        help = "if it set yacrd create tempory file, with value of this parameter as prefix, to reduce memory usage but increase the runtime"
+        help = "if it set yacrd create tempory file, with value of this parameter as prefix, to reduce memory usage but increase the runtime, warning if prefix contain path separator (`/` for unix or `\` for windows) directory is delete"
     )]
     pub ondisk: Option<String>,
 

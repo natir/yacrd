@@ -113,7 +113,7 @@ where
 
             for pos in poss.chunks(2) {
                 if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-                    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
                     break;
                 }
 
@@ -177,7 +177,7 @@ where
 
             for pos in poss.chunks(2) {
                 if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-                    error!("For read {} splitting position is larger than read, check overlap information come from same read dataset.", record.id());
+                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
                     break;
                 }
 
