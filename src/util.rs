@@ -24,7 +24,7 @@ SOFTWARE.
 use anyhow::{anyhow, Context, Result};
 
 /* local use */
-use error;
+use crate::error;
 
 #[derive(Debug, PartialEq)]
 pub enum FileType {
@@ -83,7 +83,7 @@ pub fn write_file(
 pub fn str2usize(val: &str) -> Result<usize> {
     val.parse::<usize>().with_context(|| {
         anyhow!(
-            "Error durring parsing of number from string {:?} in usize",
+            "Error during parsing of number from string {:?} in usize",
             val
         )
     })
@@ -92,7 +92,7 @@ pub fn str2usize(val: &str) -> Result<usize> {
 pub fn str2u32(val: &str) -> Result<u32> {
     val.parse::<u32>().with_context(|| {
         anyhow!(
-            "Error durring parsing of number from string {:?} in u32",
+            "Error during parsing of number from string {:?} in u32",
             val
         )
     })
@@ -101,7 +101,7 @@ pub fn str2u32(val: &str) -> Result<u32> {
 pub fn str2u64(val: &str) -> Result<u64> {
     val.parse::<u64>().with_context(|| {
         anyhow!(
-            "Error durring parsing of number from string {:?} in u64",
+            "Error during parsing of number from string {:?} in u64",
             val
         )
     })

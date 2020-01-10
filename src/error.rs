@@ -24,7 +24,7 @@ SOFTWARE.
 use thiserror::Error;
 
 /* local use */
-use util;
+use crate::util;
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -33,7 +33,7 @@ pub enum Error {
     )]
     CantReadFile { filename: String },
 
-    #[error("Creation/opening of the file '{filename:}' impossible, directory in path exist? can be write by the user?")]
+    #[error("Creation/opening of the file '{filename:}' impossible, directory in path exist? can be written by the user?")]
     CantWriteFile { filename: String },
 
     #[error("Format detection for '{filename:}' file not possible, filename need to contains .fasta, .fa, .fastq, fq, .paf, .m4, .mhap or .yacrd")]
@@ -54,22 +54,22 @@ pub enum Error {
         format: util::FileType,
     },
 
-    #[error("Error durring reading a file in format {format:?}")]
+    #[error("Error during reading a file in format {format:?}")]
     ReadingErrorNoFilename { format: util::FileType },
 
-    #[error("Error durring writing of file {filename:} in format {format:?}")]
+    #[error("Error during writing of file {filename:} in format {format:?}")]
     WritingError {
         filename: String,
         format: util::FileType,
     },
 
-    #[error("Error durring writing of file in format {format:?}")]
+    #[error("Error during writing of file in format {format:?}")]
     WritingErrorNoFilename { format: util::FileType },
 
-    #[error("Error durring yacrd overlap path creation {path:?}")]
+    #[error("Error during yacrd overlap path creation {path:?}")]
     PathCreationError { path: std::path::PathBuf },
 
-    #[error("Error durring yacrd overlap path destruction {path:?}")]
+    #[error("Error during yacrd overlap path destruction {path:?}")]
     PathDestructionError { path: std::path::PathBuf },
 
     #[error("If you get this error please contact the author with this message and command line you use: {name:?}")]

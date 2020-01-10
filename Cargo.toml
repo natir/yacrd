@@ -2,6 +2,7 @@
 name = "yacrd"
 version = "0.6.0"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
+edition = '2018'
 
 exclude = ["image/*", "tests/*"]
 
@@ -10,30 +11,26 @@ homepage = "https://github.com/natir/yacrd"
 repository = "https://github.com/natir/yacrd"
 readme = "Readme.md"
 license = "MIT"
-keywords = ["bioinformatics", "chimera", "long-read"]
+keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [badges]
 travis-ci = { repository = "natir/yacrd", branch = "master" }
 
 [dependencies]
 bio            = "0.30"
-csv            = "1"
-log 	       = "0.4.0"
+csv            = "1.1"
+log 	       = "0.4"
 anyhow         = "1.0"
 niffler        = {git = "https://github.com/luizirber/niffler/", branch = "api_1.0"}
 thiserror      = "1.0"
 structopt      = "0.3"
 env_logger     = "0.7"
-lazy_static    = "1.0"
-serde_derive   = "1.0"
-enum_primitive = "0.1.1"
-
  
 [dev-dependencies]
-tempfile = "3"
+tempfile = "3.1"
 
 [profile.release]
-debug = true # uncomment for proffiling
+# debug = true # uncomment for proffiling
 lto = 'thin'
 opt-level = 3
 overflow-checks = false

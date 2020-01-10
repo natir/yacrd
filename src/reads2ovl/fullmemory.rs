@@ -24,7 +24,7 @@
 use anyhow::Result;
 
 /* local use */
-use reads2ovl;
+use crate::reads2ovl;
 
 pub struct FullMemory {
     reads2ovl: std::collections::HashMap<String, (Vec<(u32, u32)>, usize)>,

@@ -22,20 +22,20 @@ SOFTWARE.
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    version = "0.6b Mew",
+    version = "0.6.0 Flareon",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
     name = "yacrd",
     about = "
 Yacrd use overlap between reads, to detect 'good' and 'bad' region,
-region with coverage over threshold is 'good' other are 'bad'.
-If read have a 'bad' region in middle this reads is mark as 'Chimeric'.
-If ratio of 'bad' region length on total read length is larger than threshold this reads is mark as 'Not_covered'.
+a region with coverage over the threshold is 'good' others are 'bad'.
+If read has a 'bad' region in middle this reads is mark as 'Chimeric'.
+If the ratio of 'bad' region length on total read length is larger than threshold this reads is mark as 'Not_covered'.
 
 Yacrd can make some other actions:
-- filter: for sequence or overlap file, record with reads marked as Chimeric or Not_covered isn't write in output
-- extract: for sequence or overlap file, record contain reads marked as Chimeric or Not_covered is write in output
-- split: for sequence file bad region in middle of reads are removed, Not_covered read is removed
-- scrubb: for sequence file all bad region are removed, Not_covered read is removed
+- filter: for sequence or overlap file, record with reads marked as Chimeric or NotCovered isn't written in the output
+- extract: for sequence or overlap file, record contains reads marked as Chimeric or NotCovered is written in the output
+- split: for sequence file bad region in the middle of reads are removed, NotCovered read is removed
+- scrubb: for sequence file all bad region are removed, NotCovered read is removed
 "
 )]
 pub struct Command {
@@ -43,7 +43,7 @@ pub struct Command {
         short = "i",
         long = "input",
         required = true,
-        help = "path to input file overlap (.paf|.m4) or yacrd report (.yacrd) format audetected input-format overide detection"
+        help = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetect and compression input is allowed (gz|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -51,15 +51,9 @@ pub struct Command {
         short = "o",
         long = "output",
         required = true,
-        help = "path output file, yacrd format by default output-format can overide this value"
+        help = "path output file"
     )]
     pub output: String,
-
-    #[structopt(long = "input-format", possible_values = &["paf", "m4", "yacrd", "json"], help = "set the input-format")]
-    pub input_format: Option<String>,
-
-    #[structopt(long = "output-format", possible_values = &["yacrd", "json"], default_value = "yacrd", help = "set the output-format")]
-    pub output_format: String,
 
     #[structopt(
         short = "c",
@@ -73,21 +67,21 @@ pub struct Command {
         short = "n",
         long = "not-coverage",
         default_value = "0.8",
-        help = "if ratio of bad region length on total lengh is lower that this value, all read is mark as bad"
+        help = "if the ratio of bad region length on total length is lower than this value, read is marked as NotCovered"
     )]
     pub not_coverage: f64,
 
     #[structopt(
         short = "d",
         long = "ondisk",
-        help = "if it set yacrd create tempory file, with value of this parameter as prefix, to reduce memory usage but increase the runtime, warning if prefix contain path separator (`/` for unix or `\\` for windows) directory is delete"
+        help = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"
     )]
     pub ondisk: Option<String>,
 
     #[structopt(
         long = "ondisk-buffer-size",
         default_value = "64000000",
-        help = "with the default value yacrd in ondisk mode use around 800 MBytes, you can increase to reduce runtime but increase memory usage"
+        help = "with the default value yacrd in 'ondisk' mode use around 1 GBytes, you can increase to reduce runtime but increase memory usage"
     )]
     pub ondisk_buffer_size: String,
 
@@ -99,11 +93,11 @@ pub struct Command {
 pub enum SubCommand {
     #[structopt(about = "All bad region of read is removed")]
     Scrubb(Scrubb),
-    #[structopt(about = "Record mark as chimeric or Not_covered is filter")]
+    #[structopt(about = "Record mark as chimeric or NotCovered is filter")]
     Filter(Filter),
-    #[structopt(about = "Record mark as chimeric or Not_covered is extract")]
+    #[structopt(about = "Record mark as chimeric or NotCovered is extract")]
     Extract(Extract),
-    #[structopt(about = "Record mark as chimeric or Not_covered is split")]
+    #[structopt(about = "Record mark as chimeric or NotCovered is split")]
     Split(Split),
 }
 

@@ -26,9 +26,9 @@ use std::io::Write;
 use anyhow::{anyhow, Context, Result};
 
 /* local use */
-use error;
-use reads2ovl;
-use util;
+use crate::error;
+use crate::reads2ovl;
+use crate::util;
 
 pub struct OnDisk {
     reads2ovl: std::collections::HashMap<String, Vec<(u32, u32)>>,

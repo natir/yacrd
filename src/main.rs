@@ -121,7 +121,7 @@ fn main() -> Result<()> {
         for read in reads2badregion.get_reads() {
             let path = reads2ovl::ondisk::prefix_id2pathbuf(&prefix, &read);
             if path.is_file() {
-                std::fs::remove_file(&path).with_context(|| anyhow!("We failled to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
+                std::fs::remove_file(&path).with_context(|| anyhow!("We failed to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
             }
 
             if let Some(parent_path) = path.parent() {

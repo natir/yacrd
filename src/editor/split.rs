@@ -25,10 +25,10 @@ use anyhow::{Context, Result};
 use bio::io::{fasta, fastq};
 
 /* local use */
-use editor;
-use error;
-use stack;
-use util;
+use crate::editor;
+use crate::error;
+use crate::stack;
+use crate::util;
 
 pub fn split(
     input_path: &str,
@@ -202,8 +202,8 @@ where
 mod tests {
     use super::*;
 
-    use reads2ovl;
-    use reads2ovl::Reads2Ovl;
+    use crate::reads2ovl;
+    use crate::reads2ovl::Reads2Ovl;
 
     const FASTA_FILE: &'static [u8] = b">1
 ACTGGGGGGACTGGGGGGACTG

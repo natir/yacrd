@@ -27,9 +27,9 @@ use std::cmp::Reverse;
 use anyhow::{Context, Result};
 
 /* local use */
-use error;
-use reads2ovl;
-use util;
+use crate::error;
+use crate::reads2ovl;
+use crate::util;
 
 pub trait BadPart {
     fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)>;
