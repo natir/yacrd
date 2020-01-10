@@ -119,20 +119,20 @@ fn main() -> Result<()> {
 
     if let Some(prefix) = params.ondisk {
         for read in reads2badregion.get_reads() {
-	    let path = reads2ovl::ondisk::prefix_id2pathbuf(&prefix, &read);
-	    if path.is_file() {
-		std::fs::remove_file(&path).with_context(|| anyhow!("We failled to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
-	    }
-	    
-	    if let Some(parent_path) = path.parent() {
-		if path.is_dir() {
-		    std::fs::remove_dir_all(parent_path).with_context(||
-								      error::Error::PathDestructionError {
-									  path: parent_path.to_path_buf(),
-								      }
-		    )?;
-		}
-	    }
+            let path = reads2ovl::ondisk::prefix_id2pathbuf(&prefix, &read);
+            if path.is_file() {
+                std::fs::remove_file(&path).with_context(|| anyhow!("We failled to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
+            }
+
+            if let Some(parent_path) = path.parent() {
+                if path.is_dir() {
+                    std::fs::remove_dir_all(parent_path).with_context(|| {
+                        error::Error::PathDestructionError {
+                            path: parent_path.to_path_buf(),
+                        }
+                    })?;
+                }
+            }
         }
     }
 

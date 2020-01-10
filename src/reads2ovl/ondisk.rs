@@ -56,7 +56,7 @@ impl OnDisk {
         );
 
         for (key, values) in self.reads2ovl.iter_mut() {
-	    let prefix = self.prefix.clone();
+            let prefix = self.prefix.clone();
             let mut output = std::io::BufWriter::new(OnDisk::create_yacrd_ovl_file(&prefix, key)?);
 
             for v in values.iter() {
@@ -77,19 +77,19 @@ impl OnDisk {
     }
 
     fn create_yacrd_ovl_file(prefix: &str, id: &str) -> Result<std::fs::File> {
-	/* build path */
-	let path = prefix_id2pathbuf(prefix, id);
-	
-	/* create parent directory if it's required */
-	if let Some(parent_path) = path.parent() {
-	    std::fs::create_dir_all(parent_path).with_context(||
-		error::Error::PathCreationError {
-                    path: parent_path.to_path_buf(),
-		}
-	    )?;
-	}
+        /* build path */
+        let path = prefix_id2pathbuf(prefix, id);
 
-	/* create file */
+        /* create parent directory if it's required */
+        if let Some(parent_path) = path.parent() {
+            std::fs::create_dir_all(parent_path).with_context(|| {
+                error::Error::PathCreationError {
+                    path: parent_path.to_path_buf(),
+                }
+            })?;
+        }
+
+        /* create file */
         std::fs::OpenOptions::new()
             .create(true)
             .append(true)

@@ -108,7 +108,30 @@ impl FromOverlap {
             gaps.push((last_covered, length as u32));
         }
 
-        Ok((gaps, length))
+        if gaps.is_empty() {
+            return Ok((gaps, length));
+        }
+
+        /* clean overlapped bad region */
+        let mut clean_gaps: Vec<(u32, u32)> = Vec::new();
+        let mut begin = gaps[0].0;
+        let mut end = gaps[0].1;
+        for gaps in gaps.windows(2) {
+            let g1 = gaps[0];
+            let g2 = gaps[1];
+
+            if g1.0 == g2.0 {
+                begin = g1.0;
+                end = g1.1.max(g2.1);
+            } else {
+                clean_gaps.push((begin, end));
+                begin = g2.0;
+                end = g2.1;
+            }
+        }
+        clean_gaps.push((begin, end));
+
+        Ok((clean_gaps, length))
     }
 }
 
@@ -316,5 +339,24 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
         assert_eq!(&(vec![(990, 1000)], 1000), stack.get_bad_part("D").unwrap());
         assert_eq!(&(vec![(0, 10)], 1000), stack.get_bad_part("E").unwrap());
         assert_eq!(&(vec![(490, 510)], 1000), stack.get_bad_part("F").unwrap());
+    }
+
+    #[test]
+    fn coverage_upper_than_0() {
+        let mut ovl = reads2ovl::FullMemory::new();
+
+        ovl.add_length("A".to_string(), 1000);
+
+        ovl.add_overlap("A".to_string(), (0, 425)).unwrap();
+        ovl.add_overlap("A".to_string(), (0, 450)).unwrap();
+        ovl.add_overlap("A".to_string(), (0, 475)).unwrap();
+
+        ovl.add_overlap("A".to_string(), (525, 1000)).unwrap();
+        ovl.add_overlap("A".to_string(), (550, 1000)).unwrap();
+        ovl.add_overlap("A".to_string(), (575, 1000)).unwrap();
+
+        let mut stack = FromOverlap::new(Box::new(ovl), 2);
+
+        assert_eq!(&(vec![(425, 575)], 1000), stack.get_bad_part("A").unwrap());
     }
 }
