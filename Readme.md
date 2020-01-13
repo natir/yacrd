@@ -34,14 +34,6 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or BLAS
 
 ## Instalation
 
-### With cargo
-
-If you have a rust environment setup you can run :
-
-```
-cargo install yacrd
-```
-
 ### With conda
 
 yacrd is avaible in [bioconda channel](https://bioconda.github.io/)
@@ -61,7 +53,7 @@ git checkout v0.6.0
 
 cargo build
 cargo test
-cargo install
+cargo install --path .
 ```
 
 ## How to use Yacrd
