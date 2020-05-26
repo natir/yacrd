@@ -21,7 +21,7 @@ bio            = "0.30"
 csv            = "1.1"
 log 	       = "0.4"
 anyhow         = "1.0"
-niffler        = {git = "https://github.com/luizirber/niffler/", branch = "api_1.0"}
+niffler        = "2"
 thiserror      = "1.0"
 structopt      = "0.3"
 env_logger     = "0.7"

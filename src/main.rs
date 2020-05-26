@@ -27,10 +27,6 @@ extern crate structopt;
 extern crate anyhow;
 #[macro_use]
 extern crate log;
-extern crate bio;
-extern crate csv;
-extern crate niffler;
-extern crate thiserror;
 
 /* crate use */
 use anyhow::{Context, Result};
