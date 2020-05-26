@@ -18,11 +18,11 @@ travis-ci = { repository = "natir/yacrd", branch = "master" }
 
 [dependencies]
 bio            = "0.30"
-csv            = "1.1"
+csv            = "1"
 log 	       = "0.4"
-anyhow         = "1.0"
+anyhow         = "1"
 niffler        = "2"
-thiserror      = "1.0"
+thiserror      = "1"
 structopt      = "0.3"
 env_logger     = "0.7"
  

@@ -81,7 +81,7 @@ pub trait Reads2Ovl {
     fn init_paf(&mut self, input: Box<dyn std::io::Read>) -> Result<()> {
         let mut reader = csv::ReaderBuilder::new()
             .delimiter(b'\t')
-	    .flexible(true)
+            .flexible(true)
             .has_headers(false)
             .from_reader(input);
 
