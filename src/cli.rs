@@ -22,7 +22,7 @@ SOFTWARE.
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    version = "0.6.0 Flareon",
+    version = "0.6.1 Flareon",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
     name = "yacrd",
     about = "
