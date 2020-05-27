@@ -85,24 +85,16 @@ jobs:
           toolchain: nightly
           override: true
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1
+      - name: Run cargo-tarpaulin
+        uses: actions-rs/tarpaulin@v0.1.2
         with:
-          command: test
-          args: --no-fail-fast
-        env:
-          'CARGO_INCREMENTAL': '0'
-          'RUSTFLAGS': '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads'
-
-      - name: Collect coverage and generate report with grcov
-        uses: actions-rs/grcov@v0.1.4
-        id: coverage
+          version: '0.9.0'
+          args: '-- --test-threads 1'
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1.0.3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ${{ steps.coverage.outputs.report }}
 
   lints:
     name: Lints
