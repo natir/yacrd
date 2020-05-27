@@ -21,6 +21,7 @@ SOFTWARE.
  */
 
 /* std use */
+use std::io::BufRead;
 use std::io::Read;
 use std::process::{Command, Stdio};
 
@@ -30,53 +31,53 @@ mod tests {
     use super::*;
 
     fn diff_unorder(truth: &str, result: &str) {
-        let mut truth_file = std::io::BufReader::new(
+        let truth_file = std::io::BufReader::new(
             std::fs::File::open(truth).expect(&format!("Impossible to open {}", truth)),
         );
-        let mut truth_content = String::new();
 
-        truth_file
-            .read_to_string(&mut truth_content)
-            .expect(&format!("Error durring reading of {}", truth));
+        let mut truth: std::collections::HashSet<String> = std::collections::HashSet::new();
 
-        let truth: std::collections::HashSet<&str> = truth_content.split("\n").collect();
+        for res in truth_file.lines() {
+            let line = res.unwrap();
+            truth.insert(line);
+        }
 
-        let mut result_file = std::io::BufReader::new(
+        let result_file = std::io::BufReader::new(
             std::fs::File::open(result).expect(&format!("Impossible to open {}", result)),
         );
-        let mut result_content = String::new();
 
-        result_file
-            .read_to_string(&mut result_content)
-            .expect(&format!("Error durring reading of {}", result));
+        let mut result: std::collections::HashSet<String> = std::collections::HashSet::new();
 
-        let result: std::collections::HashSet<&str> = result_content.split("\n").collect();
+        for res in result_file.lines() {
+            let line = res.unwrap();
+            result.insert(line);
+        }
 
         assert_eq!(truth, result);
     }
 
     fn diff(truth: &str, result: &str) {
-        let mut truth_file = std::io::BufReader::new(
+        let truth_file = std::io::BufReader::new(
             std::fs::File::open(truth).expect(&format!("Impossible to open {}", truth)),
         );
-        let mut truth_content = String::new();
 
-        truth_file
-            .read_to_string(&mut truth_content)
-            .expect(&format!("Error durring reading of {}", truth));
+        let mut truth: Vec<String> = Vec::new();
 
-        let truth: Vec<&str> = truth_content.split("\n").collect();
+        for res in truth_file.lines() {
+            let line = res.unwrap();
+            truth.push(line);
+        }
 
-        let mut result_file = std::io::BufReader::new(
+        let result_file = std::io::BufReader::new(
             std::fs::File::open(result).expect(&format!("Impossible to open {}", result)),
         );
-        let mut result_content = String::new();
 
-        result_file
-            .read_to_string(&mut result_content)
-            .expect(&format!("Error durring reading of {}", result));
+        let mut result: Vec<String> = Vec::new();
 
-        let result: Vec<&str> = result_content.split("\n").collect();
+        for res in result_file.lines() {
+            let line = res.unwrap();
+            result.push(line);
+        }
 
         assert_eq!(truth, result);
     }
