@@ -74,4 +74,10 @@ pub enum Error {
 
     #[error("If you get this error please contact the author with this message and command line you use: {name:?}")]
     NotReachableCode { name: String },
+
+    #[error("Yacrd postion seems corrupt")]
+    CorruptYacrdReportInPosition,
+
+    #[error("Your yacrd file {name} seems corrupt at line {line} you probably need to relaunch analisys with overlapping file")]
+    CorruptYacrdReport { name: String, line: usize },
 }

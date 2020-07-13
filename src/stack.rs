@@ -174,7 +174,7 @@ impl FromReport {
             .from_reader(input);
 
         let mut buffer = std::collections::HashMap::new();
-        for record in reader.records() {
+        for (line, record) in reader.records().enumerate() {
             let result = record.with_context(|| error::Error::ReadingError {
                 filename: input_path.to_string(),
                 format: util::FileType::Fasta,
@@ -182,7 +182,12 @@ impl FromReport {
 
             let id = result[1].to_string();
             let len = util::str2usize(&result[2])?;
-            let bad_part = FromReport::parse_bad_string(&result[3])?;
+            let bad_part = FromReport::parse_bad_string(&result[3]).with_context(|| {
+                error::Error::CorruptYacrdReport {
+                    name: input_path.to_string(),
+                    line,
+                }
+            })?;
 
             buffer.insert(id, (bad_part, len));
         }
@@ -201,15 +206,11 @@ impl FromReport {
             ret.push((
                 util::str2u32(
                     iter.next()
-                        .with_context(|| error::Error::NotReachableCode {
-                            name: format!("{} {}", file!(), line!()),
-                        })?,
+                        .with_context(|| error::Error::CorruptYacrdReportInPosition)?,
                 )?,
                 util::str2u32(
                     iter.next()
-                        .with_context(|| error::Error::NotReachableCode {
-                            name: format!("{} {}", file!(), line!()),
-                        })?,
+                        .with_context(|| error::Error::CorruptYacrdReportInPosition)?,
                 )?,
             ));
         }
@@ -358,5 +359,24 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
         let mut stack = FromOverlap::new(Box::new(ovl), 2);
 
         assert_eq!(&(vec![(425, 575)], 1000), stack.get_bad_part("A").unwrap());
+    }
+
+    #[test]
+    fn failled_correctly_on_corrupt_yacrd() {
+        let mut report = NamedTempFile::new().expect("Can't create tmpfile");
+
+        writeln!(
+            report.as_file_mut(),
+            "NotBad	SRR8494940.65223	2706	1131,0,1131;16,2690,2706
+NotCovered	SRR8494940.141626	30116	326,0,326;27159,2957,30116
+Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,156"
+        )
+        .unwrap();
+
+        let stack = FromReport::new(report.into_temp_path().to_str().unwrap());
+
+        if !stack.is_err() {
+            assert!(false);
+        }
     }
 }
