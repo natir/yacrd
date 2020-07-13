@@ -24,6 +24,7 @@ use std::io::Write;
 
 /* crate use */
 use anyhow::{anyhow, Context, Result};
+use log::info;
 
 /* local use */
 use crate::error;

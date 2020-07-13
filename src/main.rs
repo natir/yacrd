@@ -20,17 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-/* crate declaration */
-#[macro_use]
-extern crate structopt;
-#[macro_use]
-extern crate anyhow;
-#[macro_use]
-extern crate log;
-
 /* crate use */
-use anyhow::{Context, Result};
-use structopt::StructOpt;
+use anyhow::{anyhow, Context, Result};
+use clap::Clap;
 
 /* mod declaration*/
 mod cli;
@@ -43,7 +35,7 @@ mod util;
 fn main() -> Result<()> {
     env_logger::init();
 
-    let params = cli::Command::from_args();
+    let params = cli::Command::parse();
 
     /* Get bad region of reads */
     let mut reads2badregion: Box<dyn stack::BadPart> =

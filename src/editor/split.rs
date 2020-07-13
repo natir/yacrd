@@ -21,8 +21,9 @@ SOFTWARE.
  */
 
 /* crate use */
-use anyhow::{Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use bio::io::{fasta, fastq};
+use log::error;
 
 /* local use */
 use crate::editor;

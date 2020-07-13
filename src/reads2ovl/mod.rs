@@ -21,7 +21,7 @@ SOFTWARE.
  */
 
 /* crate use */
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 
 /* local mod */
 pub mod fullmemory;
