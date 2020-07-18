@@ -199,6 +199,10 @@ impl FromReport {
     fn parse_bad_string(bad_string: &str) -> Result<Vec<(u32, u32)>> {
         let mut ret = Vec::new();
 
+        if bad_string.is_empty() {
+            return Ok(ret);
+        }
+
         for sub in bad_string.split(';') {
             let mut iter = sub.split(',');
             iter.next();
@@ -282,6 +286,27 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
             &(vec![(0, 151), (7213, 11269), (15633, 15691)], 15691),
             stack.get_bad_part("SRR8494940.91655").unwrap()
         );
+    }
+
+    #[test]
+    fn perfect_read_in_report() {
+        let mut report = NamedTempFile::new().expect("Can't create tmpfile");
+
+        writeln!(report.as_file_mut(), "NotBad	perfect	2706	")
+            .expect("Error durring write of report in temp file");
+
+        let mut stack = FromReport::new(report.into_temp_path().to_str().unwrap())
+            .expect("Error when create stack object");
+
+        assert_eq!(
+            ["perfect".to_string()]
+                .iter()
+                .cloned()
+                .collect::<std::collections::HashSet<String>>(),
+            stack.get_reads()
+        );
+
+        assert_eq!(&(vec![], 2706), stack.get_bad_part("perfect").unwrap());
     }
 
     #[test]
