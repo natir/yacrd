@@ -24,7 +24,7 @@ use clap::Clap;
 
 #[derive(Clap, Debug)]
 #[clap(
-    version = "0.6.1 Flareon",
+    version = "0.6.2 Ivysaur",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
     name = "yacrd",
     about = "
