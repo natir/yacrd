@@ -28,6 +28,7 @@ use clap::Clap;
 mod cli;
 mod editor;
 mod error;
+mod io;
 mod reads2ovl;
 mod stack;
 mod util;

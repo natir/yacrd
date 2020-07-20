@@ -36,6 +36,7 @@ pub use self::fullmemory::*;
 
 /* local use */
 use crate::error;
+use crate::io;
 use crate::util;
 
 pub trait Reads2Ovl {
@@ -81,29 +82,27 @@ pub trait Reads2Ovl {
     fn init_paf(&mut self, input: Box<dyn std::io::Read>) -> Result<()> {
         let mut reader = csv::ReaderBuilder::new()
             .delimiter(b'\t')
-            .flexible(true)
             .has_headers(false)
+            .flexible(true)
             .from_reader(input);
 
-        for record in reader.records() {
-            let result = record.with_context(|| error::Error::ReadingErrorNoFilename {
-                format: util::FileType::Paf,
-            })?;
+        let mut rec = csv::StringRecord::new();
 
-            if result.len() < 9 {
-                bail!(error::Error::ReadingErrorNoFilename {
-                    format: util::FileType::Paf,
-                });
-            }
+        while reader.read_record(&mut rec).unwrap() {
+            let record: io::PafRecord =
+                rec.deserialize(None)
+                    .with_context(|| error::Error::ReadingErrorNoFilename {
+                        format: util::FileType::Paf,
+                    })?;
 
-            let id_a = result[0].to_string();
-            let id_b = result[5].to_string();
+            let id_a = record.read_a.to_string();
+            let id_b = record.read_b.to_string();
 
-            let len_a = util::str2usize(&result[1])?;
-            let len_b = util::str2usize(&result[6])?;
+            let len_a = record.length_a;
+            let len_b = record.length_b;
 
-            let ovl_a = (util::str2u32(&result[2])?, util::str2u32(&result[3])?);
-            let ovl_b = (util::str2u32(&result[7])?, util::str2u32(&result[8])?);
+            let ovl_a = (record.begin_a, record.end_a);
+            let ovl_b = (record.begin_b, record.end_b);
 
             self.add_overlap_and_length(id_a, ovl_a, len_a)?;
             self.add_overlap_and_length(id_b, ovl_b, len_b)?;
@@ -116,27 +115,26 @@ pub trait Reads2Ovl {
         let mut reader = csv::ReaderBuilder::new()
             .delimiter(b' ')
             .has_headers(false)
+            .flexible(true)
             .from_reader(input);
 
-        for record in reader.records() {
-            let result = record.with_context(|| error::Error::ReadingErrorNoFilename {
-                format: util::FileType::M4,
-            })?;
+        let mut rec = csv::StringRecord::new();
 
-            if result.len() < 12 {
-                bail!(error::Error::ReadingErrorNoFilename {
-                    format: util::FileType::M4,
-                });
-            }
+        while reader.read_record(&mut rec).unwrap() {
+            let record: io::M4Record =
+                rec.deserialize(None)
+                    .with_context(|| error::Error::ReadingErrorNoFilename {
+                        format: util::FileType::M4,
+                    })?;
 
-            let id_a = result[0].to_string();
-            let id_b = result[1].to_string();
+            let id_a = record.read_a.to_string();
+            let id_b = record.read_b.to_string();
 
-            let len_a = util::str2usize(&result[7])?;
-            let len_b = util::str2usize(&result[11])?;
+            let len_a = record.length_a;
+            let len_b = record.length_b;
 
-            let ovl_a = (util::str2u32(&result[5])?, util::str2u32(&result[6])?);
-            let ovl_b = (util::str2u32(&result[9])?, util::str2u32(&result[10])?);
+            let ovl_a = (record.begin_a, record.end_a);
+            let ovl_b = (record.begin_b, record.end_b);
 
             self.add_overlap_and_length(id_a, ovl_a, len_a)?;
             self.add_overlap_and_length(id_b, ovl_b, len_b)?;
@@ -210,7 +208,7 @@ mod tests {
 
         m4.as_file_mut()
             .write_all(M4_FILE)
-            .expect("Error durring write of paf in temp file");
+            .expect("Error durring write of m4 in temp file");
 
         let mut ovl = FullMemory::new();
 

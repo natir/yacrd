@@ -72,10 +72,11 @@ impl reads2ovl::Reads2Ovl for FullMemory {
     }
 
     fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()> {
-        let entry = self.reads2ovl.entry(id).or_insert((Vec::new(), 0));
-
-        entry.0.push(ovl);
-        entry.1 = length;
+        if let Some(value) = self.reads2ovl.get_mut(&id) {
+            value.0.push(ovl);
+        } else {
+            self.reads2ovl.insert(id, (vec![ovl], length));
+        }
 
         Ok(())
     }
