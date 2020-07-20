@@ -22,12 +22,13 @@ anyhow         = "1"
 niffler        = "2"
 thiserror      = "1"
 env_logger     = "0.7"
- 
+rustc-hash     = "1"
+
 [dev-dependencies]
 tempfile = "3.1"
 
 [profile.release]
-# debug = true # uncomment for proffiling
+debug = true # uncomment for profiling
 lto = 'thin'
 opt-level = 3
 overflow-checks = false

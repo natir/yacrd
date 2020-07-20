@@ -105,11 +105,8 @@ pub trait Reads2Ovl {
             let ovl_a = (util::str2u32(&result[2])?, util::str2u32(&result[3])?);
             let ovl_b = (util::str2u32(&result[7])?, util::str2u32(&result[8])?);
 
-            self.add_length(id_a.clone(), len_a);
-            self.add_length(id_b.clone(), len_b);
-
-            self.add_overlap(id_a, ovl_a)?;
-            self.add_overlap(id_b, ovl_b)?;
+            self.add_overlap_and_length(id_a, ovl_a, len_a)?;
+            self.add_overlap_and_length(id_b, ovl_b, len_b)?;
         }
 
         Ok(())
@@ -141,11 +138,8 @@ pub trait Reads2Ovl {
             let ovl_a = (util::str2u32(&result[5])?, util::str2u32(&result[6])?);
             let ovl_b = (util::str2u32(&result[9])?, util::str2u32(&result[10])?);
 
-            self.add_length(id_a.clone(), len_a);
-            self.add_length(id_b.clone(), len_b);
-
-            self.add_overlap(id_a, ovl_a)?;
-            self.add_overlap(id_b, ovl_b)?;
+            self.add_overlap_and_length(id_a, ovl_a, len_a)?;
+            self.add_overlap_and_length(id_b, ovl_b, len_b)?;
         }
 
         Ok(())
@@ -157,7 +151,9 @@ pub trait Reads2Ovl {
     fn add_overlap(&mut self, id: String, ovl: (u32, u32)) -> Result<()>;
     fn add_length(&mut self, id: String, ovl: usize);
 
-    fn get_reads(&self) -> std::collections::HashSet<String>;
+    fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()>;
+
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String>;
 }
 
 #[cfg(test)]
@@ -196,7 +192,7 @@ mod tests {
             ["1".to_string(), "2".to_string(), "3".to_string(),]
                 .iter()
                 .cloned()
-                .collect::<std::collections::HashSet<String>>(),
+                .collect::<rustc_hash::FxHashSet<String>>(),
             ovl.get_reads()
         );
 
@@ -225,7 +221,7 @@ mod tests {
             ["1".to_string(), "2".to_string(), "3".to_string(),]
                 .iter()
                 .cloned()
-                .collect::<std::collections::HashSet<String>>(),
+                .collect::<rustc_hash::FxHashSet<String>>(),
             ovl.get_reads()
         );
 

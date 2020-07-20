@@ -32,8 +32,8 @@ use crate::reads2ovl;
 use crate::util;
 
 pub struct OnDisk {
-    reads2ovl: std::collections::HashMap<String, Vec<(u32, u32)>>,
-    reads2len: std::collections::HashMap<String, usize>,
+    reads2ovl: rustc_hash::FxHashMap<String, Vec<(u32, u32)>>,
+    reads2len: rustc_hash::FxHashMap<String, usize>,
     prefix: String,
     number_of_value: u64,
     buffer_size: u64,
@@ -42,8 +42,8 @@ pub struct OnDisk {
 impl OnDisk {
     pub fn new(prefix: String, buffer_size: u64) -> Self {
         OnDisk {
-            reads2ovl: std::collections::HashMap::new(),
-            reads2len: std::collections::HashMap::new(),
+            reads2ovl: rustc_hash::FxHashMap::default(),
+            reads2len: rustc_hash::FxHashMap::default(),
             prefix,
             number_of_value: 0,
             buffer_size,
@@ -168,7 +168,13 @@ impl reads2ovl::Reads2Ovl for OnDisk {
         self.reads2len.entry(id).or_insert(length);
     }
 
-    fn get_reads(&self) -> std::collections::HashSet<String> {
+    fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()> {
+        self.add_length(id.clone(), length);
+
+        self.add_overlap(id, ovl)
+    }
+
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.reads2len.keys().map(|x| x.to_string()).collect()
     }
 }

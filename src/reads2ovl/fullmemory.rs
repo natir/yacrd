@@ -27,14 +27,14 @@ use anyhow::Result;
 use crate::reads2ovl;
 
 pub struct FullMemory {
-    reads2ovl: std::collections::HashMap<String, (Vec<(u32, u32)>, usize)>,
+    reads2ovl: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
     no_overlap: Vec<(u32, u32)>,
 }
 
 impl FullMemory {
     pub fn new() -> Self {
         FullMemory {
-            reads2ovl: std::collections::HashMap::new(),
+            reads2ovl: rustc_hash::FxHashMap::default(),
             no_overlap: Vec::new(),
         }
     }
@@ -71,7 +71,16 @@ impl reads2ovl::Reads2Ovl for FullMemory {
         self.reads2ovl.entry(id).or_insert((Vec::new(), 0)).1 = length;
     }
 
-    fn get_reads(&self) -> std::collections::HashSet<String> {
+    fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()> {
+        let entry = self.reads2ovl.entry(id).or_insert((Vec::new(), 0));
+
+        entry.0.push(ovl);
+        entry.1 = length;
+
+        Ok(())
+    }
+
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.reads2ovl.keys().map(|x| x.to_string()).collect()
     }
 }

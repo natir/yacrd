@@ -34,13 +34,13 @@ use crate::util;
 pub trait BadPart {
     fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)>;
 
-    fn get_reads(&self) -> std::collections::HashSet<String>;
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String>;
 }
 
 pub struct FromOverlap {
     ovl: Box<dyn reads2ovl::Reads2Ovl>,
     coverage: u64,
-    buffer: std::collections::HashMap<String, (Vec<(u32, u32)>, usize)>,
+    buffer: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
 }
 
 impl FromOverlap {
@@ -48,7 +48,7 @@ impl FromOverlap {
         FromOverlap {
             ovl,
             coverage,
-            buffer: std::collections::HashMap::new(),
+            buffer: rustc_hash::FxHashMap::default(),
         }
     }
 
@@ -150,13 +150,13 @@ impl BadPart for FromOverlap {
             })?)
     }
 
-    fn get_reads(&self) -> std::collections::HashSet<String> {
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.ovl.get_reads()
     }
 }
 
 pub struct FromReport {
-    buffer: std::collections::HashMap<String, (Vec<(u32, u32)>, usize)>,
+    buffer: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
     empty: (Vec<(u32, u32)>, usize),
 }
 
@@ -173,7 +173,7 @@ impl FromReport {
             .has_headers(false)
             .from_reader(input);
 
-        let mut buffer = std::collections::HashMap::new();
+        let mut buffer = rustc_hash::FxHashMap::default();
         for (line, record) in reader.records().enumerate() {
             let result = record.with_context(|| error::Error::ReadingError {
                 filename: input_path.to_string(),
@@ -231,7 +231,7 @@ impl BadPart for FromReport {
         }
     }
 
-    fn get_reads(&self) -> std::collections::HashSet<String> {
+    fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.buffer.keys().map(|x| x.to_string()).collect()
     }
 }
@@ -270,7 +270,7 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
             ]
             .iter()
             .cloned()
-            .collect::<std::collections::HashSet<String>>(),
+            .collect::<rustc_hash::FxHashSet<String>>(),
             stack.get_reads()
         );
 
@@ -302,7 +302,7 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
             ["perfect".to_string()]
                 .iter()
                 .cloned()
-                .collect::<std::collections::HashSet<String>>(),
+                .collect::<rustc_hash::FxHashSet<String>>(),
             stack.get_reads()
         );
 
@@ -346,7 +346,7 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
             ]
             .iter()
             .cloned()
-            .collect::<std::collections::HashSet<String>>(),
+            .collect::<rustc_hash::FxHashSet<String>>(),
             stack.get_reads()
         );
 
