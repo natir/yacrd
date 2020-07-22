@@ -27,7 +27,7 @@ use anyhow::Result;
 use crate::reads2ovl;
 
 pub struct FullMemory {
-    reads2ovl: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    reads2ovl: reads2ovl::MapReads2Ovl,
     no_overlap: Vec<(u32, u32)>,
 }
 
@@ -41,10 +41,7 @@ impl FullMemory {
 }
 
 impl reads2ovl::Reads2Ovl for FullMemory {
-    fn get_overlaps(
-        &mut self,
-        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
-    ) -> bool {
+    fn get_overlaps(&mut self, new: &mut reads2ovl::MapReads2Ovl) -> bool {
         std::mem::swap(&mut self.reads2ovl, new);
 
         true

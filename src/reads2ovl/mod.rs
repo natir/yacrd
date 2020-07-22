@@ -39,6 +39,8 @@ use crate::error;
 use crate::io;
 use crate::util;
 
+pub type MapReads2Ovl = rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>;
+
 pub trait Reads2Ovl {
     fn init(&mut self, filename: &str) -> Result<()> {
         self.sub_init(filename)
@@ -143,10 +145,7 @@ pub trait Reads2Ovl {
         Ok(())
     }
 
-    fn get_overlaps(
-        &mut self,
-        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
-    ) -> bool;
+    fn get_overlaps(&mut self, new: &mut MapReads2Ovl) -> bool;
 
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>>;
     fn length(&self, id: &str) -> usize;

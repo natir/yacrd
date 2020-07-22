@@ -43,7 +43,7 @@ pub trait BadPart {
 pub struct FromOverlap {
     ovl: Box<dyn reads2ovl::Reads2Ovl>,
     coverage: u64,
-    buffer: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    buffer: reads2ovl::MapReads2Ovl,
     empty: (Vec<(u32, u32)>, usize),
 }
 
@@ -152,7 +152,7 @@ impl BadPart for FromOverlap {
                 new.drain()
                     .par_bridge()
                     .map(|(k, v)| (k, (FromOverlap::compute_bad_part(v.0, v.1, coverage), v.1)))
-                    .collect::<rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>>(),
+                    .collect::<reads2ovl::MapReads2Ovl>(),
             );
 
             if finish {
@@ -174,7 +174,7 @@ impl BadPart for FromOverlap {
 }
 
 pub struct FromReport {
-    buffer: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    buffer: reads2ovl::MapReads2Ovl,
     empty: (Vec<(u32, u32)>, usize),
 }
 

@@ -160,10 +160,7 @@ impl reads2ovl::Reads2Ovl for OnDisk {
         Ok(())
     }
 
-    fn get_overlaps(
-        &mut self,
-        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
-    ) -> bool {
+    fn get_overlaps(&mut self, new: &mut reads2ovl::MapReads2Ovl) -> bool {
         let mut tmp = rustc_hash::FxHashMap::default();
 
         if self.reads2len.is_empty() {
