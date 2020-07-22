@@ -99,29 +99,9 @@ impl OnDisk {
                 filename: path.to_string_lossy().to_string(),
             })
     }
-}
 
-pub(crate) fn prefix_id2pathbuf(prefix: &str, id: &str) -> std::path::PathBuf {
-    let mut path = std::path::PathBuf::from(prefix);
-    path.push(id);
-    path.set_extension("yovl");
-
-    path
-}
-
-impl reads2ovl::Reads2Ovl for OnDisk {
-    fn init(&mut self, filename: &str) -> Result<()> {
-        self.sub_init(filename)?;
-
-        self.clean_buffer()
-            .with_context(|| anyhow!("Error durring creation of tempory file"))?;
-        self.number_of_value = 0;
-
-        Ok(())
-    }
-
-    fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        let filename = format!("{}{}.yovl", self.prefix, id);
+    fn _overlap(id: &str, prefix: &str) -> Result<Vec<(u32, u32)>> {
+        let filename = format!("{}{}.yovl", prefix, id);
         if std::path::Path::new(&filename).exists() {
             let mut reader = csv::ReaderBuilder::new()
                 .delimiter(b',')
@@ -146,6 +126,60 @@ impl reads2ovl::Reads2Ovl for OnDisk {
         } else {
             Ok(Vec::new())
         }
+    }
+}
+
+pub(crate) fn prefix_id2pathbuf(prefix: &str, id: &str) -> std::path::PathBuf {
+    let mut path = std::path::PathBuf::from(prefix);
+    path.push(id);
+    path.set_extension("yovl");
+
+    path
+}
+
+impl reads2ovl::Reads2Ovl for OnDisk {
+    fn init(&mut self, filename: &str) -> Result<()> {
+        self.sub_init(filename)?;
+
+        self.clean_buffer()
+            .with_context(|| anyhow!("Error durring creation of tempory file"))?;
+        self.number_of_value = 0;
+
+        Ok(())
+    }
+
+    fn get_overlaps(
+        &mut self,
+        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    ) -> bool {
+        let mut tmp = rustc_hash::FxHashMap::default();
+
+        if self.reads2len.is_empty() {
+            std::mem::swap(&mut tmp, new);
+            return true;
+        }
+
+        let prefix = self.prefix.clone();
+        let mut remove_reads = Vec::with_capacity(self.buffer_size as usize);
+
+        {
+            for (k, v) in self.reads2len.iter_mut().take(self.buffer_size as usize) {
+                remove_reads.push(k.clone());
+                tmp.insert(k.clone(), (OnDisk::_overlap(k, &prefix).unwrap(), *v));
+            }
+        }
+
+        {
+            for k in remove_reads {
+                self.reads2len.remove(&k);
+            }
+        }
+        std::mem::swap(&mut tmp, new);
+        false
+    }
+
+    fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
+        OnDisk::_overlap(id, &self.prefix)
     }
 
     fn length(&self, id: &str) -> usize {

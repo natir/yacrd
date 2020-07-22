@@ -41,6 +41,15 @@ impl FullMemory {
 }
 
 impl reads2ovl::Reads2Ovl for FullMemory {
+    fn get_overlaps(
+        &mut self,
+        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    ) -> bool {
+        std::mem::swap(&mut self.reads2ovl, new);
+
+        true
+    }
+
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
         if let Some((vec, _)) = self.reads2ovl.get(&id.to_string()) {
             Ok(vec.to_vec())

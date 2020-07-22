@@ -25,6 +25,7 @@ use std::cmp::Reverse;
 
 /* crate use */
 use anyhow::{Context, Result};
+use rayon::prelude::*;
 
 /* local use */
 use crate::error;
@@ -32,6 +33,8 @@ use crate::reads2ovl;
 use crate::util;
 
 pub trait BadPart {
+    fn compute_all_bad_part(&mut self);
+
     fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)>;
 
     fn get_reads(&self) -> rustc_hash::FxHashSet<String>;
@@ -41,43 +44,43 @@ pub struct FromOverlap {
     ovl: Box<dyn reads2ovl::Reads2Ovl>,
     coverage: u64,
     buffer: rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    empty: (Vec<(u32, u32)>, usize),
 }
 
 impl FromOverlap {
     pub fn new(ovl: Box<dyn reads2ovl::Reads2Ovl>, coverage: u64) -> Self {
+        let empty = (Vec::new(), 0);
         FromOverlap {
             ovl,
             coverage,
             buffer: rustc_hash::FxHashMap::default(),
+            empty,
         }
     }
 
-    fn compute_bad_part(&self, id: &str) -> Result<(Vec<(u32, u32)>, usize)> {
+    fn compute_bad_part(mut ovls: Vec<(u32, u32)>, len: usize, coverage: usize) -> Vec<(u32, u32)> {
         let mut gaps: Vec<(u32, u32)> = Vec::new();
         let mut stack: std::collections::BinaryHeap<Reverse<u32>> =
             std::collections::BinaryHeap::new();
 
-        let mut ovl = self.ovl.overlap(&id)?;
-        ovl.sort();
-
-        let length = self.ovl.length(&id);
+        ovls.sort();
 
         let mut first_covered = 0;
         let mut last_covered = 0;
 
-        for interval in ovl {
+        for interval in ovls {
             while let Some(head) = stack.peek() {
                 if head.0 > interval.0 {
                     break;
                 }
 
-                if stack.len() > self.coverage as usize {
+                if stack.len() > coverage {
                     last_covered = head.0;
                 }
                 stack.pop();
             }
 
-            if stack.len() <= self.coverage as usize {
+            if stack.len() <= coverage {
                 if last_covered != 0 {
                     gaps.push((last_covered, interval.0));
                 } else {
@@ -87,14 +90,15 @@ impl FromOverlap {
             stack.push(Reverse(interval.1));
         }
 
-        while stack.len() > self.coverage as usize {
+        while stack.len() > coverage {
             last_covered = stack
                 .peek()
                 .with_context(|| error::Error::NotReachableCode {
                     name: format!("{} {}", file!(), line!()),
-                })?
+                })
+                .unwrap()
                 .0;
-            if last_covered as usize >= length {
+            if last_covered as usize >= len {
                 break;
             }
             stack.pop();
@@ -104,12 +108,12 @@ impl FromOverlap {
             gaps.insert(0, (0, first_covered));
         }
 
-        if last_covered as usize != length {
-            gaps.push((last_covered, length as u32));
+        if last_covered as usize != len {
+            gaps.push((last_covered, len as u32));
         }
 
         if gaps.is_empty() {
-            return Ok((gaps, length));
+            return gaps;
         }
 
         /* clean overlapped bad region */
@@ -131,27 +135,46 @@ impl FromOverlap {
         }
         clean_gaps.push((begin, end));
 
-        Ok((clean_gaps, length))
+        clean_gaps
     }
 }
 
 impl BadPart for FromOverlap {
-    fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)> {
-        if !self.buffer.contains_key(id) {
-            self.buffer
-                .insert(id.to_string(), self.compute_bad_part(id)?);
-        }
+    fn compute_all_bad_part(&mut self) {
+        let mut new = rustc_hash::FxHashMap::default();
 
-        Ok(self
-            .buffer
-            .get(id)
-            .with_context(|| error::Error::NotReachableCode {
-                name: format!("{} {}", file!(), line!()),
-            })?)
+        let coverage = self.coverage as usize;
+
+        loop {
+            let finish = self.ovl.get_overlaps(&mut new);
+
+            self.buffer.extend(
+                new.drain()
+                    .par_bridge()
+                    .map(|(k, v)| {
+                        (
+                            k,
+                            (FromOverlap::compute_bad_part(v.0, v.1, coverage), v.1),
+                        )
+                    })
+                    .collect::<rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>>(),
+            );
+
+            if finish {
+                break;
+            }
+        }
+    }
+
+    fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)> {
+        match self.buffer.get(id) {
+            Some(v) => Ok(v),
+            None => Ok(&self.empty),
+        }
     }
 
     fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
-        self.ovl.get_reads()
+        self.buffer.keys().map(|x| x.to_string()).collect()
     }
 }
 
@@ -224,6 +247,8 @@ impl FromReport {
 }
 
 impl BadPart for FromReport {
+    fn compute_all_bad_part(&mut self) {}
+
     fn get_bad_part(&mut self, id: &str) -> Result<&(Vec<(u32, u32)>, usize)> {
         match self.buffer.get(id) {
             Some(v) => Ok(v),
@@ -289,27 +314,6 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
     }
 
     #[test]
-    fn perfect_read_in_report() {
-        let mut report = NamedTempFile::new().expect("Can't create tmpfile");
-
-        writeln!(report.as_file_mut(), "NotBad	perfect	2706	")
-            .expect("Error durring write of report in temp file");
-
-        let mut stack = FromReport::new(report.into_temp_path().to_str().unwrap())
-            .expect("Error when create stack object");
-
-        assert_eq!(
-            ["perfect".to_string()]
-                .iter()
-                .cloned()
-                .collect::<rustc_hash::FxHashSet<String>>(),
-            stack.get_reads()
-        );
-
-        assert_eq!(&(vec![], 2706), stack.get_bad_part("perfect").unwrap());
-    }
-
-    #[test]
     fn from_overlap() {
         let mut ovl = reads2ovl::FullMemory::new();
 
@@ -334,6 +338,8 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
         ovl.add_length("F".to_string(), 1000);
 
         let mut stack = FromOverlap::new(Box::new(ovl), 0);
+
+        stack.compute_all_bad_part();
 
         assert_eq!(
             [
@@ -383,6 +389,8 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
 
         let mut stack = FromOverlap::new(Box::new(ovl), 2);
 
+        stack.compute_all_bad_part();
+
         assert_eq!(&(vec![(425, 575)], 1000), stack.get_bad_part("A").unwrap());
     }
 
@@ -403,5 +411,26 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,156"
         if !stack.is_err() {
             assert!(false);
         }
+    }
+
+    #[test]
+    fn perfect_read_in_report() {
+        let mut report = NamedTempFile::new().expect("Can't create tmpfile");
+
+        writeln!(report.as_file_mut(), "NotBad	perfect	2706	")
+            .expect("Error durring write of report in temp file");
+
+        let mut stack = FromReport::new(report.into_temp_path().to_str().unwrap())
+            .expect("Error when create stack object");
+
+        assert_eq!(
+            ["perfect".to_string()]
+                .iter()
+                .cloned()
+                .collect::<rustc_hash::FxHashSet<String>>(),
+            stack.get_reads()
+        );
+
+        assert_eq!(&(vec![], 2706), stack.get_bad_part("perfect").unwrap());
     }
 }

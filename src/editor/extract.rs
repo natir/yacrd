@@ -225,6 +225,8 @@ where
 mod tests {
     use super::*;
 
+    use crate::stack::BadPart;
+
     use crate::reads2ovl;
     use crate::reads2ovl::Reads2Ovl;
 
@@ -249,6 +251,8 @@ ACTG
         ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
 
         let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+        stack.compute_all_bad_part();
 
         let mut output: Vec<u8> = Vec::new();
         fasta(FASTA_FILE, &mut output, &mut stack, 0.8).unwrap();
@@ -286,6 +290,8 @@ ACTG
 
         let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
 
+        stack.compute_all_bad_part();
+
         let mut output: Vec<u8> = Vec::new();
         fastq(FASTQ_FILE, &mut output, &mut stack, 0.8).unwrap();
 
@@ -311,6 +317,8 @@ ACTG
 
         let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
 
+        stack.compute_all_bad_part();
+
         let mut output: Vec<u8> = Vec::new();
         paf(PAF_FILE, &mut output, &mut stack, 0.8).unwrap();
 
@@ -334,6 +342,8 @@ ACTG
         ovlst.add_overlap("1".to_string(), (510, 1000)).unwrap();
 
         let mut stack = stack::FromOverlap::new(Box::new(ovlst), 0);
+
+        stack.compute_all_bad_part();
 
         let mut output: Vec<u8> = Vec::new();
         m4(M4_FILE, &mut output, &mut stack, 0.8).unwrap();

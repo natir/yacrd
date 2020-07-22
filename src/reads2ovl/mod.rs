@@ -143,6 +143,11 @@ pub trait Reads2Ovl {
         Ok(())
     }
 
+    fn get_overlaps(
+        &mut self,
+        new: &mut rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>,
+    ) -> bool;
+
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>>;
     fn length(&self, id: &str) -> usize;
 

@@ -44,18 +44,19 @@ pub struct Command {
     #[clap(
         short = "i",
         long = "input",
-        required = true,
         about = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetect and compression input is allowed (gz|bzip2|lzma)"
     )]
     pub input: String,
 
-    #[clap(
-        short = "o",
-        long = "output",
-        required = true,
-        about = "path output file"
-    )]
+    #[clap(short = "o", long = "output", about = "path output file")]
     pub output: String,
+
+    #[clap(
+        short = "t",
+        long = "thread",
+        about = "number of thread use by yacrd, 0 mean all threads avaible, default 1"
+    )]
+    pub threads: Option<usize>,
 
     #[clap(
         short = "c",

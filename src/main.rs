@@ -71,6 +71,11 @@ fn main() -> Result<()> {
         niffler::compression::Level::One,
     )?;
 
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(params.threads.or(Some(1usize)).unwrap())
+        .build_global()?;
+    reads2badregion.compute_all_bad_part();
+
     for read in reads2badregion.get_reads() {
         let (bads, len) = reads2badregion.get_bad_part(&read)?;
         editor::report(&read, *len, bads, params.not_coverage, &mut out)
