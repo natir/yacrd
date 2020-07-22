@@ -151,12 +151,7 @@ impl BadPart for FromOverlap {
             self.buffer.extend(
                 new.drain()
                     .par_bridge()
-                    .map(|(k, v)| {
-                        (
-                            k,
-                            (FromOverlap::compute_bad_part(v.0, v.1, coverage), v.1),
-                        )
-                    })
+                    .map(|(k, v)| (k, (FromOverlap::compute_bad_part(v.0, v.1, coverage), v.1)))
                     .collect::<rustc_hash::FxHashMap<String, (Vec<(u32, u32)>, usize)>>(),
             );
 

@@ -39,6 +39,12 @@ pub struct OnDisk {
     buffer_size: u64,
 }
 
+#[derive(Debug, Clone, serde::Deserialize)]
+struct OnDiskRecord {
+    begin: u32,
+    end: u32,
+}
+
 impl OnDisk {
     pub fn new(prefix: String, buffer_size: u64) -> Self {
         OnDisk {
@@ -103,23 +109,29 @@ impl OnDisk {
     fn _overlap(id: &str, prefix: &str) -> Result<Vec<(u32, u32)>> {
         let filename = format!("{}{}.yovl", prefix, id);
         if std::path::Path::new(&filename).exists() {
+            let input =
+                std::io::BufReader::new(std::fs::File::open(&filename).with_context(|| {
+                    error::Error::CantReadFile {
+                        filename: filename.clone(),
+                    }
+                })?);
+
             let mut reader = csv::ReaderBuilder::new()
                 .delimiter(b',')
                 .has_headers(false)
-                .from_reader(std::io::BufReader::new(
-                    std::fs::File::open(&filename).with_context(|| error::Error::CantReadFile {
-                        filename: filename.clone(),
-                    })?,
-                ));
+                .from_reader(input);
 
+            let mut rec = csv::StringRecord::new();
             let mut ovls = Vec::new();
-            for record in reader.records() {
-                let result = record.with_context(|| error::Error::ReadingError {
-                    filename: filename.clone(),
-                    format: util::FileType::YacrdOverlap,
-                })?;
+            while reader.read_record(&mut rec).unwrap() {
+                let record: OnDiskRecord =
+                    rec.deserialize(None)
+                        .with_context(|| error::Error::ReadingError {
+                            filename: filename.clone(),
+                            format: util::FileType::YacrdOverlap,
+                        })?;
 
-                ovls.push((util::str2u32(&result[0])?, util::str2u32(&result[1])?));
+                ovls.push((record.begin, record.end));
             }
 
             Ok(ovls)
@@ -162,18 +174,15 @@ impl reads2ovl::Reads2Ovl for OnDisk {
         let prefix = self.prefix.clone();
         let mut remove_reads = Vec::with_capacity(self.buffer_size as usize);
 
-        {
-            for (k, v) in self.reads2len.iter_mut().take(self.buffer_size as usize) {
-                remove_reads.push(k.clone());
-                tmp.insert(k.clone(), (OnDisk::_overlap(k, &prefix).unwrap(), *v));
-            }
+        for (k, v) in self.reads2len.iter_mut().take(self.buffer_size as usize) {
+            remove_reads.push(k.clone());
+            tmp.insert(k.clone(), (OnDisk::_overlap(k, &prefix).unwrap(), *v));
         }
 
-        {
-            for k in remove_reads {
-                self.reads2len.remove(&k);
-            }
+        for k in remove_reads {
+            self.reads2len.remove(&k);
         }
+
         std::mem::swap(&mut tmp, new);
         false
     }
