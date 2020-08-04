@@ -20,8 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-use std::io::Write;
-
 /* crate use */
 use anyhow::{anyhow, Context, Result};
 use log::info;
@@ -29,12 +27,11 @@ use log::info;
 /* local use */
 use crate::error;
 use crate::reads2ovl;
-use crate::util;
 
 pub struct OnDisk {
     reads2ovl: rustc_hash::FxHashMap<String, Vec<(u32, u32)>>,
     reads2len: rustc_hash::FxHashMap<String, usize>,
-    prefix: String,
+    db: sled::Db,
     number_of_value: u64,
     buffer_size: u64,
 }
@@ -46,11 +43,24 @@ struct OnDiskRecord {
 }
 
 impl OnDisk {
-    pub fn new(prefix: String, buffer_size: u64) -> Self {
+    pub fn new(on_disk_path: String, buffer_size: u64) -> Self {
+        let path = std::path::PathBuf::from(on_disk_path.clone());
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)
+                .with_context(|| error::Error::PathCreationError { path })
+                .unwrap();
+        }
+
+        let db = sled::Config::default()
+            .path(on_disk_path)
+            .open()
+            .with_context(|| error::Error::OnDiskOpen)
+            .unwrap();
+
         OnDisk {
             reads2ovl: rustc_hash::FxHashMap::default(),
             reads2len: rustc_hash::FxHashMap::default(),
-            prefix,
+            db,
             number_of_value: 0,
             buffer_size,
         }
@@ -62,91 +72,48 @@ impl OnDisk {
             self.number_of_value
         );
 
-        for (key, values) in self.reads2ovl.iter_mut() {
-            let prefix = self.prefix.clone();
-            let mut output = std::io::BufWriter::new(OnDisk::create_yacrd_ovl_file(&prefix, key)?);
+        let mut batch = sled::Batch::default();
 
-            for v in values.iter() {
-                writeln!(output, "{},{}", v.0, v.1).with_context(|| {
-                    error::Error::WritingError {
-                        filename: format!("{}{}", &prefix, key),
-                        format: util::FileType::YacrdOverlap,
-                    }
-                })?;
-            }
+        for (key, vs) in self.reads2ovl.drain() {
+            let new_val: Vec<(u32, u32)> = match self
+                .db
+                .get(key.as_bytes())
+                .with_context(|| error::Error::OnDiskReadDatabase)?
+            {
+                Some(x) => {
+                    let mut orig: Vec<(u32, u32)> = bincode::deserialize(&x)
+                        .with_context(|| error::Error::OnDiskDeserializeVec)?;
+                    orig.extend(vs);
+                    orig
+                }
+                None => vs.to_vec(),
+            };
 
-            values.clear();
+            batch.insert(
+                key.as_bytes(),
+                bincode::serialize(&new_val).with_context(|| error::Error::OnDiskSerializeVec)?,
+            );
         }
+
+        self.db
+            .apply_batch(batch)
+            .with_context(|| error::Error::OnDiskBatchApplication)?;
 
         self.number_of_value = 0;
 
         Ok(())
     }
 
-    fn create_yacrd_ovl_file(prefix: &str, id: &str) -> Result<std::fs::File> {
-        /* build path */
-        let path = prefix_id2pathbuf(prefix, id);
-
-        /* create parent directory if it's required */
-        if let Some(parent_path) = path.parent() {
-            std::fs::create_dir_all(parent_path).with_context(|| {
-                error::Error::PathCreationError {
-                    path: parent_path.to_path_buf(),
-                }
-            })?;
-        }
-
-        /* create file */
-        std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&path)
-            .with_context(|| error::Error::CantWriteFile {
-                filename: path.to_string_lossy().to_string(),
-            })
+    fn _overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
+        Ok(bincode::deserialize(
+            &self
+                .db
+                .get(id.as_bytes())
+                .with_context(|| error::Error::OnDiskReadDatabase)?
+                .unwrap(),
+        )
+        .with_context(|| error::Error::OnDiskDeserializeVec)?)
     }
-
-    fn _overlap(id: &str, prefix: &str) -> Result<Vec<(u32, u32)>> {
-        let filename = format!("{}{}.yovl", prefix, id);
-        if std::path::Path::new(&filename).exists() {
-            let input =
-                std::io::BufReader::new(std::fs::File::open(&filename).with_context(|| {
-                    error::Error::CantReadFile {
-                        filename: filename.clone(),
-                    }
-                })?);
-
-            let mut reader = csv::ReaderBuilder::new()
-                .delimiter(b',')
-                .has_headers(false)
-                .from_reader(input);
-
-            let mut rec = csv::StringRecord::new();
-            let mut ovls = Vec::new();
-            while reader.read_record(&mut rec).unwrap() {
-                let record: OnDiskRecord =
-                    rec.deserialize(None)
-                        .with_context(|| error::Error::ReadingError {
-                            filename: filename.clone(),
-                            format: util::FileType::YacrdOverlap,
-                        })?;
-
-                ovls.push((record.begin, record.end));
-            }
-
-            Ok(ovls)
-        } else {
-            Ok(Vec::new())
-        }
-    }
-}
-
-pub(crate) fn prefix_id2pathbuf(prefix: &str, id: &str) -> std::path::PathBuf {
-    let mut path = std::path::PathBuf::from(prefix);
-    path.push(id);
-    path.set_extension("yovl");
-
-    path
 }
 
 impl reads2ovl::Reads2Ovl for OnDisk {
@@ -168,12 +135,11 @@ impl reads2ovl::Reads2Ovl for OnDisk {
             return true;
         }
 
-        let prefix = self.prefix.clone();
         let mut remove_reads = Vec::with_capacity(self.buffer_size as usize);
 
-        for (k, v) in self.reads2len.iter_mut().take(self.buffer_size as usize) {
+        for (k, v) in self.reads2len.iter().take(self.buffer_size as usize) {
             remove_reads.push(k.clone());
-            tmp.insert(k.clone(), (OnDisk::_overlap(k, &prefix).unwrap(), *v));
+            tmp.insert(k.clone(), (self._overlap(k).unwrap(), *v));
         }
 
         for k in remove_reads {
@@ -185,7 +151,7 @@ impl reads2ovl::Reads2Ovl for OnDisk {
     }
 
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        OnDisk::_overlap(id, &self.prefix)
+        self._overlap(id)
     }
 
     fn length(&self, id: &str) -> usize {

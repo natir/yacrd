@@ -109,11 +109,11 @@ mod tests {
     #[test]
     fn detection_ondisk() {
         if std::path::Path::new("tests/ondisk").exists() {
-            std::fs::remove_dir_all(std::path::Path::new("tests/ondisk/"))
+            std::fs::remove_dir_all(std::path::Path::new("tests/ondisk"))
                 .expect("We can't delete temporary directory of ondisk test");
         }
 
-        std::fs::create_dir(std::path::Path::new("tests/ondisk/"))
+        std::fs::create_dir(std::path::Path::new("tests/ondisk"))
             .expect("We can't create temporary directory for ondisk test");
 
         let mut child = Command::new("./target/debug/yacrd")
@@ -123,7 +123,7 @@ mod tests {
                 "-o",
                 "tests/result.ondisk.yacrd",
                 "-d",
-                "tests/ondisk/",
+                "tests/ondisk",
             ])
             .stderr(Stdio::piped())
             .stdout(Stdio::piped())
@@ -143,8 +143,6 @@ mod tests {
         }
 
         diff_unorder("tests/truth.yacrd", "tests/result.ondisk.yacrd");
-        std::fs::remove_dir_all(std::path::Path::new("tests/ondisk/"))
-            .expect("We can't delete temporary directory of ondisk test");
     }
 
     #[test]

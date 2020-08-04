@@ -46,8 +46,8 @@ fn main() -> Result<()> {
         } else {
             /* Get bad part from overlap */
             let mut reads2ovl: Box<dyn reads2ovl::Reads2Ovl> = match params.ondisk.clone() {
-                Some(prefix) => Box::new(reads2ovl::OnDisk::new(
-                    prefix,
+                Some(on_disk_path) => Box::new(reads2ovl::OnDisk::new(
+                    on_disk_path,
                     util::str2u64(&params.ondisk_buffer_size)?,
                 )),
                 None => Box::new(reads2ovl::FullMemory::new()),
@@ -111,21 +111,19 @@ fn main() -> Result<()> {
         None => (),
     };
 
-    if let Some(prefix) = params.ondisk {
-        for read in reads2badregion.get_reads() {
-            let path = reads2ovl::ondisk::prefix_id2pathbuf(&prefix, &read);
-            if path.is_file() {
-                std::fs::remove_file(&path).with_context(|| anyhow!("We failed to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
-            }
+    if let Some(on_disk_path) = params.ondisk {
+        let path = std::path::PathBuf::from(on_disk_path);
+        if path.is_dir() {
+            std::fs::remove_dir_all(&path).with_context(|| anyhow!("We failed to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
+        }
 
-            if let Some(parent_path) = path.parent() {
-                if path.is_dir() {
-                    std::fs::remove_dir_all(parent_path).with_context(|| {
-                        error::Error::PathDestructionError {
-                            path: parent_path.to_path_buf(),
-                        }
-                    })?;
-                }
+        if let Some(parent_path) = path.parent() {
+            if path.is_dir() {
+                std::fs::remove_dir_all(parent_path).with_context(|| {
+                    error::Error::PathDestructionError {
+                        path: parent_path.to_path_buf(),
+                    }
+                })?;
             }
         }
     }
