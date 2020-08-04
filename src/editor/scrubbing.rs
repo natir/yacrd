@@ -36,9 +36,10 @@ pub fn scrubbing(
     output_path: &str,
     badregions: &mut dyn stack::BadPart,
     not_covered: f64,
+    buffer_size: usize,
 ) -> Result<()> {
-    let (input, compression) = util::read_file(input_path)?;
-    let output = util::write_file(output_path, compression)?;
+    let (input, compression) = util::read_file(input_path, buffer_size)?;
+    let output = util::write_file(output_path, compression, buffer_size)?;
 
     match util::get_file_type(input_path) {
         Some(util::FileType::Fasta) => fasta(input, output, badregions, not_covered)
@@ -240,7 +241,7 @@ ACTG
 
     #[test]
     fn fasta_keep_begin_end() -> () {
-        let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new(8192);
 
         ovlst.add_length("1".to_string(), 22);
         ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
@@ -267,7 +268,7 @@ ACTG
 
     #[test]
     fn fasta_keep_middle() -> () {
-        let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new(8192);
 
         ovlst.add_length("1".to_string(), 22);
         ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();
@@ -320,7 +321,7 @@ ACTG
 
     #[test]
     fn fastq_keep_begin_end() {
-        let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new(8192);
 
         ovlst.add_length("1".to_string(), 22);
         ovlst.add_overlap("1".to_string(), (0, 4)).unwrap();
@@ -353,7 +354,7 @@ ACTG
 
     #[test]
     fn fastq_keep_middle() {
-        let mut ovlst = reads2ovl::FullMemory::new();
+        let mut ovlst = reads2ovl::FullMemory::new(8192);
 
         ovlst.add_length("1".to_string(), 22);
         ovlst.add_overlap("1".to_string(), (4, 18)).unwrap();

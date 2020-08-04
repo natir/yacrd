@@ -34,6 +34,7 @@ pub struct OnDisk {
     db: sled::Db,
     number_of_value: u64,
     buffer_size: u64,
+    read_buffer_size: usize,
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -43,8 +44,9 @@ struct OnDiskRecord {
 }
 
 impl OnDisk {
-    pub fn new(on_disk_path: String, buffer_size: u64) -> Self {
+    pub fn new(on_disk_path: String, buffer_size: u64, read_buffer_size: usize) -> Self {
         let path = std::path::PathBuf::from(on_disk_path.clone());
+
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)
                 .with_context(|| error::Error::PathCreationError { path })
@@ -63,6 +65,7 @@ impl OnDisk {
             db,
             number_of_value: 0,
             buffer_size,
+            read_buffer_size,
         }
     }
 
@@ -182,5 +185,9 @@ impl reads2ovl::Reads2Ovl for OnDisk {
 
     fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.reads2len.keys().map(|x| x.to_string()).collect()
+    }
+
+    fn read_buffer_size(&self) -> usize {
+        self.read_buffer_size
     }
 }

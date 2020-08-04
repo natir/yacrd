@@ -75,6 +75,13 @@ pub struct Command {
     pub not_coverage: f64,
 
     #[clap(
+        long = "read-buffer-size",
+        default_value = "8192",
+        about = "Control the size of the buffer used to read paf file"
+    )]
+    pub buffer_size: usize,
+
+    #[clap(
         short = "d",
         long = "ondisk",
         about = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"

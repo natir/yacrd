@@ -54,8 +54,12 @@ pub fn get_file_type(filename: &str) -> Option<FileType> {
     }
 }
 
-pub fn read_file(filename: &str) -> Result<(Box<dyn std::io::Read>, niffler::compression::Format)> {
-    let raw_in = Box::new(std::io::BufReader::new(
+pub fn read_file(
+    filename: &str,
+    buffer_size: usize,
+) -> Result<(Box<dyn std::io::Read>, niffler::compression::Format)> {
+    let raw_in = Box::new(std::io::BufReader::with_capacity(
+        buffer_size,
         std::fs::File::open(filename).with_context(|| error::Error::CantReadFile {
             filename: filename.to_string(),
         })?,
@@ -68,8 +72,10 @@ pub fn read_file(filename: &str) -> Result<(Box<dyn std::io::Read>, niffler::com
 pub fn write_file(
     filename: &str,
     compression: niffler::compression::Format,
+    buffer_size: usize,
 ) -> Result<Box<dyn std::io::Write>> {
-    let raw_out = Box::new(std::io::BufWriter::new(
+    let raw_out = Box::new(std::io::BufWriter::with_capacity(
+        buffer_size,
         std::fs::File::create(filename).with_context(|| error::Error::CantWriteFile {
             filename: filename.to_string(),
         })?,

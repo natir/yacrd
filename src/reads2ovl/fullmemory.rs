@@ -29,13 +29,15 @@ use crate::reads2ovl;
 pub struct FullMemory {
     reads2ovl: reads2ovl::MapReads2Ovl,
     no_overlap: Vec<(u32, u32)>,
+    read_buffer_size: usize,
 }
 
 impl FullMemory {
-    pub fn new() -> Self {
+    pub fn new(read_buffer_size: usize) -> Self {
         FullMemory {
             reads2ovl: rustc_hash::FxHashMap::default(),
             no_overlap: Vec::new(),
+            read_buffer_size,
         }
     }
 }
@@ -89,5 +91,9 @@ impl reads2ovl::Reads2Ovl for FullMemory {
 
     fn get_reads(&self) -> rustc_hash::FxHashSet<String> {
         self.reads2ovl.keys().map(|x| x.to_string()).collect()
+    }
+
+    fn read_buffer_size(&self) -> usize {
+        self.read_buffer_size
     }
 }

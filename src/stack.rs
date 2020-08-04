@@ -310,7 +310,7 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
 
     #[test]
     fn from_overlap() {
-        let mut ovl = reads2ovl::FullMemory::new();
+        let mut ovl = reads2ovl::FullMemory::new(8192);
 
         ovl.add_overlap("A".to_string(), (10, 990)).unwrap();
         ovl.add_length("A".to_string(), 1000);
@@ -370,7 +370,7 @@ Chimeric	SRR8494940.91655	15691	151,0,151;4056,7213,11269;58,15633,15691"
 
     #[test]
     fn coverage_upper_than_0() {
-        let mut ovl = reads2ovl::FullMemory::new();
+        let mut ovl = reads2ovl::FullMemory::new(8192);
 
         ovl.add_length("A".to_string(), 1000);
 

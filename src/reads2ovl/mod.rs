@@ -47,7 +47,7 @@ pub trait Reads2Ovl {
     }
 
     fn sub_init(&mut self, filename: &str) -> Result<()> {
-        let (input, _) = util::read_file(filename)?;
+        let (input, _) = util::read_file(filename, self.read_buffer_size())?;
 
         match util::get_file_type(filename) {
             Some(util::FileType::Paf) => self
@@ -156,6 +156,8 @@ pub trait Reads2Ovl {
     fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()>;
 
     fn get_reads(&self) -> rustc_hash::FxHashSet<String>;
+
+    fn read_buffer_size(&self) -> usize;
 }
 
 #[cfg(test)]
@@ -185,7 +187,7 @@ mod tests {
             .write_all(PAF_FILE)
             .expect("Error durring write of paf in temp file");
 
-        let mut ovl = FullMemory::new();
+        let mut ovl = FullMemory::new(8192);
 
         ovl.init(paf.into_temp_path().to_str().unwrap())
             .expect("Error in overlap init");
@@ -214,7 +216,7 @@ mod tests {
             .write_all(M4_FILE)
             .expect("Error durring write of m4 in temp file");
 
-        let mut ovl = FullMemory::new();
+        let mut ovl = FullMemory::new(8192);
 
         ovl.init(m4.into_temp_path().to_str().unwrap())
             .expect("Error in overlap init");

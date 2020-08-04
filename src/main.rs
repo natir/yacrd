@@ -49,8 +49,9 @@ fn main() -> Result<()> {
                 Some(on_disk_path) => Box::new(reads2ovl::OnDisk::new(
                     on_disk_path,
                     util::str2u64(&params.ondisk_buffer_size)?,
+                    params.buffer_size,
                 )),
-                None => Box::new(reads2ovl::FullMemory::new()),
+                None => Box::new(reads2ovl::FullMemory::new(params.buffer_size)),
             };
 
             reads2ovl.init(&params.input)?;
@@ -89,24 +90,28 @@ fn main() -> Result<()> {
             &s.output,
             &mut *reads2badregion,
             params.not_coverage,
+            params.buffer_size,
         )?,
         Some(cli::SubCommand::Filter(f)) => editor::filter(
             &f.input,
             &f.output,
             &mut *reads2badregion,
             params.not_coverage,
+            params.buffer_size,
         )?,
         Some(cli::SubCommand::Extract(e)) => editor::extract(
             &e.input,
             &e.output,
             &mut *reads2badregion,
             params.not_coverage,
+            params.buffer_size,
         )?,
         Some(cli::SubCommand::Split(s)) => editor::split(
             &s.input,
             &s.output,
             &mut *reads2badregion,
             params.not_coverage,
+            params.buffer_size,
         )?,
         None => (),
     };
