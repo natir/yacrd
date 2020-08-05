@@ -102,6 +102,10 @@ impl OnDisk {
             .apply_batch(batch)
             .with_context(|| error::Error::OnDiskBatchApplication)?;
 
+        self.db
+            .flush()
+            .with_context(|| error::Error::OnDiskBatchApplication)?;
+
         self.number_of_value = 0;
 
         Ok(())
