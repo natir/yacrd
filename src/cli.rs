@@ -82,18 +82,18 @@ pub struct Command {
     pub buffer_size: usize,
 
     #[clap(
-        short = "d",
-        long = "ondisk",
-        about = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"
+        short = "I",
+        long = "index",
+        about = "Yacrd use an index build by ovide to didn't load all overlap in ram"
     )]
-    pub ondisk: Option<String>,
+    pub index: Option<String>,
 
     #[clap(
-        long = "ondisk-buffer-size",
+        long = "index-buffer-size",
         default_value = "64000000",
-        about = "with the default value yacrd in 'ondisk' mode use around 1 GBytes, you can increase to reduce runtime but increase memory usage"
+        about = "Number of read load in ram when index option is used"
     )]
-    pub ondisk_buffer_size: String,
+    pub index_buffer_size: String,
 
     #[clap(subcommand)]
     pub subcmd: Option<SubCommand>,

@@ -74,19 +74,4 @@ pub enum Error {
 
     #[error("Your yacrd file {name} seems corrupt at line {line} you probably need to relaunch analisys with overlapping file")]
     CorruptYacrdReport { name: String, line: usize },
-
-    #[error("Error durring open database")]
-    OnDiskOpen,
-
-    #[error("Error durring read database")]
-    OnDiskReadDatabase,
-
-    #[error("Error durring on disk deserialize vector")]
-    OnDiskDeserializeVec,
-
-    #[error("Error durring on disk serialize vector")]
-    OnDiskSerializeVec,
-
-    #[error("Error durring on disk batch application")]
-    OnDiskBatchApplication,
 }
