@@ -42,24 +42,24 @@ Yacrd can make some other actions:
 )]
 pub struct Command {
     #[clap(
-        short = "i",
+        short = 'i',
         long = "input",
         about = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetect and compression input is allowed (gz|bzip2|lzma)"
     )]
     pub input: String,
 
-    #[clap(short = "o", long = "output", about = "path output file")]
+    #[clap(short = 'o', long = "output", about = "path output file")]
     pub output: String,
 
     #[clap(
-        short = "t",
+        short = 't',
         long = "thread",
         about = "number of thread use by yacrd, 0 mean all threads avaible, default 1"
     )]
     pub threads: Option<usize>,
 
     #[clap(
-        short = "c",
+        short = 'c',
         long = "coverage",
         default_value = "0",
         about = "if coverage reach this value region is mark as bad"
@@ -67,7 +67,7 @@ pub struct Command {
     pub coverage: u64,
 
     #[clap(
-        short = "n",
+        short = 'n',
         long = "not-coverage",
         default_value = "0.8",
         about = "if the ratio of bad region length on total length is lower than this value, read is marked as NotCovered"
@@ -82,7 +82,7 @@ pub struct Command {
     pub buffer_size: usize,
 
     #[clap(
-        short = "d",
+        short = 'd',
         long = "ondisk",
         about = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"
     )]
@@ -114,7 +114,7 @@ pub enum SubCommand {
 #[derive(Clap, Debug)]
 pub struct Scrubb {
     #[clap(
-        short = "i",
+        short = 'i',
         long = "input",
         required = true,
         about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
@@ -122,7 +122,7 @@ pub struct Scrubb {
     pub input: String,
 
     #[clap(
-        short = "o",
+        short = 'o',
         long = "output",
         required = true,
         about = "path to output file, format and compression of input is preserved"
@@ -133,7 +133,7 @@ pub struct Scrubb {
 #[derive(Clap, Debug)]
 pub struct Filter {
     #[clap(
-        short = "i",
+        short = 'i',
         long = "input",
         required = true,
         about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
@@ -141,7 +141,7 @@ pub struct Filter {
     pub input: String,
 
     #[clap(
-        short = "o",
+        short = 'o',
         long = "output",
         required = true,
         about = "path to output file, format and compression of input is preserved"
@@ -152,7 +152,7 @@ pub struct Filter {
 #[derive(Clap, Debug)]
 pub struct Extract {
     #[clap(
-        short = "i",
+        short = 'i',
         long = "input",
         required = true,
         about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
@@ -160,7 +160,7 @@ pub struct Extract {
     pub input: String,
 
     #[clap(
-        short = "o",
+        short = 'o',
         long = "output",
         required = true,
         about = "path to output file, format and compression of input is preserved"
@@ -171,7 +171,7 @@ pub struct Extract {
 #[derive(Clap, Debug)]
 pub struct Split {
     #[clap(
-        short = "i",
+        short = 'i',
         long = "input",
         required = true,
         about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
@@ -179,7 +179,7 @@ pub struct Split {
     pub input: String,
 
     #[clap(
-        short = "o",
+        short = 'o',
         long = "output",
         required = true,
         about = "path to output file, format and compression of input is preserved"

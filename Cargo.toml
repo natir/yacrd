@@ -14,18 +14,18 @@ license = "MIT"
 keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [dependencies]
-bio            = "0.31"
+bio            = "0.33"
 csv            = "1"
 log 	       = "0.4"
 sled           = "0.34"
-clap           = "3.0.0-beta.1"
+clap           = "3.0.0-beta.2"
 serde          = "1"
 rayon          = "1"
 anyhow         = "1"
 bincode        = "1"
 niffler        = "2"
 thiserror      = "1"
-env_logger     = "0.7"
+env_logger     = "0.8"
 rustc-hash     = "1"
 
 [dev-dependencies]

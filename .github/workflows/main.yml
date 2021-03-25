@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+    branches: ["**"]
 
 jobs:
   check:
@@ -59,22 +59,6 @@ jobs:
           command: test
           args: --no-fail-fast
 
-  test_all_features:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --all --all-features
-
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -85,11 +69,15 @@ jobs:
           toolchain: nightly
           override: true
 
-      - name: Run cargo-tarpaulin
-        uses: actions-rs/tarpaulin@v0.1.2
+      - name: Install cargo-tarpaulin
+        uses: actions-rs/install@v0.1
         with:
-          version: '0.9.0'
-          args: '-- --test-threads 1'
+          crate: cargo-tarpaulin
+          version: latest
+          use-tool-cache: true
+
+      - name: Run cargo-tarpaulin
+        run: cargo tarpaulin --all-features --timeout 600 --out Xml -- --test-threads 1
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1.0.3
@@ -122,3 +110,22 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
+  minimum_rust_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.45.0
+          override: true
+
+      - name: check if Readme matches MSRV defined here
+        run: grep '1.45.0' Readme.md
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --no-fail-fast

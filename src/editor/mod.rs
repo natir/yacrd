@@ -89,11 +89,10 @@ pub fn type_of_read(length: usize, badregions: &[(u32, u32)], not_covered: f64) 
         return ReadType::NotCovered;
     }
 
-    let middle_gap = badregions
+    let mut middle_gap = badregions
         .iter()
-        .filter(|x| x.0 != 0 && x.1 != length as u32)
-        .collect::<Vec<&(u32, u32)>>();
-    if !middle_gap.is_empty() {
+        .filter(|x| x.0 != 0 && x.1 != length as u32);
+    if middle_gap.next().is_some() {
         return ReadType::Chimeric;
     }
 

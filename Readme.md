@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/natir/yacrd/blob/master/LICENSE)
 ![CI](https://github.com/natir/yacrd/workflows/CI/badge.svg)
+[![CodeCov](https://codecov.io/gh/natir/yacrd/branch/master/graph/badge.svg)](https://codecov.io/gh/natir/yacrd)
 
 # Yet Another Chimeric Read Detector for long reads  🧬 💻
 
@@ -17,8 +18,10 @@ Chimera detection is done as follows:
 
 - [Rationale](#rationale)
 - [Input](#input)
+- [Output](#output)
 - [Requirements](#requirements)
 - [How to use Yacrd](#how-to-use-yacrd)
+- [Minimum supported Rust version](#minimum-supported-rust-version)
 - [Citation](#citation)
 
 ## Rationale
@@ -153,6 +156,10 @@ Chimeric    readB   10452   862,1260,2122;3209,4319,7528
 ```
 
 Here, readB is chimeric with 2 zero-coverage regions: one between bases 1260 and 2122, another between 4319 and 7528.
+
+## Minimum supported Rust version
+
+Currently the minimum supported Rust version is 1.45.0.
 
 ## Citation
 

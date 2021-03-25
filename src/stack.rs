@@ -63,7 +63,7 @@ impl FromOverlap {
         let mut stack: std::collections::BinaryHeap<Reverse<u32>> =
             std::collections::BinaryHeap::new();
 
-        ovls.sort();
+        ovls.sort_unstable();
 
         let mut first_covered = 0;
         let mut last_covered = 0;
