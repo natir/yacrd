@@ -1,4 +1,7 @@
-# Yet Another Chimeric Read Detector for long reads
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/natir/yacrd/blob/master/LICENSE)
+![CI](https://github.com/natir/yacrd/workflows/CI/badge.svg)
+
+# Yet Another Chimeric Read Detector for long reads  🧬 💻
 
 Using all-against-all read mapping, yacrd performs:
 
@@ -11,6 +14,12 @@ Chimera detection is done as follows:
 2. if there is a _bad region_ that starts at a position strictly after the beginning of the read and ends strictly before the end of the read, the read is marked as `Chimeric`
 3. if total _bad region_ length > 0.8 * read length, the read is marked as `NotCovered`
 4. if a read isn't `Chimeric` or `NotCovered` is `NotBad`
+
+- [Rationale](#rationale)
+- [Input](#input)
+- [Requirements](#requirements)
+- [How to use Yacrd](#how-to-use-yacrd)
+- [Citation](#citation)
 
 ## Rationale
 
@@ -61,7 +70,7 @@ cargo install --path .
 ### Find chimera
 
 ```
-minimap2 reads.fq reads.fq > overlap.paf
+minimap2 -x {corresponding preset} reads.fq reads.fq > overlap.paf
 yacrd -i overlap.paf -o reads.yacrd
 ```
 
@@ -75,7 +84,7 @@ yacrd can perform some post-detection operation:
 - scrubb: for sequence file all bad region are removed, NotCovered read is removed
 
 ```
-minimap2 reads.fq reads.fq > mapping.paf
+minimap2 -x {corresponding preset} reads.fq reads.fq > mapping.paf
 yacrd -i mapping.paf -o reads.yacrd filter -i reads.fasta -o reads.filter.fasta
 yacrd -i mapping.paf -o reads.yacrd extract -i reads.fasta -o reads.extract.fasta
 yacrd -i mapping.paf -o reads.yacrd split -i reads.fasta -o reads.split.fasta
