@@ -119,12 +119,12 @@ fn main() -> Result<()> {
     if let Some(on_disk_path) = params.ondisk {
         let path = std::path::PathBuf::from(on_disk_path);
         if path.is_dir() {
-            std::fs::remove_dir_all(&path).with_context(|| anyhow!("We failed to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
+            remove_dir_all::remove_dir_all(&path).with_context(|| anyhow!("We failed to remove file {:?}, yacrd finish analysis but temporary file isn't removed", path.clone()))?;
         }
 
         if let Some(parent_path) = path.parent() {
             if path.is_dir() {
-                std::fs::remove_dir_all(parent_path).with_context(|| {
+                remove_dir_all::remove_dir_all(parent_path).with_context(|| {
                     error::Error::PathDestructionError {
                         path: parent_path.to_path_buf(),
                     }

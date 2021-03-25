@@ -112,14 +112,14 @@ impl OnDisk {
     }
 
     fn _overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        Ok(bincode::deserialize(
+        bincode::deserialize(
             &self
                 .db
                 .get(id.as_bytes())
                 .with_context(|| error::Error::OnDiskReadDatabase)?
                 .unwrap(),
         )
-        .with_context(|| error::Error::OnDiskDeserializeVec)?)
+        .with_context(|| error::Error::OnDiskDeserializeVec)
     }
 }
 
