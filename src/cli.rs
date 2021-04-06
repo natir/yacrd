@@ -31,7 +31,7 @@ use clap::Clap;
 Yacrd use overlap between reads, to detect 'good' and 'bad' region,
 a region with coverage over the threshold is 'good' others are 'bad'.
 If read has a 'bad' region in middle this reads is mark as 'Chimeric'.
-If the ratio of 'bad' region length on total read length is larger than threshold this reads is mark as 'Not_covered'.
+If the ratio of 'bad' region length on total read length is larger than threshold this reads is marked as 'Not_covered'.
 
 Yacrd can make some other actions:
 - filter: for sequence or overlap file, record with reads marked as Chimeric or NotCovered isn't written in the output
@@ -44,7 +44,7 @@ pub struct Command {
     #[clap(
         short = 'i',
         long = "input",
-        about = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetect and compression input is allowed (gz|bzip2|lzma)"
+        about = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetected and compression input is allowed (gz|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -54,7 +54,7 @@ pub struct Command {
     #[clap(
         short = 't',
         long = "thread",
-        about = "number of thread use by yacrd, 0 mean all threads avaible, default 1"
+        about = "number of thread use by yacrd, 0 mean all threads available, default 1"
     )]
     pub threads: Option<usize>,
 
@@ -62,7 +62,7 @@ pub struct Command {
         short = 'c',
         long = "coverage",
         default_value = "0",
-        about = "if coverage reach this value region is mark as bad"
+        about = "if coverage reach this value region is marked as bad"
     )]
     pub coverage: u64,
 
@@ -117,7 +117,7 @@ pub struct Scrubb {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
+        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -136,7 +136,7 @@ pub struct Filter {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
+        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -155,7 +155,7 @@ pub struct Extract {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
+        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -174,7 +174,7 @@ pub struct Split {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq) compression is autodetect (none|gzip|bzip2|lzma)"
+        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
