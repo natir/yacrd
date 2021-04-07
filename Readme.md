@@ -96,6 +96,8 @@ yacrd -i mapping.paf -o reads.yacrd scrubb -i reads.fasta -o reads.scrubb.fasta
 
 ### Read scrubbing overlapping recommended parameter
 
+We recommended this parameter for dataset with coverage upper than **30x**.
+
 For nanopore data, we recommend using minimap2 with all-vs-all nanopore preset with a maximal distance between seeds fixe to 500 (option `-g 500`) to generate overlap. We recommend to run yacrd with minimal coverage fixed to 4 (option `-c`) and minimal coverage of read fixed to 0.4 (option `-n`).
 
 This is an exemple of how run a yacrd scrubbing:
@@ -117,6 +119,8 @@ For pacbio Sequel data, we recommend to use minimap2 with all-vs-all pacbio pres
 minimap2 -x ava-pb -g 5000 reads.fasta reads.fasta > overlap.paf
 yacrd -i overlap.paf -o report.yacrd -c 3 -n 0.4 scrubb -i reads.fasta -o reads.scrubb.fasta
 ```
+
+If you have parameter sets for other types of data do not hesitate to make a pull request to add them, thanks.
 
 ### Important note
 
