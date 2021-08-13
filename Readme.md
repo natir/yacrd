@@ -24,6 +24,10 @@ Chimera detection is done as follows:
 - [Minimum supported Rust version](#minimum-supported-rust-version)
 - [Citation](#citation)
 
+**WARNING:**
+
+Minimap2 v2.19 introduce some change in selection of seed and chaining of this seed to generate overlap. This change could have an important impacte on yacrd behavior, I can't guarantee the quality of yacrd results with this version of minimap2, I recommend you not to use a minimap2 version higher than 2.18.
+
 ## Rationale
 
 Long read error-correction tools usually detect and also remove chimeras. But it is difficult to isolate or retrieve information from just this step.
@@ -43,6 +47,7 @@ yacrd takes the resulting PAF (Pairwise Alignement Format) from minimap2 or BLAS
 - libgz
 - libbzip2
 - liblzma
+- [minimap2](https://github.com/lh3/minimap2) <= v2.18
 
 ## Instalation
 
