@@ -1,0 +1,26 @@
+# YAML 1.2
+---
+abstract: "Genome assembly is increasingly performed on long, uncorrected reads. Assembly quality may be degraded due to unfiltered chimeric reads; also, the storage of all read overlaps can take up to terabytes of disk space.We introduce two tools: yacrd for  chimera removal and read scrubbing, and fpa for filtering out spurious overlaps. We show that yacrd results in higher-quality assemblies and is one hundred times faster than the best available alternative.https://github.com/natir/yacrd and https://github.com/natir/fpa.Supplementary data are available at Bioinformatics online."
+authors: 
+  -
+    affiliation: " Department of Computer Science , Inria, Univ. Lille, CNRS, Centrale Lille, UMR 9189 - CRIStAL, Lille F-59000, France"
+    family-names: Marijon
+    given-names: Pierre
+    orcid: "https://orcid.org/0000-0002-6694-6873"
+  -
+    affiliation: " Department of Computational Biology , Institut Pasteur, C3BI USR 3756 IP CNRS, Paris, France"
+    family-names: Chikhi
+    given-names: Rayan
+    orcid: "https://orcid.org/0000-0003-1099-8735"
+  -
+    affiliation: " Univ. Lille , CNRS, Centrale Lille, UMR 9189 - CRIStAL - Centre de Recherche en Informatique Signal et Automatique de Lille, F-59000 Lille, France"
+    family-names: "Varré"
+    given-names: "Jean-Stéphane"
+    orcid: "https://orcid.org/0000-0001-6322-0519"
+cff-version: "1.1.0"
+date-released: 2020-04-21
+doi: "10.1093/bioinformatics/btaa262"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/natir/yacrd"
+title: "yacrd and fpa: upstream tools for long-read genome assembly"
+...
