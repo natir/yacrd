@@ -14,7 +14,7 @@ license = "MIT"
 keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [dependencies]
-bio            = "0.33"
+bio            = "0.38"
 csv            = "1"
 log 	       = "0.4"
 sled           = "0.34"
@@ -25,7 +25,7 @@ anyhow         = "1"
 bincode        = "1"
 niffler        = "2"
 thiserror      = "1"
-env_logger     = "0.8"
+env_logger     = "0.9"
 rustc-hash     = "1"
 remove_dir_all = "0.7"
 
