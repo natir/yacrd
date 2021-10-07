@@ -49,7 +49,7 @@ impl OnDisk {
 
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)
-                .with_context(|| error::Error::PathCreationError { path })
+                .with_context(|| error::Error::PathCreation { path })
                 .unwrap();
         }
 

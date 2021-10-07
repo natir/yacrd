@@ -125,7 +125,7 @@ fn main() -> Result<()> {
         if let Some(parent_path) = path.parent() {
             if path.is_dir() {
                 remove_dir_all::remove_dir_all(parent_path).with_context(|| {
-                    error::Error::PathDestructionError {
+                    error::Error::PathDestruction {
                         path: parent_path.to_path_buf(),
                     }
                 })?;

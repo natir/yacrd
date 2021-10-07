@@ -193,7 +193,7 @@ impl FromReport {
 
         let mut buffer = rustc_hash::FxHashMap::default();
         for (line, record) in reader.records().enumerate() {
-            let result = record.with_context(|| error::Error::ReadingError {
+            let result = record.with_context(|| error::Error::Reading {
                 filename: input_path.to_string(),
                 format: util::FileType::Fasta,
             })?;

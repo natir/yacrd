@@ -49,7 +49,7 @@ pub enum Error {
     },
 
     #[error("Error durring reading of file {filename:} in format {format:?}")]
-    ReadingError {
+    Reading {
         filename: String,
         format: util::FileType,
     },
@@ -61,10 +61,10 @@ pub enum Error {
     WritingErrorNoFilename { format: util::FileType },
 
     #[error("Error during yacrd overlap path creation {path:?}")]
-    PathCreationError { path: std::path::PathBuf },
+    PathCreation { path: std::path::PathBuf },
 
     #[error("Error during yacrd overlap path destruction {path:?}")]
-    PathDestructionError { path: std::path::PathBuf },
+    PathDestruction { path: std::path::PathBuf },
 
     #[error("If you get this error please contact the author with this message and command line you use: {name:?}")]
     NotReachableCode { name: String },
