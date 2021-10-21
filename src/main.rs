@@ -22,7 +22,7 @@ SOFTWARE.
 
 /* crate use */
 use anyhow::{anyhow, Context, Result};
-use clap::Clap;
+use clap::Parser;
 
 /* mod declaration*/
 mod cli;

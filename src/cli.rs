@@ -20,9 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-use clap::Clap;
-
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 #[clap(
     version = "0.6.2 Ivysaur",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
@@ -99,7 +97,7 @@ pub struct Command {
     pub subcmd: Option<SubCommand>,
 }
 
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 pub enum SubCommand {
     #[clap(about = "All bad region of read is removed")]
     Scrubb(Scrubb),
@@ -111,7 +109,7 @@ pub enum SubCommand {
     Split(Split),
 }
 
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 pub struct Scrubb {
     #[clap(
         short = 'i',
@@ -130,7 +128,7 @@ pub struct Scrubb {
     pub output: String,
 }
 
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 pub struct Filter {
     #[clap(
         short = 'i',
@@ -149,7 +147,7 @@ pub struct Filter {
     pub output: String,
 }
 
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 pub struct Extract {
     #[clap(
         short = 'i',
@@ -168,7 +166,7 @@ pub struct Extract {
     pub output: String,
 }
 
-#[derive(Clap, Debug)]
+#[derive(clap::Parser, Debug)]
 pub struct Split {
     #[clap(
         short = 'i',

@@ -14,11 +14,11 @@ license = "MIT"
 keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [dependencies]
-bio            = "0.38"
+bio            = "0.39"
 csv            = "1"
 log 	       = "0.4"
 sled           = "0.34"
-clap           = "3.0.0-beta.2"
+clap           = "3.0.0-beta.5"
 serde          = "1"
 rayon          = "1"
 anyhow         = "1"
@@ -30,10 +30,10 @@ rustc-hash     = "1"
 remove_dir_all = "0.7"
 
 [dev-dependencies]
-tempfile = "3.1"
+tempfile       = "3"
 
 [profile.release]
-debug = true # uncomment for profiling
+#debug = true # uncomment for profiling
 lto = 'thin'
 opt-level = 3
 overflow-checks = false
