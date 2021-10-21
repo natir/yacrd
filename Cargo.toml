@@ -2,7 +2,7 @@
 name = "yacrd"
 version = "0.6.2"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
-edition = '2018'
+edition = '2021'
 
 exclude = ["image/*", "tests/*"]
 
