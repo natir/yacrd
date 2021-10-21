@@ -168,7 +168,7 @@ Here, readB is chimeric with 2 zero-coverage regions: one between bases 1260 and
 
 ## Minimum supported Rust version
 
-Currently the minimum supported Rust version is 1.45.0.
+Currently the minimum supported Rust version is 1.56.
 
 ## Citation
 
