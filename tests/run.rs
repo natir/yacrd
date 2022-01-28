@@ -30,9 +30,9 @@ mod tests {
 
     use super::*;
 
-    fn diff_unorder(truth: &str, result: &str) {
+    fn diff_unorder(truth_path: &str, result_path: &str) {
         let truth_file = std::io::BufReader::new(
-            std::fs::File::open(truth).expect(&format!("Impossible to open {}", truth)),
+            std::fs::File::open(truth_path).expect(&format!("Impossible to open {}", truth_path)),
         );
 
         let mut truth: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -43,7 +43,7 @@ mod tests {
         }
 
         let result_file = std::io::BufReader::new(
-            std::fs::File::open(result).expect(&format!("Impossible to open {}", result)),
+            std::fs::File::open(result_path).expect(&format!("Impossible to open {}", result_path)),
         );
 
         let mut result: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -53,12 +53,17 @@ mod tests {
             result.insert(line);
         }
 
-        assert_eq!(truth, result);
+        if truth != result {
+            panic!(
+                "Truth {} and result {} are different",
+                truth_path, result_path
+            );
+        }
     }
 
-    fn diff(truth: &str, result: &str) {
+    fn diff(truth_path: &str, result_path: &str) {
         let truth_file = std::io::BufReader::new(
-            std::fs::File::open(truth).expect(&format!("Impossible to open {}", truth)),
+            std::fs::File::open(truth_path).expect(&format!("Impossible to open {}", truth_path)),
         );
 
         let mut truth: Vec<String> = Vec::new();
@@ -69,7 +74,7 @@ mod tests {
         }
 
         let result_file = std::io::BufReader::new(
-            std::fs::File::open(result).expect(&format!("Impossible to open {}", result)),
+            std::fs::File::open(result_path).expect(&format!("Impossible to open {}", result_path)),
         );
 
         let mut result: Vec<String> = Vec::new();
@@ -79,7 +84,12 @@ mod tests {
             result.push(line);
         }
 
-        assert_eq!(truth, result);
+        if truth != result {
+            panic!(
+                "Truth {} and result {} are different",
+                truth_path, result_path
+            );
+        }
     }
 
     #[test]

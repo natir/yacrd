@@ -25,7 +25,7 @@ SOFTWARE.
     version = "0.6.2 Ivysaur",
     author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
     name = "yacrd",
-    about = "
+    override_help = "
 Yacrd use overlap between reads, to detect 'good' and 'bad' region,
 a region with coverage over the threshold is 'good' others are 'bad'.
 If read has a 'bad' region in middle this reads is mark as 'Chimeric'.
@@ -42,17 +42,17 @@ pub struct Command {
     #[clap(
         short = 'i',
         long = "input",
-        about = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetected and compression input is allowed (gz|bzip2|lzma)"
+        help = "path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetected and compression input is allowed (gz|bzip2|lzma)"
     )]
     pub input: String,
 
-    #[clap(short = 'o', long = "output", about = "path output file")]
+    #[clap(short = 'o', long = "output", help = "path output file")]
     pub output: String,
 
     #[clap(
         short = 't',
         long = "thread",
-        about = "number of thread use by yacrd, 0 mean all threads available, default 1"
+        help = "number of thread use by yacrd, 0 mean all threads available, default 1"
     )]
     pub threads: Option<usize>,
 
@@ -60,7 +60,7 @@ pub struct Command {
         short = 'c',
         long = "coverage",
         default_value = "0",
-        about = "if coverage reach this value region is marked as bad"
+        help = "if coverage reach this value region is marked as bad"
     )]
     pub coverage: u64,
 
@@ -68,28 +68,28 @@ pub struct Command {
         short = 'n',
         long = "not-coverage",
         default_value = "0.8",
-        about = "if the ratio of bad region length on total length is lower than this value, read is marked as NotCovered"
+        help = "if the ratio of bad region length on total length is lower than this value, read is marked as NotCovered"
     )]
     pub not_coverage: f64,
 
     #[clap(
         long = "read-buffer-size",
         default_value = "8192",
-        about = "Control the size of the buffer used to read paf file"
+        help = "Control the size of the buffer used to read paf file"
     )]
     pub buffer_size: usize,
 
     #[clap(
         short = 'd',
         long = "ondisk",
-        about = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"
+        help = "yacrd switches to 'ondisk' mode which will reduce memory usage but increase computation time. The value passed as a parameter is used as a prefix for the temporary files created by yacrd. Be careful if the prefix contains path separators (`/` for unix or `\\` for windows) this folder will be deleted"
     )]
     pub ondisk: Option<String>,
 
     #[clap(
         long = "ondisk-buffer-size",
         default_value = "64000000",
-        about = "with the default value yacrd in 'ondisk' mode use around 1 GBytes, you can increase to reduce runtime but increase memory usage"
+        help = "with the default value yacrd in 'ondisk' mode use around 1 GBytes, you can increase to reduce runtime but increase memory usage"
     )]
     pub ondisk_buffer_size: String,
 
@@ -99,13 +99,13 @@ pub struct Command {
 
 #[derive(clap::Parser, Debug)]
 pub enum SubCommand {
-    #[clap(about = "All bad region of read is removed")]
+    #[clap(override_help = "All bad region of read is removed")]
     Scrubb(Scrubb),
-    #[clap(about = "Record mark as chimeric or NotCovered is filter")]
+    #[clap(override_help = "Record mark as chimeric or NotCovered is filter")]
     Filter(Filter),
-    #[clap(about = "Record mark as chimeric or NotCovered is extract")]
+    #[clap(override_help = "Record mark as chimeric or NotCovered is extract")]
     Extract(Extract),
-    #[clap(about = "Record mark as chimeric or NotCovered is split")]
+    #[clap(override_help = "Record mark as chimeric or NotCovered is split")]
     Split(Split),
 }
 
@@ -115,7 +115,7 @@ pub struct Scrubb {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
+        help = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -123,7 +123,7 @@ pub struct Scrubb {
         short = 'o',
         long = "output",
         required = true,
-        about = "path to output file, format and compression of input is preserved"
+        help = "path to output file, format and compression of input is preserved"
     )]
     pub output: String,
 }
@@ -134,7 +134,7 @@ pub struct Filter {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
+        help = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -142,7 +142,7 @@ pub struct Filter {
         short = 'o',
         long = "output",
         required = true,
-        about = "path to output file, format and compression of input is preserved"
+        help = "path to output file, format and compression of input is preserved"
     )]
     pub output: String,
 }
@@ -153,7 +153,7 @@ pub struct Extract {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
+        help = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -161,7 +161,7 @@ pub struct Extract {
         short = 'o',
         long = "output",
         required = true,
-        about = "path to output file, format and compression of input is preserved"
+        help = "path to output file, format and compression of input is preserved"
     )]
     pub output: String,
 }
@@ -172,7 +172,7 @@ pub struct Split {
         short = 'i',
         long = "input",
         required = true,
-        about = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
+        help = "path to sequence input (fasta|fastq), compression is autodetected (none|gzip|bzip2|lzma)"
     )]
     pub input: String,
 
@@ -180,7 +180,7 @@ pub struct Split {
         short = 'o',
         long = "output",
         required = true,
-        about = "path to output file, format and compression of input is preserved"
+        help = "path to output file, format and compression of input is preserved"
     )]
     pub output: String,
 }

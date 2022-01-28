@@ -39,8 +39,8 @@ pub struct OnDisk {
 
 #[derive(Debug, Clone, serde::Deserialize)]
 struct OnDiskRecord {
-    begin: u32,
-    end: u32,
+    _begin: u32,
+    _end: u32,
 }
 
 impl OnDisk {

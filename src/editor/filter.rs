@@ -22,7 +22,6 @@ SOFTWARE.
 
 /* crate use */
 use anyhow::{anyhow, bail, Context, Result};
-use bio::io::{fasta, fastq};
 
 /* local use */
 use crate::editor;
@@ -74,15 +73,15 @@ where
     R: std::io::Read,
     W: std::io::Write,
 {
-    let reader = fasta::Reader::new(input);
-    let mut writer = fasta::Writer::new(output);
+    let mut reader = noodles::fasta::Reader::new(std::io::BufReader::new(input));
+    let mut writer = noodles::fasta::Writer::new(std::io::BufWriter::new(output));
 
     for result in reader.records() {
         let record = result.with_context(|| error::Error::ReadingErrorNoFilename {
             format: util::FileType::Fasta,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(&record.id().to_string())?;
+        let (badregion, length) = badregions.get_bad_part(record.name())?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 
@@ -108,15 +107,20 @@ where
     R: std::io::Read,
     W: std::io::Write,
 {
-    let reader = fastq::Reader::new(input);
-    let mut writer = fastq::Writer::new(output);
+    let mut reader = noodles::fastq::Reader::new(std::io::BufReader::new(input));
+    let mut writer = noodles::fastq::Writer::new(std::io::BufWriter::new(output));
 
     for result in reader.records() {
         let record = result.with_context(|| error::Error::ReadingErrorNoFilename {
             format: util::FileType::Fastq,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(&record.id().to_string())?;
+        let (badregion, length) = badregions.get_bad_part(
+            std::str::from_utf8(record.name())?
+                .split_ascii_whitespace()
+                .next()
+                .unwrap(),
+        )?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 

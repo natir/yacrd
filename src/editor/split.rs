@@ -22,7 +22,6 @@ SOFTWARE.
 
 /* crate use */
 use anyhow::{anyhow, bail, Context, Result};
-use bio::io::{fasta, fastq};
 use log::error;
 
 /* local use */
@@ -81,15 +80,15 @@ where
     R: std::io::Read,
     W: std::io::Write,
 {
-    let reader = fasta::Reader::new(input);
-    let mut writer = fasta::Writer::new(output);
+    let mut reader = noodles::fasta::Reader::new(std::io::BufReader::new(input));
+    let mut writer = noodles::fasta::Writer::new(std::io::BufWriter::new(output));
 
     for result in reader.records() {
         let record = result.with_context(|| error::Error::ReadingErrorNoFilename {
             format: util::FileType::Fasta,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(&record.id().to_string())?;
+        let (badregion, length) = badregions.get_bad_part(record.name())?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 
@@ -114,17 +113,24 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
-                if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
+                if pos[0] as usize > record.sequence().len()
+                    || pos[1] as usize > record.sequence().len()
+                {
+                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.name());
                     break;
                 }
 
                 writer
-                    .write(
-                        &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
-                        record.desc(),
-                        &record.seq()[(pos[0] as usize)..(pos[1] as usize)],
-                    )
+                    .write_record(&noodles::fasta::Record::new(
+                        noodles::fasta::record::Definition::new(
+                            &format!("{}_{}_{}", record.name(), pos[0], pos[1]),
+                            None,
+                        ),
+                        noodles::fasta::record::Sequence::from(
+                            record.sequence().as_ref()[(pos[0] as usize)..(pos[1] as usize)]
+                                .to_vec(),
+                        ),
+                    ))
                     .with_context(|| error::Error::WritingErrorNoFilename {
                         format: util::FileType::Fasta,
                     })?;
@@ -145,15 +151,20 @@ where
     R: std::io::Read,
     W: std::io::Write,
 {
-    let reader = fastq::Reader::new(input);
-    let mut writer = fastq::Writer::new(output);
+    let mut reader = noodles::fastq::Reader::new(std::io::BufReader::new(input));
+    let mut writer = noodles::fastq::Writer::new(std::io::BufWriter::new(output));
 
     for result in reader.records() {
         let record = result.with_context(|| error::Error::ReadingErrorNoFilename {
             format: util::FileType::Fastq,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(&record.id().to_string())?;
+        let (badregion, length) = badregions.get_bad_part(
+            std::str::from_utf8(record.name())?
+                .split_ascii_whitespace()
+                .next()
+                .unwrap(),
+        )?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 
@@ -166,6 +177,10 @@ where
                     format: util::FileType::Fastq,
                 })?;
         } else {
+            let mut sequence_description = std::str::from_utf8(record.name())?.splitn(2, ' ');
+            let name = sequence_description.next().unwrap();
+            let description = sequence_description.next();
+
             let mut poss = vec![0];
             for interval in badregion {
                 if interval.0 == 0 || interval.1 == *length as u32 {
@@ -178,20 +193,25 @@ where
             poss.push(*length as u32);
 
             for pos in poss.chunks(2) {
-                if pos[0] as usize > record.seq().len() || pos[1] as usize > record.seq().len() {
-                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.id());
+                if pos[0] as usize > record.sequence().len()
+                    || pos[1] as usize > record.sequence().len()
+                {
+                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", std::str::from_utf8(record.name())?);
                     break;
                 }
 
                 writer
-                    .write(
-                        &format!("{}_{}_{}", record.id(), pos[0], pos[1]),
-                        record.desc(),
-                        &record.seq()[(pos[0] as usize)..(pos[1] as usize)],
-                        &record.qual()[(pos[0] as usize)..(pos[1] as usize)],
-                    )
+                    .write_record(&noodles::fastq::Record::new(
+                        match description {
+                            Some(desc) => format!("{}_{}_{} {}", name, pos[0], pos[1], desc),
+                            None => format!("{}_{}_{}", name, pos[0], pos[1]),
+                        }
+                        .as_bytes(),
+                        record.sequence()[(pos[0] as usize)..(pos[1] as usize)].to_vec(),
+                        record.quality_scores()[(pos[0] as usize)..(pos[1] as usize)].to_vec(),
+                    ))
                     .with_context(|| error::Error::WritingErrorNoFilename {
-                        format: util::FileType::Fastq,
+                        format: util::FileType::Fasta,
                     })?;
             }
         }
