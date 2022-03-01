@@ -20,23 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+/// Yacrd use overlap between reads, to detect 'good' and 'bad' region,
+/// a region with coverage over the threshold is 'good' others are 'bad'.
+/// If read has a 'bad' region in middle this reads is mark as 'Chimeric'.
+/// If the ratio of 'bad' region length on total read length is larger than threshold this reads is marked as 'Not_covered'.
+
+/// Yacrd can make some other actions:
+/// - filter: for sequence or overlap file, record with reads marked as Chimeric or NotCovered isn't written in the output
+/// - extract: for sequence or overlap file, record contains reads marked as Chimeric or NotCovered is written in the output
+/// - split: for sequence file bad region in the middle of reads are removed, NotCovered read is removed
+/// - scrubb: for sequence file all bad region are removed, NotCovered read is removed
 #[derive(clap::Parser, Debug)]
 #[clap(
-    version = "0.6.2 Ivysaur",
-    author = "Pierre Marijon <pmarijon@mpi-inf.mpg.de>",
-    name = "yacrd",
-    override_help = "
-Yacrd use overlap between reads, to detect 'good' and 'bad' region,
-a region with coverage over the threshold is 'good' others are 'bad'.
-If read has a 'bad' region in middle this reads is mark as 'Chimeric'.
-If the ratio of 'bad' region length on total read length is larger than threshold this reads is marked as 'Not_covered'.
-
-Yacrd can make some other actions:
-- filter: for sequence or overlap file, record with reads marked as Chimeric or NotCovered isn't written in the output
-- extract: for sequence or overlap file, record contains reads marked as Chimeric or NotCovered is written in the output
-- split: for sequence file bad region in the middle of reads are removed, NotCovered read is removed
-- scrubb: for sequence file all bad region are removed, NotCovered read is removed
-"
+    version = "1.0.0 Magby",
+    author = "Pierre Marijon <pierre@marijon.fr>",
+    name = "yacrd"
 )]
 pub struct Command {
     /// path to input file overlap (.paf|.m4|.mhap) or yacrd report (.yacrd), format is autodetected and compression input is allowed (gz|bzip2|lzma)
