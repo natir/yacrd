@@ -73,7 +73,7 @@ fn main() -> Result<()> {
     )?;
 
     rayon::ThreadPoolBuilder::new()
-        .num_threads(params.threads.or(Some(1usize)).unwrap())
+        .num_threads(params.threads.unwrap_or(1usize))
         .build_global()?;
     reads2badregion.compute_all_bad_part();
 
