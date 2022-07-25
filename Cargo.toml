@@ -15,7 +15,7 @@ keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [dependencies]
 noodles        = { version = "0.18", features = ["fasta", "fastq"] }
-csv            = "1"
+csv            = { version = "1" }
 log 	       = "0.4"
 sled           = "0.34"
 clap           = { version = "3", features = ["derive"] }
