@@ -2,7 +2,7 @@
 ![CI](https://github.com/natir/yacrd/workflows/CI/badge.svg)
 [![CodeCov](https://codecov.io/gh/natir/yacrd/branch/master/graph/badge.svg)](https://codecov.io/gh/natir/yacrd)
 
-# Yet Another Chimeric Read Detector for long reads  🧬 💻
+# Yet Another Chimeric Read Detector for long reads  🧬 
 
 Using all-against-all read mapping, yacrd performs:
 
