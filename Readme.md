@@ -26,7 +26,7 @@ Chimera detection is done as follows:
 
 **WARNING:**
 
-Minimap2 v2.19 introduce some change in selection of seed and chaining of this seed to generate overlap. This change could have an important impacte on yacrd behavior, I can't guarantee the quality of yacrd results with this version of minimap2, I recommend you not to use a minimap2 version higher than 2.18.
+Minimap2 v2.19 introduce some change in selection of seed and chaining of this seed to generate overlap. This change could have an impacte on yacrd behavior, it's [seems not so important](https://github.com/natir/yacrd/issues/57) (thanks to Rohit-Satyam for testing), but if you use higher version it's at your own risk.
 
 ## Rationale
 
