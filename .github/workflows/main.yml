@@ -77,10 +77,10 @@ jobs:
           use-tool-cache: true
 
       - name: Run cargo-tarpaulin
-        run: cargo tarpaulin --all-features --timeout 600 --out Xml -- --test-threads 1
+        run: cargo tarpaulin --all-features --engine llvm --follow-exec --timeout 600 --out Xml -- --test-threads 1
 
       - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v1.0.3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -118,11 +118,11 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.57
+          toolchain: 1.74
           override: true
 
       - name: check if Readme matches MSRV defined here
-        run: grep '1.57' Readme.md
+        run: grep '1.74' Readme.md
 
       - name: Run tests
         uses: actions-rs/cargo@v1

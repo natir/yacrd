@@ -81,7 +81,8 @@ where
             format: util::FileType::Fasta,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(record.name())?;
+        let (badregion, length) = badregions
+            .get_bad_part(&unsafe { String::from_utf8_unchecked(record.name().to_vec()) })?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 

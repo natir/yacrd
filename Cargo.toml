@@ -3,6 +3,7 @@ name = "yacrd"
 version = "1.0.0"
 authors = ["Pierre Marijon <pierre.marijon@inria.fr>"]
 edition = '2021'
+rust-version = "1.74"
 
 exclude = ["image/*", "tests/*"]
 
@@ -14,7 +15,7 @@ license = "MIT"
 keywords = ["bioinformatics", "chimera", "long-read", "scrubbing"]
 
 [dependencies]
-noodles        = { version = "0.18", features = ["fasta", "fastq"] }
+noodles        = { version = "0.84", features = ["fasta", "fastq"] }
 csv            = { version = "1" }
 log 	       = "0.4"
 sled           = "0.34"
@@ -27,7 +28,7 @@ niffler        = "2"
 thiserror      = "1"
 env_logger     = "0.9"
 rustc-hash     = "1"
-remove_dir_all = "0.7"
+remove_dir_all = "0.8"
 
 [dev-dependencies]
 tempfile       = "3"

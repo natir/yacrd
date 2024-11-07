@@ -88,7 +88,8 @@ where
             format: util::FileType::Fasta,
         })?;
 
-        let (badregion, length) = badregions.get_bad_part(record.name())?;
+        let (badregion, length) = badregions
+            .get_bad_part(&unsafe { String::from_utf8_unchecked(record.name().to_vec()) })?;
 
         let rtype = editor::type_of_read(*length, badregion, not_covered);
 
@@ -116,14 +117,20 @@ where
                 if pos[0] as usize > record.sequence().len()
                     || pos[1] as usize > record.sequence().len()
                 {
-                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", record.name());
+                    error!("For read {} split position is larger than read, it's strange check your data. For this read, this split position and next are ignore.", &unsafe { String::from_utf8_unchecked(record.name().to_vec()) });
                     break;
                 }
 
                 writer
                     .write_record(&noodles::fasta::Record::new(
                         noodles::fasta::record::Definition::new(
-                            &format!("{}_{}_{}", record.name(), pos[0], pos[1]),
+                            format!(
+                                "{}_{}_{}",
+                                &unsafe { String::from_utf8_unchecked(record.name().to_vec()) },
+                                pos[0],
+                                pos[1]
+                            )
+                            .as_bytes(),
                             None,
                         ),
                         noodles::fasta::record::Sequence::from(
@@ -177,9 +184,8 @@ where
                     format: util::FileType::Fastq,
                 })?;
         } else {
-            let mut sequence_description = std::str::from_utf8(record.name())?.splitn(2, ' ');
-            let name = sequence_description.next().unwrap();
-            let description = sequence_description.next();
+            let name = record.name();
+            let description = record.description();
 
             let mut poss = vec![0];
             for interval in badregion {
@@ -202,11 +208,10 @@ where
 
                 writer
                     .write_record(&noodles::fastq::Record::new(
-                        match description {
-                            Some(desc) => format!("{}_{}_{} {}", name, pos[0], pos[1], desc),
-                            None => format!("{}_{}_{}", name, pos[0], pos[1]),
-                        }
-                        .as_bytes(),
+                        noodles::fastq::record::Definition::new(
+                            format!("{}_{}_{}", name, pos[0], pos[1]).as_bytes(),
+                            description,
+                        ),
                         record.sequence()[(pos[0] as usize)..(pos[1] as usize)].to_vec(),
                         record.quality_scores()[(pos[0] as usize)..(pos[1] as usize)].to_vec(),
                     ))

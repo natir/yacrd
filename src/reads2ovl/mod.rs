@@ -32,7 +32,6 @@ pub use self::fullmemory::*;
 pub use self::ondisk::*;
 
 /* std use */
-pub use self::fullmemory::*;
 
 /* local use */
 use crate::error;
@@ -147,7 +146,9 @@ pub trait Reads2Ovl {
 
     fn get_overlaps(&mut self, new: &mut MapReads2Ovl) -> bool;
 
+    #[allow(dead_code)]
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>>;
+    #[allow(dead_code)]
     fn length(&self, id: &str) -> usize;
 
     fn add_overlap(&mut self, id: String, ovl: (u32, u32)) -> Result<()>;
@@ -155,6 +156,7 @@ pub trait Reads2Ovl {
 
     fn add_overlap_and_length(&mut self, id: String, ovl: (u32, u32), length: usize) -> Result<()>;
 
+    #[allow(dead_code)]
     fn get_reads(&self) -> rustc_hash::FxHashSet<String>;
 
     fn read_buffer_size(&self) -> usize;

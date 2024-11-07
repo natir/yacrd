@@ -162,11 +162,11 @@ impl reads2ovl::Reads2Ovl for OnDisk {
     }
 
     fn length(&self, id: &str) -> usize {
-        *self.reads2len.get(&id.to_string()).unwrap_or(&0)
+        *self.reads2len.get(id).unwrap_or(&0)
     }
 
     fn add_overlap(&mut self, id: String, ovl: (u32, u32)) -> Result<()> {
-        self.reads2ovl.entry(id).or_insert_with(Vec::new).push(ovl);
+        self.reads2ovl.entry(id).or_default().push(ovl);
 
         self.number_of_value += 1;
 

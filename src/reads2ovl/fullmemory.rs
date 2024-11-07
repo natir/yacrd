@@ -50,7 +50,7 @@ impl reads2ovl::Reads2Ovl for FullMemory {
     }
 
     fn overlap(&self, id: &str) -> Result<Vec<(u32, u32)>> {
-        if let Some((vec, _)) = self.reads2ovl.get(&id.to_string()) {
+        if let Some((vec, _)) = self.reads2ovl.get(id) {
             Ok(vec.to_vec())
         } else {
             Ok(self.no_overlap.to_vec())
@@ -58,7 +58,7 @@ impl reads2ovl::Reads2Ovl for FullMemory {
     }
 
     fn length(&self, id: &str) -> usize {
-        if let Some((_, len)) = self.reads2ovl.get(&id.to_string()) {
+        if let Some((_, len)) = self.reads2ovl.get(id) {
             *len
         } else {
             0
